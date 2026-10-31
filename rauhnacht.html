@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0c0710"><title>Rauhnacht Open Air – Todesstollen live in der Hölle</title>
+<style>
+:root{--gold:#ff9a5c;--paper:#f6e6dc;--panel:#1c1226;--panel2:#2c1c38;--red:#ff4a3a;--green:#4a9a72;--muted:#b6a8c4;--ice:#8fd3ff}
+*{box-sizing:border-box}
+body{margin:0;background:#0c0710;color:var(--paper);font:17px/1.65 Georgia,'Times New Roman',serif;min-height:100vh}
+button{font:inherit;cursor:pointer;color:inherit}
+.hidden{display:none!important}
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+header{position:sticky;top:0;z-index:5;background:#120a1cf2;border-bottom:1px solid #7a3a3a}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:9px 4%;gap:8px;flex-wrap:wrap}
+.bar strong{font-size:14px;color:var(--gold);letter-spacing:.09em}
+.bar button{background:var(--panel2);border:1px solid #9a5a4a;border-radius:8px;padding:6px 10px;font:14px system-ui,sans-serif}
+.bar button:hover{background:#4a2a50}
+.lights{display:flex;justify-content:space-between;height:13px;padding:0 1%;overflow:hidden}
+.lights i{width:7px;height:11px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--c);box-shadow:0 0 9px var(--c);animation:tw 2.6s infinite;animation-delay:var(--d)}
+@keyframes tw{50%{opacity:.3}}
+.shell{max-width:980px;margin:auto;padding:16px 14px 60px;position:relative;z-index:2}
+.hero{position:relative;overflow:hidden;min-height:230px;border:1px solid #9a5a4a;border-radius:16px;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;box-shadow:inset 0 -90px 90px #0c0710cc;background:radial-gradient(ellipse at 70% 30%,#7fc4e8 0%,#3b3560 28%,#1c1028 62%,#0c0710 92%)}
+.hero[data-place=park]{background:radial-gradient(ellipse at 70% 30%,#7fc4e8 0%,#3b3560 28%,#1c1028 62%,#0c0710 92%)}
+.hero[data-place=camp]{background:radial-gradient(ellipse at 50% 70%,#e0703a,#6a2e36 34%,#1a0e22 80%)}
+.hero[data-place=bar]{background:radial-gradient(ellipse at 40% 60%,#f0a83a,#6a3a2a 32%,#1a0e1a 78%)}
+.hero[data-place=merch]{background:radial-gradient(ellipse at 60% 40%,#d04a9a,#4a2060 34%,#140a1e 80%)}
+.hero[data-place=tent]{background:radial-gradient(ellipse at 50% 60%,#9ac47a,#3a5040 32%,#101a18 80%)}
+.hero[data-place=back]{background:radial-gradient(ellipse at 50% 40%,#b0d8f0,#4a5a8a 30%,#1a1630 78%)}
+.hero[data-place=stage]{background:radial-gradient(ellipse at 50% 45%,#ff6a3a,#7a1c2c 34%,#16081c 80%)}
+.hero[data-place=end]{background:radial-gradient(ellipse at 50% 40%,#ffb050,#8a2a38 34%,#180a24 80%)}
+.hero::after{content:attr(data-ic);position:absolute;right:20px;top:8px;font-size:68px;opacity:.28}
+.hero small{letter-spacing:.17em;text-transform:uppercase;color:#ffc9a2;font:12px system-ui,sans-serif}
+.hero h1{margin:4px 0 0;font:900 clamp(24px,5vw,40px)/1.1 'Arial Black',Impact,sans-serif;text-transform:uppercase;letter-spacing:.02em;color:#ffd9b0;text-shadow:0 3px 0 #7a1c1c,0 6px 14px #000}
+.clock{position:absolute;left:20px;top:14px;font:13px system-ui,sans-serif;color:#ffc9a2;background:#0008;padding:3px 9px;border-radius:12px}
+.acts{display:flex;gap:6px;margin:12px 2px 0;align-items:center;font:12px system-ui,sans-serif;color:var(--muted)}
+.acts span{flex:1;height:5px;border-radius:3px;background:#3a2448}
+.acts span.on{background:var(--gold)}
+.layout{display:grid;grid-template-columns:1fr 245px;gap:18px;margin-top:14px}
+.story,.side{background:var(--panel);border:1px solid #6a3a4a;border-radius:12px;padding:22px}
+.story p{margin:0 0 15px}
+.story blockquote{margin:0 0 15px;padding:10px 14px;border-left:3px solid var(--red);background:#0003;font-style:italic}
+.story ul{padding-left:20px}
+.note{font:13px system-ui,sans-serif;color:var(--muted)}
+.soup{color:#ffc9a2;font-style:italic;border-top:1px dashed #7a4a4a;padding-top:12px}
+.badge{color:#ff9a5c;font:12px system-ui,sans-serif;letter-spacing:.1em;margin-bottom:8px}
+.choices{display:grid;gap:10px;margin-top:20px}
+.choices button{width:100%;text-align:left;border:1px solid #a0604e;border-radius:9px;background:linear-gradient(110deg,#4a2a50,#2c1c3c);color:#ffe6d2;padding:12px 16px}
+.choices button:hover:not(:disabled){background:#6a3a40}
+.choices button:disabled{opacity:.55;cursor:not-allowed;border-style:dashed;background:#22162c}
+.choices small{display:block;font:12.5px system-ui,sans-serif;color:var(--muted);margin-top:3px}
+.side h3{margin:0 0 6px;color:var(--gold);font-size:17px}
+.side p,.side li{font:14px/1.5 system-ui,sans-serif;color:#d3cfdb}
+.side ul{padding-left:18px;margin:0 0 14px}
+.puzzle{margin:18px 0 0;padding:14px;border:1px dashed #a0604e;border-radius:10px;background:#0003;text-align:center}
+.slots{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+.slots div{width:54px;height:54px;border:2px solid #7a4a4a;border-radius:10px;display:grid;place-items:center;font-size:28px;background:#0004}
+.syms{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.puzzle button{background:#4a2a50;border:1px solid #a0604e;border-radius:9px;padding:9px 13px;color:#ffe6d2}
+.puzzle button:disabled{opacity:.35;cursor:default}
+.puzzle .row{margin-top:12px;display:flex;gap:8px;justify-content:center}
+.modal{position:fixed;inset:0;background:#08040cee;z-index:9;display:grid;place-items:center;padding:14px}
+.modal>div{max-width:580px;width:100%;max-height:88vh;overflow:auto;background:#241530;border:1px solid #d3805b;padding:22px;border-radius:14px}
+.modal h2{color:#ffb98e;margin-top:0}
+.modal li,.modal p{font:15px/1.55 system-ui,sans-serif}
+.modal button{margin:6px 6px 0 0;padding:10px 14px;background:#4a2a50;color:#ffe6d2;border:1px solid #d3805b;border-radius:8px}
+.foot{font:12px system-ui,sans-serif;color:#8b8ea6;text-align:center;margin-top:22px}
+@media(max-width:720px){.layout{grid-template-columns:1fr}.hero{min-height:190px;padding:18px}.story{padding:17px}.side{padding:15px}body{font-size:16.5px}}
+@media(prefers-reduced-motion:reduce){.lights i{animation:none}}
+</style></head><body>
+<canvas id="snow"></canvas>
+<header><div class="bar"><strong>🎸 RAUHNACHT OPEN AIR</strong><div><button id="hintBtn">💡 Tipp</button> <button id="journalBtn">📜 Journal</button> <button id="restartBtn">↺</button></div></div><div class="lights" id="lights"></div></header>
+<main class="shell">
+<section class="hero" id="hero"><span class="clock" id="clock"></span><small id="chapter"></small><h1 id="heading"></h1></section>
+<div class="acts" id="acts"></div>
+<div class="layout"><section class="story"><div class="badge" id="status"></div><div id="prose"></div><div id="puzzle" class="puzzle hidden"></div><div class="choices" id="choices"></div></section>
+<aside class="side"><h3>🎒 Inventar</h3><ul id="inventory"></ul><h3>🧭 Auftrag</h3><p id="quest"></p><h3>🎲 Charakter</h3><p id="character"></p></aside></div>
+<p class="foot" id="foot"></p></main>
+<div class="modal hidden" id="modal"><div><h2 id="modalTitle"></h2><div id="modalText"></div><div id="modalActions"></div></div></div>
+<script>
+const DEDICATION='Für Kevin · Rauhnacht-Special 🎁🤘';
+const KEY='rauhnacht_v1',KEYE='rauhnacht_v1_enden';
+const ENDINGS={sun:'Die Sonne steht auf',pact:'Perchta on Ice',eternal:'Endlos-Zugabe',rest:'Das letzte Solo',chaos:'Circle Pit der Götter',cable:'Der Mann am Kabel',flop:'Soundcheck des Grauens',sell:'Eisbrecher Records',newsinger:'Der neue Sänger',sabine:'Sabine sagt: Aufstehen!'};
+const PLACES={park:'🚐',camp:'⛺',bar:'🍷',merch:'🛍️',tent:'🏕️',back:'🎤',stage:'🎸',end:'🎄'};
+const ITEMS={
+'Glühweinmarken':'Währung der Hölle. Bezahlen alles außer Würde.',
+'Gästeliste':'Du bist darauf als „Todesstolen (3 Pers.)“ geführt.',
+'Gaffer-Tape':'Hält die Welt zusammen. Meistens.',
+'Walkman (kaputt)':'Auf dem Gehäuse steht „Rüdiger“. Das Band ist verheddert.',
+'Walkman':'Repariert mit Tape und Hoffnung.',
+'Festivalbändchen':'Gilt für Tote, Dämonen und Leute mit Dauerkarte.',
+'Kehlenkonserve':'Gunters Stimme in einer Dose, Kratzstufe 9.',
+'Gitarre „Ulrike“':'Dieters Gitarre. Er liebt sie mehr als seine Ex-Frau.',
+'Kaffee für Dieter':'Schwarz wie die Hölle, und heißer.',
+'Kaffee für Sabine':'Mit Milch. Sie wird fragen, woher du das weißt.',
+'Kassette: Rüdigers Mixtape':'Mit der Baseline, die er vergessen hat.',
+'Kassette: Perchtas Demo':'Ein Vorsprechen vor 800 Jahren. „Zu laut“, steht darauf.',
+'Backstage-Pass':'Opa Wotans Lifetime-Pass der Wilden Jagd.',
+'Sonnenstecker':'Der Stecker des Sonnenweckers. Warm. Er brummt.'};
+const $=id=>document.getElementById(id);
+const S0=()=>({node:'intro',cls:null,items:[],flags:{},n:{sab:0,per:0,kal:0,marken:0,wrong:0},visited:[],journal:{},fb:null,seq:[],clock:'18:00',act:0,place:'park',chap:''});
+let S=S0();
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r),d=S0();S=Object.assign(d,o);S.n=Object.assign(S0().n,o.n||{})}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let ENDMEM=[];
+function getEnds(){try{const e=JSON.parse(localStorage.getItem(KEYE)||'[]');return e.length>=ENDMEM.length?e:ENDMEM}catch(e){return ENDMEM}}
+function addEnd(k){if(!ENDMEM.includes(k))ENDMEM.push(k);const e=getEnds();if(!e.includes(k))e.push(k);try{localStorage.setItem(KEYE,JSON.stringify(e))}catch(x){}}
+const has=i=>S.items.includes(i);
+const add=i=>{if(!has(i))S.items.push(i)};
+const rem=i=>{S.items=S.items.filter(x=>x!==i)};
+const f=k=>!!S.flags[k];
+const set=(k,v=true)=>{S.flags[k]=v};
+const num=(k,d)=>{S.n[k]=(S.n[k]||0)+d};
+const mk=()=>S.n.marken||0;
+const pay=n=>{S.n.marken=Math.max(0,mk()-n);if(S.n.marken===0)rem('Glühweinmarken')};
+const clue=(k,t)=>{S.journal[k]=t};
+const C=(b,s,r)=>S.cls==='Schreihals'?b:S.cls==='Roadie'?s:r;
+const bad=(t,x,back)=>()=>{S.fb={t,x,back}};
+const heart=n=>n>0?'♥'.repeat(Math.min(n,6)):'–';
+const N={};
+function band(){return 1+(f('gunterOk')?1:0)+(f('dieterOk')?1:0)+(f('ruedigerOk')?1:0)}
+function ready(){return band()>=3&&f('riffA')&&f('perchtaMet')}
+function missing(){const m=[];if(band()<3)m.push('mindestens drei Bandmitglieder (Sabine ist schon da)');if(!f('riffA'))m.push('das Sonnenriff');if(!f('perchtaMet'))m.push('ein Gespräch mit Frau Perchta');return m}
+function clockNow(){const t=(18*60+S.visited.length*6)%(24*60);const c=Math.min(t,6*60+20);return String(Math.floor((S.visited.length*6+18*60)/60)%24).padStart(2,'0')+':'+String((S.visited.length*6)%60).padStart(2,'0')}
+function bandFate(){
+ const L=[];
+ L.push(f('gunterOk')?'Gunter schreit zum ersten Mal in seinem Leben ohne Whiteboard.':'Gunter schreibt „DANKE“ auf sein Whiteboard. Es ist das schönste Wort, das er je gemalt hat.');
+ if(f('dieterOk'))L.push('Dieter küsst „Ulrike“ und verspricht, nie wieder Glühwein zu pfänden. Er hält es drei Stunden durch.');
+ if(f('ruedigerOk'))L.push('Rüdiger spielt, als hätte er vierzig Jahre geübt. Hat er auch.');
+ return '<p>'+L.join(' ')+'</p>'}
+function perchtaFate(){
+ if(S.n.per>=3)return '<p>Perchta steht am Bühnenrand und tut so, als hätte sie etwas im Auge. Sie hat zwei Eiswürfel im Auge. Das zählt.</p>';
+ return '<p>Perchta sieht von der Seite zu, mit verschränkten Armen und einem Gesichtsausdruck wie ein Eisberg, der gerade einen Witz nicht verstanden hat.</p>'}
+function quest(){
+ const n=N[S.node];if(n&&n.end)return 'Dein Abenteuer ist zu Ende. Andere Entscheidungen führen zu anderen Enden.';
+ if(!f('inside'))return 'Komm am Krampus am Höllentor vorbei. Ohne Bändchen kein Zutritt.';
+ const l=[];
+ if(!f('gunterOk'))l.push('Gunters Stimme finden');
+ if(!f('dieterOk'))l.push('Dieter und seine Gitarre zurückholen');
+ if(!f('ruedigerOk'))l.push('Rüdigers Baseline wiederfinden');
+ const m=missing();
+ if(!ready())return 'Zur Hauptbühne fehlt: '+m.join(', ')+'.'+(l.length?' Offen bei der Band: '+l.join('; ')+'.':'');
+ return 'Alles bereit. Es ist kurz vor Sonnenaufgang. Betritt die Hauptbühne und spiele das Sonnenriff, oder entscheide dich anders.'}
+function go(id){
+ let n=N[id];if(!n){console.error('Unbekannte Szene',id);id='intro';n=N[id]}
+ S.node=id;if(!S.visited.includes(id))S.visited.push(id);
+ const tm=typeof n.time==='function'?n.time():n.time;S.clock=tm||clockNow();
+ if(n.act!=null)S.act=n.act;if(n.place)S.place=n.place;if(typeof n.chap==='string')S.chap=n.chap;
+ if(n.on)n.on();if(n.end)addEnd(n.end);
+ save();render();window.scrollTo(0,0)}
+function choose(c){if(c.fx)c.fx();const to=typeof c.to==='function'?c.to():c.to;go(to)}
+function reset(){S=S0();save()}
+function endInfo(){const e=getEnds();return '<p class="note">Enden entdeckt: '+e.length+' von '+Object.keys(ENDINGS).length+'<br>'+Object.keys(ENDINGS).map(k=>e.includes(k)?'✔ '+ENDINGS[k]:'? ? ?').join(' · ')+'</p><p class="note">'+DEDICATION+'</p>'}
+function renderPuzzle(n){
+ const box=$('puzzle'),P=n.puzzle;
+ if(!P){box.classList.add('hidden');box.innerHTML='';return}
+ box.classList.remove('hidden');box.innerHTML='';
+ const slots=document.createElement('div');slots.className='slots';
+ for(let i=0;i<P.ans.length;i++){const d=document.createElement('div');const s=P.syms.find(x=>x.id===S.seq[i]);d.textContent=s?s.ic:'·';slots.appendChild(d)}
+ box.appendChild(slots);
+ const syms=document.createElement('div');syms.className='syms';
+ P.syms.forEach(s=>{const b=document.createElement('button');b.textContent=s.ic+' '+s.nm;b.disabled=S.seq.includes(s.id)||S.seq.length>=P.ans.length;b.onclick=()=>{S.seq.push(s.id);save();render()};syms.appendChild(b)});
+ box.appendChild(syms);
+ const row=document.createElement('div');row.className='row';
+ const r=document.createElement('button');r.textContent='↺ Zurücksetzen';r.onclick=()=>{S.seq=[];save();render()};
+ const ok=document.createElement('button');ok.textContent='✔ Bestätigen';ok.disabled=S.seq.length<P.ans.length;
+ ok.onclick=()=>{const good=S.seq.join()===P.ans.join();S.seq=[];if(good){go(P.ok)}else{num('wrong',1);go(P.bad)}};
+ row.appendChild(r);row.appendChild(ok);box.appendChild(row)}
+function render(){
+ const n=N[S.node]||N.intro;
+ const title=typeof n.t==='function'?n.t():n.t;
+ const hero=$('hero');const pl=n.end?'end':(S.place||'park');hero.dataset.place=pl;hero.dataset.ic=PLACES[pl]||'';
+ $('chapter').textContent=S.chap||'';$('heading').textContent=title||'';$('clock').textContent='🕰 '+S.clock+' Uhr';
+ const a=S.act||0;const lab=['Prolog','Akt I','Akt II','Akt III','Akt IV','Epilog'][a];
+ $('acts').innerHTML='<b style="color:#ff9a5c;min-width:58px">'+lab+'</b>'+[1,2,3,4].map(i=>'<span class="'+((a>=5||i<=a)?'on':'')+'"></span>').join('');
+ $('status').textContent=n.end?'KONZERT BEENDET':(S.cls?S.cls.toUpperCase()+' · SZENEN: '+S.visited.length:'KLASSENWAHL');
+ $('prose').innerHTML=n.text()+(n.end?endInfo():'');
+ renderPuzzle(n);
+ const box=$('choices');box.innerHTML='';
+ const list=n.ch?n.ch():[{l:'Noch einmal spielen – andere Entscheidungen führen zu anderen Enden',to:'intro',fx:reset}];
+ list.forEach(c=>{
+  if(c.hide&&c.hide())return;
+  const ok=!c.if||c.if();
+  if(!ok&&!c.lock)return;
+  const b=document.createElement('button');
+  if(!ok){b.disabled=true;b.textContent='🔒 '+c.l;const s=document.createElement('small');s.textContent=typeof c.lock==='function'?c.lock():c.lock;b.appendChild(s)}
+  else{b.textContent='➜ '+c.l;b.onclick=()=>choose(c)}
+  box.appendChild(b)});
+ $('inventory').innerHTML=(S.items.length?S.items:['Noch leer']).map(i=>'<li>'+(i==='Glühweinmarken'?'Glühweinmarken ×'+mk():i)+'</li>').join('');
+ $('quest').textContent=quest();
+ $('character').textContent=S.cls?({Schreihals:'Schreihals – Stimme, Charme, Lautstärke',Roadie:'Roadie – Kabel, Tape, Lösungen',Mosher:'Mosher – Ellenbogen, Mut, Menschenwände'})[S.cls]:'Noch nicht gewählt';
+ $('foot').textContent=DEDICATION}
+function modal(title,html,btns){
+ $('modalTitle').textContent=title;$('modalText').innerHTML=html;const a=$('modalActions');a.innerHTML='';
+ btns.forEach(b=>{const e=document.createElement('button');e.textContent=b.l;e.onclick=()=>{$('modal').classList.add('hidden');if(b.fn)b.fn()};a.appendChild(e)});
+ $('modal').classList.remove('hidden')}
+function journalHTML(){
+ const cl=Object.values(S.journal);
+ let h='<p><b>Auftrag:</b> '+quest()+'</p><p><b>Hinweise:</b></p>'+(cl.length?'<ul>'+cl.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'<p>Noch keine.</p>');
+ h+='<p><b>Gegenstände:</b></p>'+(S.items.length?'<ul>'+S.items.map(i=>'<li><b>'+(i==='Glühweinmarken'?'Glühweinmarken ×'+mk():i)+'</b> – '+(ITEMS[i]||'')+'</li>').join('')+'</ul>':'<p>Noch keine.</p>');
+ h+='<p><b>Band:</b> Sabine ✔'+(f('gunterOk')?' · Gunter ✔':' · Gunter ✘')+(f('dieterOk')?' · Dieter ✔':' · Dieter ✘')+(f('ruedigerOk')?' · Rüdiger ✔':' · Rüdiger ✘')+'</p>';
+ h+='<p><b>Enden entdeckt:</b> '+getEnds().length+' von '+Object.keys(ENDINGS).length+'</p>';
+ return h}
+$('journalBtn').onclick=()=>modal('📜 Tourtagebuch',journalHTML(),[{l:'Schließen'}]);
+$('hintBtn').onclick=()=>{const n=N[S.node];let h=n&&n.hint?(typeof n.hint==='function'?n.hint():n.hint):'Hier gibt es kein Rätsel. Sieh dich um, sprich mit allen und lies das Tourtagebuch: Dort steht, was du schon weißt.';modal('💡 Tipp','<p>'+h+'</p>',[{l:'Danke'}])};
+$('restartBtn').onclick=()=>modal('Neu beginnen?','<p>Dein Spielstand wird gelöscht. Die entdeckten Enden bleiben erhalten.</p>',[{l:'Ja, neu beginnen',fn:()=>{reset();go('intro')}},{l:'Abbrechen'}]);
+(function(){const L=$('lights'),cols=['#ff4a3a','#ff9a5c','#8fd3ff','#4a9a72'];for(let i=0;i<46;i++){const e=document.createElement('i');e.style.setProperty('--c',cols[i%4]);e.style.setProperty('--d',(i*0.37%2.6)+'s');L.appendChild(e)}
+ const c=$('snow'),x=c.getContext('2d');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;let W,H,fl=[];
+ function rs(){W=c.width=innerWidth;H=c.height=innerHeight}rs();addEventListener('resize',rs);
+ for(let i=0;i<60;i++)fl.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2+.6,v:Math.random()*.6+.25,d:Math.random()*6.3});
+ (function t(){x.clearRect(0,0,W,H);x.fillStyle='rgba(255,255,255,.7)';fl.forEach(p=>{p.y+=p.v;p.d+=.01;p.x+=Math.sin(p.d)*.4;if(p.y>H){p.y=-5;p.x=Math.random()*W}x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill()});requestAnimationFrame(t)})()})();
+const fbNode={t:()=>S.fb.t,text:()=>`<p>${S.fb.x}</p>`,ch:()=>[{l:'Noch einmal versuchen',to:S.fb.back}]};
+Object.assign(N,{
+fb:fbNode,
+intro:{act:0,place:'park',time:'18:00',chap:'Prolog · Die längste Nacht des Jahres',t:'Rauhnacht Open Air',
+hint:'Wähle eine Klasse. Jede löst manche Hindernisse auf ihre eigene Weise, aber jede kann das ganze Abenteuer schaffen.',
+text:()=>`<p>Es ist die längste Nacht des Jahres, und du stehst auf dem Parkplatz der Hölle. Das ist nicht metaphorisch gemeint: Das Schild am Eingang sagt <em>„Höllenschlund Open Air Gelände – Parken auf eigene Seele“</em>. Darunter, schief, ein zweites: <em>„Rauhnacht Open Air: Winterkonzert für Tote, Dämonen und Leute mit Dauerkarte.“</em></p><p>Dein Job: Manager und Roadie von <b>TODESSTOLLEN</b>, der einzigen Weihnachts-Death-Metal-Band Deutschlands. Hits: <em>„Stille Nacht (Blutrünstig)“</em>, <em>„O Tannenbaum, du wirst brennen“</em>, <em>„Last Christmas (Grind-Version)“</em>. Fans: drei. Alle Mütter.</p><p>Trotzdem seid ihr hier, denn die Wilde Jagd, seit tausend Jahren Headliner, hat abgesagt: <em>„Pferde krank, Hunde im Stau.“</em> Und wenn am Ende der längsten Nacht niemand das <b>Sonnenriff</b> spielt, geht die Sonne nicht auf. Im Line-up klafft eine Lücke. Eure.</p><p>Das Problem: Ihr seid nicht gut. Der Sänger hat seine Stimme verloren. Der Gitarrist ist verschwunden. Und der Bassist ist ein Geist, aber das stand schon im Vertrag.</p><p class="note">Etwa 45 Minuten · Alle Enden sind eingebaut · Oben: Tipp, Tourtagebuch, Neustart · Fortschritt wird automatisch gespeichert.</p><p>Wer bist du?</p>`,
+ch:()=>[
+ {l:'Schreihals: Stimme wie ein Presslufthammer, Charme wie ein Presslufthammer, überraschend überzeugend',to:'parkplatz',fx:()=>{S.cls='Schreihals'}},
+ {l:'Roadie: Gaffer-Tape, Kabel und Lösungen. Du hast schon Schlimmeres repariert als die Welt',to:'parkplatz',fx:()=>{S.cls='Roadie'}},
+ {l:'Mosher: Ellenbogen, Mut und keine Angst vor Wänden aus Menschen',to:'parkplatz',fx:()=>{S.cls='Mosher'}}]},
+
+parkplatz:{act:1,place:'park',time:'18:05',chap:'Akt I · Anreise',t:'Der Parkplatz der Hölle',
+hint:'Sieh dir den Stollenwagen genau an und rede mit Gunter und Sabine. Am Höllentor brauchst du ein Bändchen.',
+text:()=>`<p>Schnee fällt in großen, fetten Flocken und verdampft kurz über dem Boden, weil er aus dem Höllenschlund hochkommt. Dein Tourbus, der <b>Stollenwagen</b>, steht schief zwischen zwei Autos, die nach Schwefel riechen. Auf dem Dach klebt eine Lichterkette in Totenkopfform. Sie blinkt im Takt von „Stille Nacht“, nur etwas aggressiver.</p><p>Neben dem Wagen steht <b>Gunter „Der Gnadenlose“</b>, Sänger, tagsüber Altenpfleger, mit einem Whiteboard um den Hals. <b>Sabine</b>, Schlagzeugerin und Grundschullehrerin, hält ein laminiertes Blatt mit ihrem Zeitplan. Am Ende des Parkplatzes sitzt hinter einer Schranke aus Knochen ein riesiger Krampus mit Warnweste.</p>`,
+ch:()=>[
+ {l:'Den Stollenwagen durchsuchen',to:'van'},
+ {l:'Mit Gunter reden (er schreibt alles auf ein Whiteboard)',to:'gunter1'},
+ {l:'Mit Sabine reden',to:'sabine1'},
+ {l:'Zum Höllentor und dem Krampus gehen',to:'tor',if:()=>!f('inside')},
+ {l:'Zurück aufs Festivalgelände',to:'gelaende',if:()=>f('inside')}]},
+van:{place:'park',chap:'Akt I · Anreise',t:'Der Stollenwagen',
+hint:'Gaffer-Tape und ein kaputter Walkman könnten sich noch als nützlich erweisen.',
+text:()=>`<p>Der Stollenwagen riecht nach Schweiß, Lebkuchen und Verzweiflung. ${f('vanDone')?'Du hast alles Nützliche schon eingesteckt.':'Im Handschuhfach findest du vier <b>Glühweinmarken</b> (Währung der Hölle), eine Rolle <b>Gaffer-Tape</b>, einen kaputten <b>Walkman</b> mit der Aufschrift „Rüdiger“ und die <b>Gästeliste</b>, auf der ihr als „Todesstolen (3 Pers.)“ geführt werdet. Es sind vier Personen. Eine davon tot.'}</p>${has('Walkman (kaputt)')&&has('Gaffer-Tape')?'<p>Das Band im Walkman ist verheddert. Mit etwas Tape ließe er sich vielleicht reparieren.</p>':''}`,
+on:()=>{if(!f('vanDone')){set('vanDone');add('Glühweinmarken');S.n.marken=4;add('Gaffer-Tape');add('Walkman (kaputt)');add('Gästeliste');clue('van','Im Stollenwagen: Glühweinmarken, Gaffer-Tape, ein kaputter Walkman (gehört Rüdiger) und die Gästeliste.')}},
+ch:()=>[
+ {l:'Den Walkman mit Tape reparieren',to:'walkman_fix',if:()=>has('Walkman (kaputt)')&&has('Gaffer-Tape')},
+ {l:'Zurück',to:()=>f('inside')?'gelaende':'parkplatz'}]},
+walkman_fix:{place:'park',t:'Tape löst alles',
+text:()=>`<p>${C('Du wickelst das Band mit einem Bleistift auf, singst dabei leise „Stille Nacht“ in Moll, und der Walkman scheint es zu schätzen.','Das ist deine Königsdisziplin: drei Handgriffe, ein halber Meter Tape, ein kurzer Schlag auf die Rückseite. Der Walkman schnurrt wie eine Katze.','Du versuchst es mit Gewalt. Das Gehäuse bricht. Du klebst es mit Tape wieder zusammen. Es funktioniert besser als vorher, und das macht dich unruhig.')}</p><p><b>Erhalten: Walkman.</b> Jetzt fehlt nur noch eine Kassette.</p>`,
+on:()=>{rem('Walkman (kaputt)');add('Walkman')},
+ch:()=>[{l:'Weiter',to:()=>f('inside')?'gelaende':'parkplatz'}]},
+gunter1:{place:'park',t:'Gunter, ohne Stimme',
+hint:'Gunter beschreibt seine Stimme auf dem Whiteboard. Merk dir das Detail, es hilft später beim Erkennen.',
+text:()=>`<p>Gunter hebt sein Whiteboard. Darauf, in zittriger Handschrift:</p><blockquote>STIMME WEG. GESTOHLEN VON PERCHTAS LEUTEN, GLAUBE ICH. IN EINE DOSE GESPERRT. BITTE ZURÜCKHOLEN.<br>MEINE STIMME: REIBEISEN, KRATZSTUFE 9. NIE HUSTEN. NIE SÄUSELN.</blockquote><p>Er sieht aus wie ein Bernhardiner, der seinen Napf verloren hat. Dann dreht er das Board um: <em>„SELBST DAS HÖLLENTOR HAT MICH NICHT ANGEBRÜLLT, SO GUT BIN ICH.“</em></p>`,
+on:()=>{set('gunterMet');clue('gunter','Gunters Stimme ist in einer Dose: Reibeisen, Kratzstufe 9, nie husten, nie säuseln. Geklaut von Perchtas Leuten.')},
+ch:()=>[{l:'Zurück',to:()=>f('inside')?'gelaende':'parkplatz'}]},
+sabine1:{place:'park',t:'Sabine und der Plan',
+hint:'Sabine wird später wichtig, wenn du sie gut behandelt hast. Zuhören und Ordnung bringen Punkte.',
+text:()=>`<p>Sabine hält dir ihren laminierten Zeitplan unter die Nase. „Auftritt: 06:30 bis 06:45. Wir brauchen vollständige Besetzung, ein funktionierendes Equipment und Pünktlichkeit. Das ist nicht viel verlangt. Das ist das Mindeste, das ich in zwanzig Jahren Schuldienst gelernt habe.“</p><p>Sie mustert dich. „Und du bist unser Manager. Ich erwarte Ergebnisse. Wenn nicht, schreibe ich dir einen Eintrag ins Klassenbuch.“ Ein Schauer läuft dir über den Rücken, der nichts mit dem Wetter zu tun hat.</p>`,
+on:()=>{set('sabineMet')},
+ch:()=>[
+ {l:'Ihren Zeitplan in Ruhe anhören',to:'fb',fx:()=>{if(!f('sabListen')){set('sabListen');num('sab',1);S.fb={t:'Aufmerksam zugehört',x:'Du hörst ihr zu, ohne zu unterbrechen, ohne aufs Handy zu schauen. Sabine hält inne. „Das tut niemand.“ Sie nickt. „Danke.“ Eine kleine Veränderung in ihrem Gesicht: Du hast Respekt gewonnen.',back:'sabine1'}}else{S.fb={t:'Noch einmal zuhören',x:'Sie wiederholt den Zeitplan. Du bleibst höflich. Es ändert nichts, aber es schadet auch nicht.',back:'sabine1'}}}},
+ {l:'Das Equipment ordentlich im Wagen sortieren',to:'fb',fx:()=>{if(!f('sabTidy')){set('sabTidy');num('sab',1);S.fb={t:'Ordnung muss sein',x:'Du sortierst Kabel nach Länge, Becken nach Größe und Sabines Ersatzsticks nach Gewicht. Sie schaut zu. „Du bist der erste Manager, der Kabeltrommeln richtig rollt.“ Sie lächelt kaum merklich, wie eine Lehrerin, die einen guten Aufsatz bekommt.',back:'sabine1'}}else{S.fb={t:'Alles in Ordnung',x:'Das Equipment ist bereits perfekt sortiert. Du siehst dich um und kannst nichts mehr verbessern.',back:'sabine1'}}}},
+ {l:'Zurück',to:()=>f('inside')?'gelaende':'parkplatz'}]},
+
+tor:{act:1,place:'park',time:'18:20',chap:'Akt I · Das Höllentor',t:'Krampus Kalle',
+hint:'Du brauchst ein Bändchen. Du kannst zahlen (zwei Glühweinmarken) oder deine Klasse einsetzen.',
+text:()=>`<p>Am Höllentor steht ein Krampus von zwei Metern Höhe, mit Hörnern, Ketten und einer Warnweste. Auf dem Namensschild steht <b>Kalle</b>. Er sieht aus wie jemand, der in einem anderen Leben Friseur werden wollte. „Bändchen?“, fragt er müde. „Ohne Bändchen kein Zutritt. Das ist kein Gesetz. Das ist ... Tradition.“</p><p>Hinter ihm glüht das Gelände: Lichterketten aus Schwefelflammen, Glühweinbuden mit Hörnern, ein Tannenbaum aus Stacheldraht. Es sieht furchtbar aus. Du willst sofort hin.</p>`,
+ch:()=>[
+ {l:'Zwei Glühweinmarken zahlen',to:'tor_pay',if:()=>mk()>=2,lock:'Du hast nicht genug Marken. Probier etwas anderes.'},
+ {l:'Kalle „Last Christmas (Grind-Version)“ vorschreien',to:'tor_sing',if:()=>S.cls==='Schreihals'},
+ {l:'Ein Bändchen aus Gaffer-Tape nachbauen',to:'tor_forge',hide:()=>S.cls!=='Roadie',if:()=>has('Gaffer-Tape'),lock:'Dafür brauchst du Gaffer-Tape. Vielleicht liegt welches im Stollenwagen?'},
+ {l:'Kalle zu einem Schubswettbewerb herausfordern',to:'tor_mosh',if:()=>S.cls==='Mosher'},
+ {l:'Einfach an ihm vorbeigehen',to:'fb',fx:bad('Ein Versuch','Du gehst einfach vorbei. Kalle packt dich am Kragen, hebt dich zwanzig Zentimeter vom Boden und stellt dich wieder hin. „Nein.“ Es war nicht unfreundlich. Es war das Nein eines Mannes, der es schon tausendmal gesagt hat.','tor')},
+ {l:'Zurück zum Stollenwagen',to:'parkplatz'}]},
+tor_pay:{place:'park',t:'Marken gegen Bändchen',
+text:()=>`<p>Kalle zählt die Marken langsam, als würde er hoffen, dass sie sich verrechnen. Dann seufzt er und klebt dir ein Bändchen aus Papier ans Handgelenk, das nach Pech riecht. „Viel Spaß in der Hölle. Es ist auch nur ein Festival.“</p>`,
+on:()=>{pay(2);add('Festivalbändchen');set('inside')},
+ch:()=>[{l:'Das Gelände betreten',to:'einlass'}]},
+tor_sing:{place:'park',t:'Ein Schrei für Kalle',
+text:()=>`<p>Du holst tief Luft und brüllst „Last Christmas (Grind-Version)“ so laut, dass die Schranke aus Knochen klappert. Kalle zuckt. Dann zittert seine Unterlippe. „Meine Frau hört nur Schlager“, flüstert er. „Seit elf Jahren. Das ist das Schönste, was ich je gehört habe.“ Er klebt dir ein Bändchen ans Handgelenk und zwinkert verdächtig feucht. „Wenn du was brauchst: Ich bin hier. Das ist leider auch mein Hobby.“</p>`,
+on:()=>{num('kal',1);add('Festivalbändchen');set('inside')},
+ch:()=>[{l:'Das Gelände betreten',to:'einlass'}]},
+tor_forge:{place:'park',t:'Handwerkskunst',
+text:()=>`<p>Mit Gaffer-Tape, einem silbernen Edding und drei Minuten Geduld baust du ein Bändchen, das aussieht wie das Original. Kalle hält eine UV-Lampe darüber. Die Lampe summt. Er seufzt. „Gaffer-Tape. Das Dichtmittel der Hölle.“ Er nickt anerkennend. „Gute Arbeit. Keine Beschwerden.“</p>`,
+on:()=>{add('Festivalbändchen');set('inside')},
+ch:()=>[{l:'Das Gelände betreten',to:'einlass'}]},
+tor_mosh:{place:'park',t:'Schubswettbewerb',
+text:()=>`<p>Du stellst dich vor Kalle, Schulter an Schulter. Er schiebt. Du schiebst. Ihr rutscht beide fünf Meter durch den Schneematsch, ein Auto verliert einen Seitenspiegel, und am Ende liegt ihr nebeneinander im Dreck und lacht. „Du bist nicht schlecht“, keucht Kalle. „Mein letzter Gegner hat aufgegeben, als ich ihm meinen Namen gesagt habe.“ Er klebt dir ein Bändchen ans Handgelenk und klopft dir auf die Schulter, was weh tut.</p>`,
+on:()=>{num('kal',1);add('Festivalbändchen');set('inside')},
+ch:()=>[{l:'Das Gelände betreten',to:'einlass'}]},
+einlass:{act:2,place:'camp',time:'18:45',chap:'Akt II · Das Gelände',t:'Willkommen in der Hölle',
+text:()=>`<p>Hinter dem Tor öffnet sich ein Tal aus Zelten, Lichtern und Schwefeldampf. Eine Girlande aus Schädeln hängt über dem Hauptweg, jeder Schädel mit einer winzigen Weihnachtsmütze. Aus einem Zelt klingt „O du fröhliche“ als Blastbeat. Gunter fängt an zu weinen, weil er es nicht mitbrüllen kann.</p><p>Sabine sieht auf die Uhr. „Es ist 18:45. Um 06:30 spielen wir. Wir haben knapp zwölf Stunden, um ein Sonnenriff zu lernen, einen Sänger zu bekommen und einen Gitarristen zu finden. Das ist ein Zeitfenster. Das ist machbar.“ Sie nickt, als hätte sie gerade eine Klassenarbeit angekündigt.</p><p>Auf dem Gelände gibt es fünf Orte, die dich weiterbringen: das <b>Zeltlager</b>, in dem Rüdiger spukt, das <b>Seniorenzelt</b>, die <b>Merch-Meile</b>, die <b>Glühwein-Hölle</b> und, weiter hinten, das <b>Backstage-Zelt</b> und die <b>Hauptbühne</b>.</p>`,
+ch:()=>[{l:'Das Gelände erkunden',to:'gelaende'}]},
+gelaende:{act:2,place:'camp',chap:'Akt II · Das Gelände',t:'Das Festivalgelände',
+hint:()=>`Du brauchst vier Dinge: Gunters Stimme (Merch-Meile), Dieters Gitarre (Glühwein-Hölle), Rüdigers Baseline (Zeltlager, Seniorenzelt) und das Sonnenriff (Seniorenzelt). Dazu ein Gespräch mit Perchta im Backstage-Zelt. Bisher fehlt: ${missing().join(', ')||'nichts'}.`,
+text:()=>`<p>Der Hauptweg des Festivals ist ein Kopfsteinpflaster aus Glühweinflecken. Über allem schwebt ein riesiger Adventskranz aus Stacheldraht, in dem vier schwarze Kerzen brennen. Drei Dämonen in Pelzmänteln tanzen mit einem Weihnachtsmann, der aussieht, als hätte er etwas zu verantworten.</p><p>${band()>=3?'Die Band wirkt langsam wie eine Band.':'Die Band wirkt wie ein Unfall mit Instrumenten.'} ${f('perchtaMet')?'Frau Perchta ist dir inzwischen begegnet.':''}</p>`,
+ch:()=>[
+ {l:'Zum Zeltlager',to:'zelt'},
+ {l:'Ins Seniorenzelt',to:'opa'},
+ {l:'Zur Merch-Meile',to:'merch'},
+ {l:'In die Glühwein-Hölle',to:'bar'},
+ {l:'Zum Backstage-Zelt',to:()=>f('backOpen')?'backstage':'backstage_gate'},
+ {l:'Zur Hauptbühne',to:'buehne',if:()=>ready(),lock:()=>'Noch nicht bereit. Es fehlt: '+missing().join(', ')+'.'},
+ {l:'Zurück zum Stollenwagen',to:'van'}]}
+});
+Object.assign(N,{
+zelt:{act:2,place:'camp',chap:'Akt II · Das Zeltlager',t:'Zeltlager der Verlorenen',
+hint:'Rüdiger braucht seine alte Baseline. Dafür brauchst du den Walkman, den du im Stollenwagen reparieren kannst, und eine Kassette, die jemand im Seniorenzelt aufbewahrt hat.',
+text:()=>`<p>Das Zeltlager ist ein Dorf aus Zelten, Lagerfeuern und Menschen, die sich fragen, ob sie noch leben. In einem abgesperrten Bereich mit Flatterband steht ein Schild: <em>„Geisterwiese. Betreten auf eigene Gefahr. Wir haften nicht für Durchzug.“</em> Dort sitzt, durchsichtig, in Jeansweste mit Patches, ein Mann auf einem Campingstuhl: Rüdiger, der Bassist.</p><p>Gunter steht neben dir und starrt traurig auf sein Whiteboard. ${f('gunterOk')?'Er brüllt inzwischen wieder, wenn auch nur die Zeltnachbarn an.':''}</p>`,
+ch:()=>[
+ {l:'Mit Rüdiger reden',to:'ruediger1'},
+ {l:'Gunter die Dose geben',to:'gunter_ok',if:()=>has('Kehlenkonserve')&&!f('gunterOk')},
+ {l:'Sabine den Kaffee reichen',to:'s_coffee',if:()=>has('Kaffee für Sabine')},
+ {l:'Zurück zum Hauptweg',to:'gelaende'}]},
+ruediger1:{place:'camp',t:'Rüdiger, seit 1983 tot',
+hint:()=>f('ruedigerOk')?'Rüdiger ist bereit.':'Du brauchst zwei Dinge: einen funktionierenden Walkman (Tape aus dem Stollenwagen) und die Kassette, die im Seniorenzelt liegt.',
+text:()=>`<p>„Ich bin Rüdiger“, sagt der Geist. „Seit 1983 tot. Seit 1983 Bassist. Das Zweite ist anstrengender.“ Er sieht müde aus, auch wenn man durch ihn die Zeltwand sehen kann. „Ich bin damals über ein Kabel gestolpert. Beim Soundcheck. Ein dickes, warmes Kabel hinter der Bühne. Seitdem erinnere ich mich nur an Kabel.“</p><p>${f('ruedigerOk')?'Er nickt dir freundlich zu. Seine Hände zucken, als würde er schon wieder spielen.':'„Meine Baseline habe ich vergessen. Mein Bandkollege Wotan hat damals ein Mixtape aufgenommen, bei der Probe. Er wohnt im Seniorenzelt. Aber ohne Abspielgerät bringt mir das Band nichts. Mein Walkman ist ... nun ja. Er liegt wahrscheinlich noch im Bus.“'}</p>`,
+on:()=>{set('ruedigerMet');clue('ruediger','Rüdiger (Geist, 1983 über ein Kabel gestolpert) hat seine Baseline vergessen. Wotans Mixtape liegt im Seniorenzelt, sein Walkman im Stollenwagen.')},
+ch:()=>[
+ {l:'Rüdiger Walkman und Kassette geben',to:'ruediger_ok',if:()=>has('Walkman')&&has('Kassette: Rüdigers Mixtape')&&!f('ruedigerOk')},
+ {l:'Zurück zum Zeltlager',to:'zelt'}]},
+ruediger_ok:{place:'camp',t:'Play',
+text:()=>`<p>Rüdiger setzt die Kopfhörer auf. Er drückt Play. Aus dem Walkman knistert 1983: ein Probenraum, Gelächter, Wotans Stimme: <em>„Nein, nein, erst der Donner, dann der Rabe, wie oft denn noch?“</em> Danach die Baseline: tief, dreckig, wunderschön.</p><p>Rüdiger schließt die Augen. Eine Träne aus Ektoplasma läuft ihm über die Wange und fällt auf den Boden, wo sie zischt. „Ich weiß wieder, wie es geht. Alles.“ Seine Finger tanzen auf dem Griffbrett, das nicht da ist. „Danke. Ich bin dabei.“</p>`,
+on:()=>{set('ruedigerOk');set('riffB');clue('riffB','Auf dem Mixtape sagt Wotan: „Erst der Donner, dann der Rabe.“')},
+ch:()=>[{l:'Zurück zum Zeltlager',to:'zelt'}]},
+gunter_ok:{place:'camp',t:'Die Dose öffnet sich',
+text:()=>`<p>Du reichst Gunter die Dose. Er sieht sie an, schnuppert daran, nickt feierlich. Dann dreht er den Deckel ab, hält die Dose an die Kehle und atmet ein.</p><p>Ein Geräusch wie ein Pottwal, der eine Schubkarre voll Kies verschluckt, kommt aus seinem Mund. Gunter strahlt. Er brüllt, so laut, dass drei Zelte umfallen und ein Dämon applaudiert. „DANKE!“, schreit er, und es klingt wie Musik, wenn Musik schlechte Laune hätte.</p>`,
+on:()=>{rem('Kehlenkonserve');set('gunterOk')},
+ch:()=>[{l:'Zurück zum Zeltlager',to:'zelt'}]},
+s_coffee:{place:'camp',t:'Kaffee für Sabine',
+text:()=>`<p>Du reichst Sabine den Kaffee, mit Milch, genau so, wie sie ihn mag. Sie nimmt einen Schluck und schaut dich lange an. „Woher wusstest du das?“, fragt sie. Du sagst nichts. Sie nickt langsam. „Das war aufmerksam. Das Klassenbuch bleibt zu.“</p>`,
+on:()=>{rem('Kaffee für Sabine');num('sab',1);clue('sab','Sabine mag Kaffee mit Milch, Pünktlichkeit und gut sortierte Kabel.')},
+ch:()=>[{l:'Zurück zum Zeltlager',to:'zelt'}]},
+
+opa:{act:2,place:'tent',chap:'Akt II · Das Seniorenzelt',t:'Das Seniorenzelt',
+hint:'Opa Wotan hat das Sonnenriff. Hör ihm zu, auch wenn es dauert, am Ende lohnt es sich.',
+text:()=>`<p>Das Seniorenzelt ist ein Hort der Ruhe: Klappstühle, Thermoskannen, Wärmflaschen, ein Radio, das leise Schlager spielt. Ein alter Mann sitzt in der Mitte, in Wollsocken und Sandalen, mit einem Hörgerät und einem Auge, das etwas zu blau leuchtet. Auf seinem Schoß liegt ein Speer, den er als Regenschirm benutzt.</p><p>„Wotan“, stellt er sich vor. „Ehemaliger Anführer der Wilden Jagd. Opa Wotan, wenn's recht ist. Ich war mal wichtig.“</p>`,
+ch:()=>[
+ {l:'Nach dem Sonnenriff fragen',to:'opa1'},
+ {l:'Nach Rüdiger und seinem Mixtape fragen',to:'opa_tape',if:()=>f('ruedigerMet')&&!has('Kassette: Rüdigers Mixtape')&&!f('ruedigerOk')},
+ {l:'Ihm Gesellschaft leisten und zuhören',to:'opa_story',if:()=>f('riffA')&&!f('opaStory')},
+ {l:'Zurück zum Hauptweg',to:'gelaende'}]},
+opa1:{place:'tent',t:'Das Riff der Sonne',
+hint:'Das Riff besteht aus vier Teilen: Wolf, Donner, Rabe, Sonne. Wotan sagt dir, was zuerst und was zuletzt kommt. Den Rest findest du an anderer Stelle.',
+text:()=>`<p>„Das Sonnenriff?“, ruft Wotan. „Jedes Kind kennt das Sonnenriff! Oder jedenfalls jedes Kind vor tausend Jahren.“ Er hustet, nimmt einen Schluck aus der Thermoskanne und beginnt:</p><blockquote>„Zuerst heult der Wolf den Mond an, damit der Mond weiß, wer hier spielt. Dann der Donner, dann der Rabe, aber nicht in dieser Reihenfolge, oder doch, ich vergesse das immer. Und zuletzt die Sonne, die ist ja kein Frühaufsteher.“</blockquote><p>Er blinzelt. „Wo war ich?“</p>`,
+on:()=>{set('riffA');clue('riffA','Wotan: Das Sonnenriff beginnt mit dem Wolf und endet mit der Sonne. Zwischen Donner und Rabe ist er sich nicht sicher.')},
+ch:()=>[{l:'Zurück zu Wotan',to:'opa'}]},
+opa_tape:{place:'tent',t:'Ein altes Mixtape',
+text:()=>`<p>„Rüdiger?“ Wotan schnauft. „Der arme Junge. Gestolpert wie ein Kalb.“ Er kramt in einer Tasche aus Filz und zieht eine Kassette hervor: <em>„Rüdigers Baselines, 1983, bitte nicht überspielen“</em>. „Habe ich vierzig Jahre aufgehoben. Ich wusste nicht, wofür. Jetzt weiß ich es.“ Er drückt sie dir in die Hand. „Sag ihm: Es tut mir leid. Ich hätte das Kabel sichern müssen.“</p><p><b>Erhalten: Kassette: Rüdigers Mixtape.</b></p>`,
+on:()=>{add('Kassette: Rüdigers Mixtape')},
+ch:()=>[{l:'Zurück zu Wotan',to:'opa'}]},
+opa_story:{place:'tent',t:'Wotans Geschichte',
+text:()=>`<p>Du setzt dich. Wotan erzählt. Er erzählt von der Wilden Jagd, von Stürmen, die er allein losgetreten hat, und von dem Mädchen, das vor achthundert Jahren vorgesprochen hat. „Perchta. Hübsche Stimme. Zu laut.“ Er seufzt. „Ich habe sie abgelehnt. Wir hatten schon eine Banshee. Zwei Frauen, die schreien, das wäre zu viel gewesen.“</p><p>„Sie hat ein Demoband dagelassen.“ Er kramt weiter. „Ich habe es nie angehört. Ich fühle mich seit achthundert Jahren schlecht. Nimm es mit.“ Er legt dir eine Kassette und einen laminierten Ausweis in die Hand: <em>„Wilde Jagd: Lifetime Backstage-Pass.“</em> „Der gilt überall. Ich habe sowieso keine Lust mehr auf Backstage.“</p><p><b>Erhalten: Kassette: Perchtas Demo, Backstage-Pass.</b></p>`,
+on:()=>{set('opaStory');add('Kassette: Perchtas Demo');add('Backstage-Pass');clue('perchta','Perchta hat vor 800 Jahren bei der Wilden Jagd vorgesprochen und wurde abgelehnt („zu laut“). Ihr Demoband liegt in deiner Tasche.')},
+ch:()=>[{l:'Zurück zu Wotan',to:'opa'}]},
+
+merch:{act:2,place:'merch',chap:'Akt II · Die Merch-Meile',t:'Die Merch-Meile',
+hint:'Gunters Stimme steckt in einer der Dosen. Er hat sie beschrieben. Für das Riff lohnt sich auch ein Blick auf die T-Shirts.',
+text:()=>`<p>Die Merch-Meile besteht aus fünfzig Ständen, an denen Dämonen und Untote T-Shirts, Plektren und Kuscheltier-Teufel verkaufen. Über allem hängt ein Banner: <em>„PERCHTA PRESENTS: Ewige Rauhnacht. Dauerkarte jetzt sichern!“</em></p><p>Am größten Stand arbeitet ein Imp namens <b>Imbert</b>, mit Lesebrille und Preisschild am Horn. Neben ihm: ein Regal voller Dosen mit Etiketten wie „Zartes Säuseln“.</p>`,
+ch:()=>[
+ {l:'Die T-Shirts ansehen',to:'shirt'},
+ {l:'Die Dosen ansehen',to:'jars',if:()=>!has('Kehlenkonserve')&&!f('gunterOk')},
+ {l:'Mit Imbert sprechen',to:'imbert'},
+ {l:'Zurück zum Hauptweg',to:'gelaende'}]},
+shirt:{place:'merch',t:'Die Tour-Shirts der Wilden Jagd',
+text:()=>`<p>Eines der T-Shirts zeigt die Tour-Termine der Wilden Jagd von 1203. Auf dem Rücken steht ein Spruch in gotischer Schrift: <em>„Nach dem Donner kommt der Rabe.“</em> Darunter, kleiner: <em>„Dann die Sonne. Aber erst, wenn alle gegangen sind.“</em></p><p>Du merkst dir das, obwohl du es nie gesehen hast, außer jetzt.</p>`,
+on:()=>{set('riffB');clue('riffB','Tour-Shirt der Wilden Jagd: „Nach dem Donner kommt der Rabe. Dann die Sonne.“')},
+ch:()=>[{l:'Zurück zur Merch-Meile',to:'merch'}]},
+imbert:{place:'merch',t:'Imbert, Imp',
+text:()=>`<p>Imbert schaut dich über die Brille an. „Kann ich helfen? Ich verkaufe Stimmen. Aus Gründen. Frag nicht. Die Rechnung ist beglichen, die Lieferung ist geklärt.“ Er schiebt dir ein Preisschild entgegen: <em>„Stimme in Dose: 2 Glühweinmarken. Umtausch ausgeschlossen. Haftung ausgeschlossen. Spaß ausgeschlossen.“</em></p><p>„Meine Chefin hat gesagt, ich soll alle Stimmen von heute früh verkaufen. Keine Ahnung, warum sie so viele wollte.“</p>`,
+ch:()=>[{l:'Zurück zur Merch-Meile',to:'merch'}]},
+jars:{place:'merch',t:'Vier Dosen',
+hint:'Gunter sagte: Reibeisen, Kratzstufe 9, nie husten, nie säuseln. Schau dir die Etiketten an.',
+text:()=>`<p>Vier Dosen stehen im Regal, jede mit einem handgeschriebenen Etikett. Aus einer kommt ein leises Summen, aus einer ein Husten, aus einer ein tiefes Grollen. Aus der vierten kommt ein Geräusch, als würde jemand einen Nagel durch einen Schornstein ziehen.</p><ul><li><b>„Zartes Säuseln (Sopran)“</b></li><li><b>„Tiefer Grunzer (Bass)“</b></li><li><b>„Raspelnder Husten (Winterversion)“</b></li><li><b>„Reibeisen mit Anschlag (Kratzstufe 9)“</b></li></ul>`,
+ch:()=>[
+ {l:'„Zartes Säuseln (Sopran)“ nehmen',to:'fb',fx:bad('Falsch','Du öffnest die Dose. Heraus kommt ein Säuseln, so lieblich, dass ein Dämon neben dir in Tränen ausbricht. Das ist nicht Gunter. Das ist niemand, der Todesstollen jemals unterstützen würde.','jars')},
+ {l:'„Tiefer Grunzer (Bass)“ nehmen',to:'fb',fx:bad('Fast, aber nein','Ein tiefes Grollen. Es klingt gut, aber es fehlt das Kratzen, die Heiserkeit, die Verzweiflung. Das ist ein Mann, der Bier mag. Gunter ist ein Mann, der Menschen pflegt.','jars')},
+ {l:'„Raspelnder Husten (Winterversion)“ nehmen',to:'fb',fx:bad('Nein','Die Dose hustet dich an. Du hast sofort das Gefühl, krank zu werden. Gunter sagte: „Nie husten.“ Das war ernst gemeint.','jars')},
+ {l:'„Reibeisen mit Anschlag (Kratzstufe 9)“ nehmen',to:'jar_pay'},
+ {l:'Zurück',to:'merch'}]},
+jar_pay:{place:'merch',t:'Die richtige Dose',
+hint:'Du kannst zahlen (zwei Marken) oder deine Klasse einsetzen.',
+text:()=>`<p>Das ist sie. Die Dose vibriert, als du sie berührst, und ein Geräusch dringt heraus, das wie „Gnaaaaaa“ klingt. Imbert beobachtet dich mit hochgezogener Braue. „Zwei Marken. Oder eine gute Idee.“</p>`,
+ch:()=>[
+ {l:'Zwei Glühweinmarken zahlen',to:'jar_get',if:()=>mk()>=2,lock:'Dafür brauchst du zwei Glühweinmarken.',fx:()=>{pay(2)}},
+ {l:'Imbert beeindrucken: „Ich bin der Manager der nächsten großen Band. Du verkaufst gerade ihren Sänger.“',to:'jar_get',if:()=>S.cls==='Schreihals',hide:()=>S.cls!=='Schreihals'},
+ {l:'Die Dose unauffällig in den Ärmel gleiten lassen',to:'jar_get',if:()=>S.cls==='Roadie',hide:()=>S.cls!=='Roadie'},
+ {l:'Imbert freundlich an die Wand drücken, bis er die Preise vergisst',to:'jar_get',if:()=>S.cls==='Mosher',hide:()=>S.cls!=='Mosher'},
+ {l:'Doch zurück',to:'merch'}]},
+jar_get:{place:'merch',t:'Gunters Stimme',
+text:()=>`<p>Du hast die Dose. Sie ist warm und ein bisschen zornig. Auf dem Etikett steht in Gunters Handschrift: <em>„Gehört Gunter, nicht Perchta.“</em> Jemand hat ihm also vorher schon ein Etikett geklebt. Das war Perchtas Idee von Humor.</p><p><b>Erhalten: Kehlenkonserve.</b> Bring sie zu Gunter im Zeltlager.</p>`,
+on:()=>{add('Kehlenkonserve')},
+ch:()=>[{l:'Zurück zur Merch-Meile',to:'merch'}]},
+
+bar:{act:2,place:'bar',chap:'Akt II · Die Glühwein-Hölle',t:'Die Glühwein-Hölle',
+hint:'Dieter schläft am Tresen. Seine Gitarre hängt hinter der Bar. Du brauchst einen Weg, sie zu bekommen, und Kaffee, um ihn zu wecken.',
+text:()=>`<p>Die Glühwein-Hölle ist ein Zelt aus Rauch, Dampf und schlechten Entscheidungen. Hinter dem Tresen steht <b>Mephisto Mike</b>, ein Barmann mit Hörnern, Schürze und einem Lächeln, das zu lange hält. An der Wand hängt eine Gitarre mit einem Pfandzettel: <em>„Ulrike, Flying V, 12 Glühwein, nicht ausgelöst.“</em></p><p>Am Tresen schläft ein Mann in Dachdecker-Latzhose, die Stirn auf einer Tischplatte, ein leeres Glas in der Hand. Dieter. ${f('dieterOk')?'(Er ist inzwischen wach und sehr peinlich berührt.)':''}</p>`,
+ch:()=>[
+ {l:'Mit Mike sprechen',to:'mike'},
+ {l:'Die Gitarre zurückholen',to:'guitar_deal',if:()=>!has('Gitarre „Ulrike“')&&!f('dieterOk')},
+ {l:'Dieter wecken',to:'dieter1',if:()=>!f('dieterOk')},
+ {l:'Dem betrunkenen Dämon Heinz zuhören',to:'heinz'},
+ {l:'Zurück zum Hauptweg',to:'gelaende'}]},
+mike:{place:'bar',t:'Mephisto Mike',
+text:()=>`<p>„Dieter?“ Mike poliert ein Glas mit einem Lappen, der älter ist als das Glas. „Netter Kerl. Er hat die Gitarre als Pfand hinterlassen, für zwölf Glühwein. Das ist ein guter Preis. Zu gut. Wenn er sie wiederhaben will, muss er mir einen Glühwein mixen, der der Hölle würdig ist. Die Hölle ist anspruchsvoll.“</p><p>Er schiebt dir zwei Becher über den Tresen. „Kaffee. Schwarz wie die Hölle. Niemand bestellt ihn, deshalb ist er umsonst.“ Er sieht dich an. „Einer für den Schläfer, einer für dich oder wen auch immer.“</p>`,
+on:()=>{if(!f('coffeeGot')){set('coffeeGot');add('Kaffee für Dieter');add('Kaffee für Sabine')}},
+ch:()=>[{l:'Zurück zur Bar',to:'bar'}]},
+heinz:{place:'bar',t:'Dämon Heinz, Stammgast seit 1612',
+text:()=>`<p>Heinz hängt über dem Tresen wie ein nasser Mantel. „Weißt du“, lallt er, „die Perchta, die hat den Sonnenwecker abgestellt. Ich hab's gesehen. Sie hat den Stecker gezogen. Hinter der Bühne, so groß wie ein Scheunentor, der Wecker. Hat gelacht dabei.“ Er rülpst Rauch. „Und weißt du was? Ich hab dabei zwei Glühweinmarken verloren. Hier, hab sie wiedergefunden.“</p>${f('heinzDone')?'':'<p>Er drückt dir zwei Marken in die Hand und schläft wieder ein.</p>'}`,
+on:()=>{if(!f('heinzDone')){set('heinzDone');num('marken',2);add('Glühweinmarken');set('weckerHint');clue('wecker','Heinz: Perchta hat den Stecker des Sonnenweckers gezogen. Der Wecker steht hinter der Bühne, so groß wie ein Scheunentor.')}},
+ch:()=>[{l:'Zurück zur Bar',to:'bar'}]},
+dieter1:{place:'bar',t:'Dieter',
+hint:()=>'Dieter braucht seine Gitarre und einen Kaffee. Mike will einen Glühwein, der der Hölle würdig ist.',
+text:()=>`<p>${has('Gitarre „Ulrike“')&&has('Kaffee für Dieter')?'Du stellst Dieter den Kaffee unter die Nase und legst ihm „Ulrike“ in den Arm. Er schnuppert, öffnet ein Auge, dann das zweite. „ULRIKE!“ Er springt auf, umarmt die Gitarre, weint ein bisschen und fragt, welcher Tag ist. Als du es ihm sagst, wird er bleich. „Wir spielen heute Nacht?“ Er schluckt. „Ich bin dabei.“':has('Gitarre „Ulrike“')?'Dieter schläft. Du hältst ihm die Gitarre unter die Nase. Er murmelt im Schlaf „Ulrike“, dreht sich um und schläft weiter. Er braucht etwas Stärkeres. Etwas Heißes. Schwarz wie die Hölle.':'Dieter murmelt im Schlaf: „Ohne Ulrike spiele ich nicht.“ Er schnarcht. Mike lächelt. Er lächelt immer.'}</p>`,
+on:()=>{if(has('Gitarre „Ulrike“')&&has('Kaffee für Dieter')){rem('Gitarre „Ulrike“');rem('Kaffee für Dieter');set('dieterOk')}},
+ch:()=>[{l:'Zurück zur Bar',to:'bar'}]},
+guitar_deal:{place:'bar',t:'Ulrike zurückholen',
+hint:'Mike will einen würdigen Glühwein, einen Wettkampf oder einen Gefallen. Dein Klassenweg ist einfacher, aber der Glühwein klappt für jeden.',
+text:()=>`<p>Mike schiebt dir die Speisekarte hin: <em>„Der Höllentor-Glühwein: Erst Feuer im Mund. Dann gemütlich wie Oma. Dann der Gestank der Unterwelt. Zuletzt will man sich bei allen entschuldigen.“</em></p><p>Auf dem Tresen stehen vier Zutaten: <b>Chili</b>, <b>Zimt</b>, <b>Schwefel</b> und <b>Honig</b>.</p>`,
+ch:()=>[
+ {l:'Den Höllentor-Glühwein mixen',to:'mix'},
+ {l:'Mike zum Armdrücken herausfordern',to:'guitar_arm',if:()=>S.cls==='Mosher',hide:()=>S.cls!=='Mosher'},
+ {l:'Mit Mike zu „Last Christmas“ duettieren',to:'guitar_duet',if:()=>S.cls==='Schreihals',hide:()=>S.cls!=='Schreihals'},
+ {l:'Die kaputte Jukebox in der Ecke reparieren',to:'guitar_juke',if:()=>S.cls==='Roadie',hide:()=>S.cls!=='Roadie'},
+ {l:'Zurück zur Bar',to:'bar'}]},
+mix:{place:'bar',t:'Der Höllentor-Glühwein',
+hint:'Die Speisekarte nennt die Reihenfolge der Wirkung: Feuer im Mund (Chili), dann gemütlich (Zimt), dann Gestank (Schwefel), zuletzt Versöhnung (Honig).',
+puzzle:{syms:[{id:'chili',ic:'🌶️',nm:'Chili'},{id:'zimt',ic:'🟤',nm:'Zimt'},{id:'schwefel',ic:'🟡',nm:'Schwefel'},{id:'honig',ic:'🍯',nm:'Honig'}],ans:['chili','zimt','schwefel','honig'],ok:'guitar_ok',bad:'mix_bad'},
+text:()=>`<p>Du stellst vier Zutaten vor dich. Mike beobachtet jeden deiner Handgriffe, als würde er Seelen prüfen. „Die Reihenfolge ist alles“, sagt er leise. „Und der Wille.“</p><p class="note">Tippe die Zutaten nacheinander an und bestätige.</p>`,
+ch:()=>[{l:'Zurück',to:'guitar_deal'}]},
+mix_bad:{place:'bar',t:'Ein Fehlschlag',
+text:()=>`<p>Mike nimmt einen Schluck, behält ihn im Mund und verzieht keine Miene. Dann schluckt er. „Ich habe schon schlimmere Dinge getrunken“, sagt er. „Aber nicht freiwillig.“ ${S.n.wrong>=2?'Er seufzt. „Denk an die Karte: Feuer, Gemütlichkeit, Gestank, Entschuldigung. Das ist kein Rätsel, das ist Genuss.“':'Er schiebt dir das Glas zurück. „Nochmal.“'}</p>`,
+ch:()=>[{l:'Noch einmal mixen',to:'mix'},{l:'Zurück',to:'guitar_deal'}]},
+guitar_arm:{place:'bar',t:'Armdrücken',
+text:()=>`<p>Mike legt den Ellbogen auf den Tresen. Du auch. Der Tresen ächzt. Fünf Minuten später sind beide Arme rot, zwei Barhocker zerbrochen und ein Dämon hat Wetten abgeschlossen. Mike verliert, weil du schlicht weniger Verstand hast und mehr Sturheit. Er hält dir die Gitarre hin. „Ich verliere gern gegen Idioten.“</p>`,
+on:()=>{add('Gitarre „Ulrike“')},
+ch:()=>[{l:'Gitarre nehmen',to:'bar'}]},
+guitar_duet:{place:'bar',t:'Ein Duett',
+text:()=>`<p>Mike lächelt, und es ist das erste ehrliche Lächeln, das du bei ihm gesehen hast. „Ich singe seit dreihundert Jahren nur in Gedanken.“ Ihr singt „Last Christmas“, er in Bass, du in Grind. Der halbe Raum weint. Heinz hält ein Feuerzeug hoch. Als ihr fertig seid, räuspert sich Mike und reicht dir die Gitarre. „Das war mein Highlight des Jahrhunderts.“</p>`,
+on:()=>{add('Gitarre „Ulrike“')},
+ch:()=>[{l:'Gitarre nehmen',to:'bar'}]},
+guitar_juke:{place:'bar',t:'Die Jukebox',
+text:()=>`<p>Du schraubst die Jukebox auf, ziehst zwei Kabel heraus, steckst sie anders wieder rein und schlägst einmal gegen die Seite. Die Jukebox hustet, dann spielt sie „Jingle Bells (Doom-Version)“. Mike steht reglos da, die Hand an der Brust. „Seit 1999 ist sie kaputt.“ Er legt dir die Gitarre in die Arme. „Nimm sie. Und komm wieder, wenn du Arbeit suchst.“</p>`,
+on:()=>{add('Gitarre „Ulrike“')},
+ch:()=>[{l:'Gitarre nehmen',to:'bar'}]},
+guitar_ok:{place:'bar',t:'Ein würdiger Glühwein',
+text:()=>`<p>Mike nimmt den Becher, riecht daran, nippt. Seine Augen werden groß, dann glasig. „Feuer im Mund. Dann Oma. Dann Gestank. Und dann ...“ Er schluckt. „... will ich mich bei meiner Mutter entschuldigen.“ Er stellt den Becher ab und streicht sich über den Schnurrbart. „Das ist der beste Höllentor-Glühwein seit 1887.“ Er reicht dir die Gitarre. „Sie gehört dir.“</p>`,
+on:()=>{add('Gitarre „Ulrike“')},
+ch:()=>[{l:'Gitarre nehmen',to:'bar'}]}
+});
+Object.assign(N,{
+backstage_gate:{act:3,place:'back',chap:'Akt III · Backstage',t:'Der Eingang zum Backstage-Zelt',
+hint:'Opa Wotan hat einen Pass. Es gibt aber noch andere Wege, je nach Klasse und Freunden.',
+text:()=>`<p>Das Backstage-Zelt liegt hinter der Hauptbühne, ein Palast aus Eis und Lichterketten. Am Eingang stehen zwei Eisgolems mit Walkie-Talkies und einem Schild: <em>„Nur für Personal, Künstler und Leute mit Stil. Stil wird geprüft.“</em></p><p>„Name?“, fragt einer der Golems mit einer Stimme wie knackendes Eis. „Todesstolen?“, antwortet er selbst. „Nicht auf der Liste.“</p>`,
+ch:()=>[
+ {l:'Opa Wotans Backstage-Pass zeigen',to:'gate_open',if:()=>has('Backstage-Pass'),lock:'Du hast keinen Pass. Wer hat so etwas? Vielleicht jemand, der alt und wichtig war?'},
+ {l:'Kalle zuwinken: Er winkt dich durch',to:'gate_open',if:()=>S.n.kal>=1,hide:()=>S.n.kal<1},
+ {l:'Durch den Kabelkanal kriechen',to:'gate_open',if:()=>S.cls==='Roadie',hide:()=>S.cls!=='Roadie'},
+ {l:'Mit der Moshpit-Welle an den Golems vorbeidrängen',to:'gate_open',if:()=>S.cls==='Mosher',hide:()=>S.cls!=='Mosher'},
+ {l:'Den Golems ein Liedchen vorsingen',to:'gate_open',if:()=>S.cls==='Schreihals',hide:()=>S.cls!=='Schreihals'},
+ {l:'Zurück zum Hauptweg',to:'gelaende'}]},
+gate_open:{place:'back',t:'Durch',
+text:()=>`<p>${has('Backstage-Pass')?'Der Golem prüft den Pass, dann dich, dann wieder den Pass. „Wilde Jagd. Lifetime.“ Er hebt eine Eisbraue. „Der Typ ist seit achthundert Jahren nicht mehr hier gewesen. Willkommen zurück.“':S.n.kal>=1?'Kalle steht am anderen Ende des Platzes, hebt zwei Finger an die Stirn und nickt. Die Golems sehen es, erstarren und treten beiseite. „Du bist ein Freund von Kalle? Warum sagst du das nicht gleich?“':S.cls==='Roadie'?'Du kriechst durch den Kabelkanal, eine Röhre aus Staub, Verlängerungskabeln und totem Gaffer-Tape. Es riecht nach Rock. Am anderen Ende fällst du durch einen Vorhang und landest zwischen zwei Eisskulpturen.':S.cls==='Mosher'?'Eine Welle aus Fans schwappt vorbei, und du schwimmst mit, Ellenbogen voran. Die Golems verlieren die Fassung, einer von ihnen den Walkie-Talkie. Du bist drin, und es hat nur zwei blaue Flecken gekostet.':'Du singst den Golems ein altes Weihnachtslied. Im Grind-Stil. Sie lauschen, die Gesichter erstarren, dann beginnen sie, mit den Köpfen zu nicken. „Okay“, sagt einer, „ihr könnt rein, aber ich will eine Zugabe.“'}</p>`,
+on:()=>{set('backOpen')},
+ch:()=>[{l:'Ins Backstage-Zelt',to:'backstage'}]},
+backstage:{act:3,place:'back',chap:'Akt III · Backstage',t:'Das Backstage-Zelt',
+hint:()=>f('perchtaMet')?'Perchta ist wichtig fürs Finale: Je besser du sie verstehst, desto mehr Möglichkeiten hast du später.':'Du musst Perchta treffen, bevor du zur Hauptbühne darfst.',
+text:()=>`<p>Das Backstage-Zelt ist ein Winterpalast: Eisskulpturen von Rockstars, ein Glühweinbrunnen mit Dampf, Lichterketten in Form von Stacheldraht. In der Mitte steht eine Garderobe aus Eis, und daneben, so groß wie ein Scheunentor, ein <b>Wecker</b> aus Messing. Auf dem Ziffernblatt: Sonnenstrahlen. Der Zeiger steht auf <b>06:30</b>.</p><p>${f('perchtaMet')?'Die Garderobentür steht offen. Von drinnen klingt leise Musik, die an Schnee erinnert.':'Aus der Garderobe dringen eine Stimme und das Klirren von Eis.'}</p>`,
+ch:()=>[
+ {l:'Perchtas Garderobe betreten',to:'perchta1',if:()=>!f('perchtaMet')},
+ {l:'Noch einmal mit Perchta sprechen',to:'perchta_talk',if:()=>f('perchtaMet')},
+ {l:'Den riesigen Wecker untersuchen',to:'wecker'},
+ {l:'Zurück aufs Gelände',to:'gelaende'}]},
+perchta1:{place:'back',t:'Frau Perchta',
+text:()=>`<p>Perchta sitzt vor einem Spiegel aus Eis. Sie trägt ein Kleid aus Schneeflocken, auf dem Frisiertisch liegen fünf Masken: lächelnd, weinend, grimmig, verführerisch und eine, die aussieht wie ein Hund mit zwei Köpfen. Sie dreht sich langsam um. Ihr Lächeln ist wunderschön und ein bisschen zu breit.</p><p>„Ah. Die <em>Stollen</em>. Ich liebe Gebäck.“ Sie schlägt die Beine übereinander. „Ihr seid mein Notnagel. Ich habe die Wilde Jagd ausgeladen. Sie reiten immer so <em>pünktlich</em>. Und Pünktlichkeit hat die Sonne zu verantworten.“</p><p>Sie nippt an ihrem Glühwein. „Wenn heute früh niemand das Sonnenriff spielt, bleibt es Rauhnacht. Für immer. Ein Dauerfestival. Glühwein, Moshpits und kein Montag. Und ihr seid die schlechteste Band im Line-up, mit euch ist nichts zu befürchten.“ Sie lacht, wie Glöckchen, die jemandem auf die Zehen gefallen sind. „Die Stimme von Gunter? Hat eine meiner Imps verkauft. Ich war das nicht. Gut, ich war das.“</p>`,
+on:()=>{set('perchtaMet');clue('perchtaMet','Perchta hat die Wilde Jagd ausgeladen, den Wecker abgestellt und Gunters Stimme verkaufen lassen. Sie will eine ewige Rauhnacht.')},
+ch:()=>[{l:'Mit ihr sprechen',to:'perchta_talk'},{l:'Gehen',to:'backstage'}]},
+perchta_talk:{place:'back',t:'Frau Perchta',
+hint:'Wer sie versteht, hat im Finale mehr Möglichkeiten. Bewundere, höre zu, und wenn du das Demoband hast, gib es ihr.',
+text:()=>`<p>Perchta betrachtet dich über den Rand ihres Glases. „Du hast Mut. Oder keine Ahnung. In meiner Erfahrung ist das dasselbe.“ ${S.n.per>=1?'Sie wirkt etwas weicher als zuvor.':''} ${S.n.per>=3?'Ihre Maske liegt achtlos neben dem Spiegel. Sie sieht aus wie jemand, der gerade zum ersten Mal seit Jahrhunderten keine Rolle spielt.':''}</p>`,
+ch:()=>[
+ {l:'Ihre Eisskulpturen bewundern',to:'p_art',if:()=>!f('pArt')},
+ {l:'Fragen, warum sie keine Sonne will',to:'p_listen',if:()=>!f('pListen')},
+ {l:'Ihr das Demoband von damals geben',to:'p_tape',if:()=>has('Kassette: Perchtas Demo')},
+ {l:'Zurück ins Backstage-Zelt',to:'backstage'}]},
+p_art:{place:'back',t:'Details im Eis',
+text:()=>`<p>Du gehst von Skulptur zu Skulptur: ein Rockstar mit Gitarre, aus dem eine Schneeflocke als Plektrum wächst, ein Dämon im Schneeanzug, ein Kind, das einen Schneemann umarmt. Und dir fällt auf: Jede Skulptur hat ein Gesicht, das lacht.</p><p>„Die Details“, sagst du leise. „Der Eiszapfen hier hat eine Perspektive. Das hat doch nie jemand bemerkt?“ Perchta erstarrt. Dann sagt sie, kaum hörbar: „Niemand sieht das. Die meisten kommen wegen der Musik.“ Sie dreht die Maske in der Hand. „Danke.“</p>`,
+on:()=>{set('pArt');num('per',1)},
+ch:()=>[{l:'Zurück zu Perchta',to:'perchta_talk'}]},
+p_listen:{place:'back',t:'Warum Winter?',
+text:()=>`<p>„Warum so viel Winter?“, fragst du. Perchta sieht dich lange an. Dann lacht sie, kurz und ehrlich.</p><p>„Weil die Leute mich nur lieben, solange die Nacht dauert. Zwölf Nächte im Jahr bin ich eine Göttin. Sie tanzen, sie trinken, sie rufen meinen Namen. Und am Morgen? Bin ich wieder ein Märchen, mit dem man Kinder erschreckt.“ Sie streicht über das Eis des Spiegels. „Ich habe achthundert Jahre Weihnachten gefeiert, und niemand hat mich je gefragt, wie es mir geht.“</p><p>Sie sagt es leichthin, aber ihre Hand zittert ein bisschen.</p>`,
+on:()=>{set('pListen');num('per',1);clue('perchtaWhy','Perchta liebt die Rauhnacht, weil sie nur dann geliebt wird. Danach wird sie wieder zur Schauergeschichte.')},
+ch:()=>[{l:'Zurück zu Perchta',to:'perchta_talk'}]},
+p_tape:{place:'back',t:'Ein altes Demoband',
+text:()=>`<p>Du reichst ihr die Kassette. Perchta nimmt sie, als wäre sie aus Glas. „Woher ...?“ Sie liest das Etikett. „Das ist mein Vorsprechen.“ Sie steckt es in einen Kassettenrekorder aus Eis. Eine junge Stimme erklingt, hell und kräftig, viel zu laut. Dann ein Brummen: Wotans Stimme, noch jung. <em>„Zu laut.“</em></p><p>Perchta hört es sich bis zum Ende an. Sie lacht. Sie weint ein bisschen. Dann sagt sie: „Das ist die netteste Beleidigung, die ich je bekommen habe.“ Sie sieht dich an, ohne Maske. „Ich war so jung. Ich wollte nur mitspielen.“</p>`,
+on:()=>{rem('Kassette: Perchtas Demo');set('demoGiven');num('per',2)},
+ch:()=>[{l:'Zurück zu Perchta',to:'perchta_talk'}]},
+wecker:{place:'back',t:'Der Sonnenwecker',
+hint:'Das Kabel des Weckers führt zur Bühne. Der Stecker fehlt. Wer ihn findet, kann den Wecker wieder anschließen.',
+text:()=>`<p>Der Wecker ist ein Monstrum: zwei Meter hoch, aus Messing, mit zwei Klöppeln wie Kokosnüsse. Auf der Rückseite steht in verschnörkelter Schrift: <em>„Sonnenwecker, Marke Ewiglich, hergestellt 1203. Garantie abgelaufen.“</em> Das Kabel ist dick wie ein Arm. Es führt unter die Zeltwand, in Richtung Bühne. Am Ende fehlt der Stecker.</p><p>${C('Du lauschst. Der Wecker tickt nicht. Er hält die Luft an.','Du siehst sofort: ein Starkstromstecker, Typ Weltuntergang. Wer so etwas zieht, der wusste, was er tat.','Du schlägst gegen den Wecker. Er klingt hohl. Das war eine Dummheit.')}</p>${has('Sonnenstecker')?'<p>In deiner Tasche brummt der Stecker, als würde er sich freuen.</p>':''}`,
+on:()=>{set('weckerSeen')},
+ch:()=>[{l:'Zurück ins Backstage-Zelt',to:'backstage'}]}
+});
+Object.assign(N,{
+buehne:{act:4,place:'stage',time:'06:25',chap:'Akt IV · Das Sonnenriff',t:'Die Hauptbühne',
+hint:()=>f('riffOk')?'Das Riff sitzt. Jetzt entscheidest du, wie die Nacht endet. Jede Option hat Folgen.':'Stell am Sonnenverstärker die Pedale in der richtigen Reihenfolge ein. Wotan nannte Anfang und Ende. Das Tour-Shirt und das Mixtape verraten, was in der Mitte kommt.',
+text:()=>`<p>Die Hauptbühne ragt aus dem Schnee wie ein Altar für Lärm. Hunderte Dämonen, Geister und Menschen drängen sich davor, Handylichter aus Schwefelflammen im Anschlag. Über der Bühne hängt ein Banner: <em>„Rauhnacht Open Air: Heute spielt: Wer auch immer da ist.“</em> Hinter dem Horizont ist ein schwacher grauer Streifen zu sehen. Es ist 06:25. In fünf Minuten müsst ihr anfangen.</p><p>${f('gunterOk')?'Gunter steht am Mikro, mit einer Stimme wie ein Reibeisen im Sonntagsanzug. ':'Das Mikro steht verwaist. Gunter hält sein Whiteboard hoch: „ICH KANN NICHT.“ '}${f('dieterOk')?'Dieter streichelt „Ulrike“. ':'Der Platz des Gitarristen bleibt leer. '}${f('ruedigerOk')?'Rüdiger schwebt kaum sichtbar neben seinem Verstärker. ':'Der Bass steht allein da, wie ein Schiff ohne Kapitän. '}Sabine sitzt hinter dem Schlagzeug und zählt in Gedanken Sekunden.</p><p>Am Bühnenrand steht Perchta in einem silbernen Kleid und beobachtet dich mit einem Lächeln wie ein offenes Messer. ${S.n.kal>=1?'Kalle winkt dir aus dem Fotograben zu und hebt beide Daumen. Er kann fast nicht mehr vor Aufregung.':''}</p>`,
+ch:()=>[
+ {l:'Dem Kabel des Sonnenweckers folgen',to:'stecker',if:()=>f('weckerSeen')&&!has('Sonnenstecker')&&!f('steckerTaken')},
+ {l:'Am Sonnenverstärker die Pedale einstellen',to:'amp',if:()=>!f('riffOk')},
+ {l:'Das Sonnenriff spielen: Todesstollen live',to:'end_sun',if:()=>f('riffOk')&&f('gunterOk')},
+ {l:'Selbst ans Mikro treten und singen',to:'end_newsinger',if:()=>f('riffOk')&&!f('gunterOk')},
+ {l:'Perchta bitten, mit der Band zu singen',to:'end_pact',if:()=>f('riffOk')&&S.n.per>=3&&f('demoGiven'),hide:()=>!(S.n.per>=3&&f('demoGiven'))},
+ {l:'Rüdiger das letzte Solo überlassen',to:'end_rest',if:()=>f('riffOk')&&f('ruedigerOk'),hide:()=>!f('ruedigerOk')},
+ {l:'Sabine das Kommando übergeben',to:'end_sabine',if:()=>f('riffOk')&&S.n.sab>=3,hide:()=>S.n.sab<3},
+ {l:'Den Stecker einstecken, während die Band improvisiert',to:'end_cable',if:()=>has('Sonnenstecker'),hide:()=>!has('Sonnenstecker')},
+ {l:'Einen Circle Pit eröffnen',to:'end_chaos',if:()=>S.cls==='Mosher',hide:()=>S.cls!=='Mosher'},
+ {l:'Einfach loslegen, ohne Riff und ohne Plan',to:'end_flop'},
+ {l:'Perchtas Angebot anhören',to:'perchta_offer'},
+ {l:'Zurück zum Hauptweg',to:'gelaende'}]},
+stecker:{place:'stage',t:'Das Kabel',
+text:()=>`<p>Du folgst dem dicken Kabel unter die Bühne, durch Eisbrecher-Records-Flyer, leere Becher und einen toten Weihnachtsmann, den niemand weggeräumt hat. Am Ende des Kabels, unter einem Stapel Plakate, liegt der Stecker: schwer, kupferfarben, mit einer Sonne auf dem Gehäuse. Er brummt leise, wie ein Tier, das Hunger hat.</p>${f('ruedigerOk')?'<p>Von hinten flüstert Rüdiger: „Das ist es. Das ist das Kabel. Ich bin darübergefallen.“ Er lächelt traurig. „Heute passe ich auf.“</p>':''}<p><b>Erhalten: Sonnenstecker.</b> Er ist warm.</p>`,
+on:()=>{add('Sonnenstecker');set('steckerTaken');clue('stecker','Der Sonnenstecker lag unter der Bühne. Wer ihn in den Wecker steckt, weckt die Sonne, ganz ohne Riff.')},
+ch:()=>[{l:'Zurück zur Bühne',to:'buehne'}]},
+amp:{place:'stage',t:'Der Sonnenverstärker',
+hint:'Wotan: Zuerst der Wolf, zuletzt die Sonne. Tour-Shirt und Mixtape: Nach dem Donner kommt der Rabe.',
+puzzle:{syms:[{id:'wolf',ic:'🐺',nm:'Wolf'},{id:'donner',ic:'⚡',nm:'Donner'},{id:'rabe',ic:'🐦',nm:'Rabe'},{id:'sonne',ic:'☀️',nm:'Sonne'}],ans:['wolf','donner','rabe','sonne'],ok:'riff_ok',bad:'riff_bad'},
+text:()=>`<p>Am Rand der Bühne steht der Sonnenverstärker, ein Monolith mit vier Fußpedalen. Jedes zeigt ein Symbol: ein Wolf, ein Blitz, ein Rabe, eine Sonne. Sabine tritt neben dich. „Vier Pedale, vier Stufen“, sagt sie. „Ich habe das nicht gelernt, aber ich kann Reihenfolgen.“</p><p class="note">Tippe die Pedale in der richtigen Reihenfolge an und bestätige.</p>`,
+ch:()=>[{l:'Zurück zur Bühne',to:'buehne'}]},
+riff_bad:{place:'stage',t:'Falsches Riff',
+text:()=>`<p>Ein Ton erklingt, der klingt wie ein Staubsauger, der sich in einen Akkordeonladen verirrt hat. Weit hinter dem Horizont öffnet sich ein Auge, blinzelt, sagt „Das ist keine Musik“ und schließt sich wieder. Die Menge buht. ${S.n.wrong>=2?(f('riffB')?'Sabine seufzt: „Wolf zuerst. Sonne zuletzt. Nach dem Donner kommt der Rabe. Das steht in deinen Notizen.“':'Sabine seufzt: „Wotan hat Wolf und Sonne genannt. Für die Mitte gibt es ein Tour-Shirt auf der Merch-Meile.“'):'Perchta lacht leise im Hintergrund.'}</p>`,
+ch:()=>[{l:'Noch einmal versuchen',to:'amp'},{l:'Zurück zur Bühne',to:'buehne'}]},
+riff_ok:{place:'stage',t:'Das Riff sitzt',
+text:()=>`<p>Du trittst die Pedale: Wolf, Donner, Rabe, Sonne. Aus dem Verstärker steigt ein Ton, der nicht laut ist, sondern <em>richtig</em>: ein Heulen, ein Grollen, ein Flügelschlag und etwas Warmes, das sich wie ein Lächeln anhört. Der graue Streifen am Horizont wird rosa. Die Dämonen verstummen. Selbst Perchta hält den Atem an.</p><p>Das Riff ist eingestellt. Jetzt muss es nur noch gespielt werden.</p>`,
+on:()=>{set('riffOk')},
+ch:()=>[{l:'Zurück zur Bühne',to:'buehne'}]},
+perchta_offer:{place:'stage',t:'Perchtas Angebot',
+text:()=>`<p>Perchta gleitet heran, ein Schatten aus Silber. „Zwei Angebote, für Leute mit Geschmack“, flüstert sie. „Erstens: <b>Ewige Rauhnacht</b>. Du spielst nicht. Wir feiern weiter, für immer. Glühwein, Moshpits, kein Montag. Zweitens: <b>Eisbrecher Records</b>. Ein Plattenvertrag für Todesstollen: drei Alben, Welttournee durch alle Jenseitsstufen, Gold-Dosen für jeden Fan.“ Sie lächelt. „Beides ist unbürokratisch. Ich habe sie handgeschrieben.“</p><p>Die Menge flüstert. Gunter schüttelt den Kopf. Sabine schaut auf die Uhr.</p>`,
+ch:()=>[
+ {l:'Die ewige Rauhnacht annehmen',to:'end_eternal'},
+ {l:'Den Plattenvertrag unterschreiben',to:'end_sell'},
+ {l:'Beides ablehnen',to:'buehne'}]},
+
+end_sun:{act:5,place:'end',end:'sun',chap:'Epilog · Sonnenaufgang',t:'Die Sonne steht auf',
+text:()=>`<p>Sabine zählt ein: vier Schläge, genau getaktet. Dann setzt ${f('dieterOk')?'Dieter mit „Ulrike“ ein, tief, dreckig, wunderschön':'die Band ein, dünn, aber entschlossen'}, ${f('ruedigerOk')?'Rüdigers Bass legt sich darunter wie warmer Nebel, ':''}und Gunter brüllt die erste Zeile des Sonnenriffs, die niemand je gehört hat und die trotzdem jeder kennt.</p><p>Der Wolf heult. Der Donner kracht. Der Rabe fliegt. Und dann: die Sonne. Ein goldener Streifen kriecht über die Berge, erst scheu, dann strahlend, und der Schnee beginnt zu funkeln. Die Dämonen weinen, die Geister winken, und irgendwo schluchzt ein Krampus in einer Warnweste.</p>${bandFate()}${perchtaFate()}<p><b>Todesstollen hat die Sonne geweckt. Es war das schlechteste Konzert ihrer Karriere, und das beste.</b></p><p class="soup">Pünktlich, übrigens: 06:44. Sabine hat nachgesehen. Sie lächelt. Dann schreibt sie dir doch einen Eintrag ins Klassenbuch, aber einen guten.</p>`},
+end_pact:{act:5,place:'end',end:'pact',chap:'Epilog · Kompromiss',t:'Perchta on Ice',
+text:()=>`<p>Du trittst an den Bühnenrand und hältst Perchta die Hand hin. „Wir spielen das Sonnenriff“, sagst du. „Aber wir brauchen eine Stimme, die laut genug ist.“ Perchta starrt dich an. Dann ihre Augen. Dann die Hand. Sie nimmt sie, sehr vorsichtig, wie jemand, der nicht sicher ist, ob es ein Trick ist.</p><p>Sie singt. Sie ist <em>wirklich</em> laut. Sie singt das Sonnenriff, achthundert Jahre aufgestaut, so grell und so frei, dass die Sonne aufgeht, nur um nachzusehen. ${f('gunterOk')?'Gunter nimmt die Gegenstimme, Reibeisen und Sopran, und es klingt wie ein Wintersturm, der verliebt ist.':'Die Band folgt, so gut sie kann.'}</p>${bandFate()}<p>Am Ende, als die Sonne über den Hügeln steht, sagt Perchta leise: „Danke, dass ihr mich nicht für zu laut gehalten habt.“ Sie plant noch am selben Morgen das erste <em>„Perchta on Ice“</em>: ein Sommerfestival, mitten im Juli, mit Eisskulpturen, Kältekuppel und Glühwein-Eis.</p><p><b>Du hast bewiesen, dass sogar eine Wintergöttin ein Publikum verdient, das ihr zuhört.</b></p><p class="soup">Das Festival im Juli ist ausverkauft. Kalle macht die Security. Er trägt einen Sonnenhut.</p>`},
+end_eternal:{act:5,place:'end',end:'eternal',chap:'Epilog · Dauerfeier',t:'Endlos-Zugabe',
+text:()=>`<p>Du nickst. Perchta strahlt wie ein Weihnachtsbaum im Atomkraftwerk. „Vorzüglich“, flötet sie, und die Sonne bleibt, wo sie ist: unter dem Horizont, zugedeckt, mit einem Schild an der Tür: <em>„Bitte nicht stören. Der Winter hat Pause.“</em></p><p>Das Festival geht weiter. Und weiter. Und weiter. Die ersten zwei Wochen sind großartig. Nach vier Wochen fragen sich die Ersten, welcher Tag ist. Nach acht Wochen hat niemand mehr Wäsche, und Dieter hat die zweite Gitarre pfänden lassen. Nach zwölf Wochen ist der Kaffee alle. Die Hölle ist, wenn man merkt, dass es nie wieder Montag wird.</p>${bandFate()}<p><b>Alle sind glücklich. Niemand ist ausgeschlafen.</b></p><p class="soup">Und die Suppe? Gibt es immer, solange der Vorrat reicht. Der Vorrat reicht nicht. Aber das ist in der Hölle ja nichts Neues.</p>`},
+end_rest:{act:5,place:'end',end:'rest',chap:'Epilog · Abschied',t:'Das letzte Solo',
+text:()=>`<p>„Rüdiger“, sagst du. „Du hast das Riff. Spiel es.“ Er sieht dich lange an. „Ich habe vierzig Jahre auf diese Gelegenheit gewartet.“ Er hebt den Bass, der gar nicht da ist, und die Luft biegt sich um seine Hände. Dann spielt er, allein, die tiefste, wärmste Baseline der Welt, begleitet von Sabines Schlag, Dieters Akkorden und Gunters Reibeisen, und über allem ein Ton, der aufsteigt wie Rauch.</p><p>Als der letzte Ton verklingt, geht die Sonne auf. Das Licht fällt direkt durch Rüdiger hindurch. Er lächelt, und sein Körper wird dünner, heller, durchsichtiger. „Ich bin gestolpert“, murmelt er. „Aber ich bin angekommen.“ Dann ist er weg. Nur ein Staubkorn leuchtet kurz in der Luft.</p>${bandFate()}<p><b>Ein Geist hat endlich Feierabend gemacht. Es war sein bestes Konzert.</b></p><p class="soup">Und die Suppe? Gunter stellt jedes Jahr einen Teller auf Rüdigers Platz. Er bleibt leer, und das ist der Beweis, dass er trotzdem kommt.</p>`},
+end_chaos:{act:5,place:'end',end:'chaos',chap:'Epilog · Chaos',t:'Circle Pit der Götter',
+text:()=>`<p>Du stürzt dich in die Menge, brüllst „CIRCLE PIT!“, und die Menge versteht. Erst kreisen zwanzig Dämonen, dann hundert, dann tausend, ein Wirbel aus Fell, Hörnern und Weihnachtsmützen, der sich dreht und dreht und immer schneller wird. Die Erde ächzt. Der Schnee schmilzt in Spiralen. Selbst die Wolken kreisen mit.</p><p>Der Wirbel wird so schnell, dass er die Welt ein kleines bisschen schneller dreht, und plötzlich ist die Sonne zwei Stunden zu früh da. Sie guckt verdutzt. „Ich hab doch noch gar nicht ...“ Dann sieht sie den Pit. „Okay, ich geh ja schon.“</p>${bandFate()}${perchtaFate()}<p><b>Die Sonne kam nicht wegen des Riffs. Sie kam, weil sie nicht in dieses Chaos hineinschlafen wollte.</b></p><p class="soup">Und die Suppe? Sie wurde zentrifugiert. Niemand hat sie je wiedergesehen.</p>`},
+end_cable:{act:5,place:'end',end:'cable',chap:'Epilog · Hinter den Kulissen',t:'Der Mann am Kabel',
+text:()=>`<p>Während Gunter vorn improvisiert, so laut, dass drei Zelte umfallen, und Sabine ein Schlagzeugsolo spielt, das vierzig Minuten dauert, schleichst du dich hinter die Bühne. Du hast den Stecker, du kennst den Wecker, und du bist Roadie. Das ist dein Leben: Kabel stecken, während andere gefeiert werden.</p><p>Der Stecker rastet ein. Der Wecker erwacht, klingelt, so laut wie ein Weltuntergang mit Sinn für Humor. Am Horizont reißt ein Auge auf. „Schon?“, murmelt die Sonne. „Okay, okay, ich bin da.“ Ein goldener Streifen schiebt sich über die Berge. Die Menge jubelt.</p><p>Niemand sieht dich. Nur Rüdiger, falls er da ist, winkt dir zu.</p>${bandFate()}${perchtaFate()}<p><b>Der wahre Held ist immer der Mann am Kabel.</b></p><p class="soup">Und die Suppe? Sabine bringt dir eine Schüssel, ohne ein Wort zu sagen. Das ist die höchste Auszeichnung, die sie zu vergeben hat.</p>`},
+end_flop:{act:5,place:'end',end:'flop',chap:'Epilog · Katastrophe',t:'Soundcheck des Grauens',
+text:()=>`<p>Du gibst Sabine das Zeichen. Sie zählt ein. Ihr spielt. Und es ist furchtbar. Es ist nicht einmal das lustige Furchtbare, das Rock’n’Roll ist. Es ist das Furchtbare, das klingt, als hätte jemand eine Gitarre die Treppe hinuntergeworfen und dann gefragt, warum sie nicht stimmt.</p><p>Die Menge buht. Ein Dämon wirft einen Glühweinbecher. Weit am Horizont öffnet sich ein Auge, hört zu, verzieht das Gesicht, sagt „Nein. Danke.“ und schließt sich wieder. Der Streifen am Himmel wird wieder dunkel.</p>${perchtaFate()}<p><b>Der Winter dauert sechs Wochen länger als geplant. Alle machen euch dafür verantwortlich.</b></p><p class="soup">Und die Suppe? Es gibt keine. Aber Sabine schreibt dir einen Eintrag ins Klassenbuch. Mit rotem Stift. Unterstrichen.</p>`},
+end_sell:{act:5,place:'end',end:'sell',chap:'Epilog · Ausverkauf',t:'Eisbrecher Records',
+text:()=>`<p>Du unterschreibst. Perchta hält dir einen Federkiel hin, der aus einer Eisnadel gemacht ist. Die Tinte ist kalt. Drei Alben, Welttournee durch alle Jenseitsstufen, Gold-Dosen für jeden Fan. Du ahnst, dass etwas fehlt, aber du schaust nicht genau hin.</p><p>Die Band wird umbenannt: <em>„Todesstollen feat. Perchta“</em>. Das erste Album heißt <em>„Ewige Nacht“</em>, verkauft sich millionenfach und ist, mit Verlaub, großartig. Die Sonne? Schläft. Niemand merkt es, weil es immer Party ist. Gunter beschwert sich in Whiteboard-Schrift. Sabine kündigt mit einem laminierten Brief.</p><p>Du bist reich. Du hast Fans. Du hast keinen Tag. Die Uhr in der Garderobe ist stehen geblieben.</p><p><b>Du hast ein Konzert verkauft und eine Sonne verpasst.</b></p><p class="soup">Und die Suppe? Gibt es immer, solange der Vorrat reicht. Er reicht, weil niemand mehr hungrig ist. Das ist das Unheimlichste daran.</p>`},
+end_newsinger:{act:5,place:'end',end:'newsinger',chap:'Epilog · Notlösung',t:'Der neue Sänger',
+text:()=>`<p>Gunter hat keine Stimme. Du hast eine, wenn auch nicht die beste. Du trittst ans Mikro, die Menge sieht dich an, du holst Luft und singst. ${C('Als Schreihals hast du die Stimme dafür: ein Brüllen wie ein Presslufthammer, aber mit Gefühl. Das Sonnenriff erklingt, rau und echt.','Als Roadie sprichst du leiser, als du schreist. Aber du schreist: so schief und so laut, dass die Menge es für Avantgarde hält.','Als Mosher hast du keine Stimme, aber du hast Haltung. Du brüllst, du heulst, du stampfst. Die Menge folgt, weil sie nicht anders kann.')}</p><p>Die Sonne geht auf. Gunter steht neben dir und weint vor Rührung. Du siehst, wie er sein Whiteboard hebt: „DAS WAR DEIN SONG. ICH DARF MITSINGEN?“ Du nickst.</p>${bandFate()}${perchtaFate()}<p><b>Du bist der neue Sänger von Todesstollen. Die Karriere endet bei der nächsten Probe, aber der Auftritt war legendär.</b></p><p class="soup">Und die Suppe? Gunter bringt sie dir jeden Tag in den Proberaum. Mit Whiteboard-Gruß.</p>`},
+end_sabine:{act:5,place:'end',end:'sabine',chap:'Epilog · Autorität',t:'Sabine sagt: Aufstehen!',
+text:()=>`<p>„Sabine“, sagst du. „Übernimm.“ Sie steht auf, geht ans Mikro, nimmt es mit der Hand wie eine Schulglocke und sagt in einem Ton, der drei Jahrhunderte Grundschulpädagogik bündelt: „SONNE! Aufstehen! Sofort! Ich zähle bis drei!“</p><p>Es wird still. Selbst der Wind hält den Atem an. „Eins.“ Weit hinter dem Horizont raschelt Bettzeug. „Zwei.“ Ein goldener Streifen zuckt. Die Sonne schreit leise: „Ich bin ja schon da!“ Und dann steht sie, ganz brav, und scheint wie ein Kind, das zum ersten Mal pünktlich in der Schule war.</p>${bandFate()}${perchtaFate()}<p><b>Die Sonne hat nicht auf Musik gehört. Aber auf Sabine hört jeder.</b></p><p class="soup">Und die Suppe? Sabine hat sie gekocht. Pünktlich. Zu viert. Niemand wagt es, nachzusalzen.</p>`}
+});
+
+load();go(S.node);
+</script></body></html>
