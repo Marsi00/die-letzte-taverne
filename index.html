@@ -1,42 +1,684 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Die letzte Taverne vor Weihnachten</title><style>
-:root{--gold:#eac17d;--paper:#f4dfb5;--dark:#11121c;--panel:#1c2030;--muted:#a7a6b3}*{box-sizing:border-box}body{margin:0;background:#0b0c13;color:var(--paper);font:16px/1.6 Georgia,serif}button{font:inherit;cursor:pointer}header{display:flex;justify-content:space-between;align-items:center;padding:12px 4%;background:#10121b;border-bottom:1px solid #665137;position:sticky;top:0;z-index:3}header strong{font-size:15px;color:var(--gold);letter-spacing:.08em}header button,.tabs button{background:#242638;color:var(--paper);border:1px solid #756347;border-radius:8px;padding:7px 12px}.shell{max-width:980px;margin:auto;padding:20px 14px 55px}.hero{min-height:280px;border:1px solid #685536;border-radius:16px;background:radial-gradient(ellipse at 65% 55%,#a56c32 0%,#4d382c 20%,#202033 48%,#10121c 85%);display:flex;flex-direction:column;justify-content:flex-end;padding:26px;box-shadow:inset 0 -80px 90px #11121caa}.hero[data-place="village"]{background:radial-gradient(ellipse at 70% 20%,#8aa9ba,#37495c 30%,#171e2b 65%,#10121c)}.hero[data-place="crypt"]{background:radial-gradient(ellipse at 50% 70%,#518e7c,#253d40 35%,#10141d 80%)}.hero[data-place="stage"]{background:radial-gradient(ellipse at 50% 45%,#a34e65,#4a2b46 35%,#151522 80%)}.hero[data-place="forest"]{background:radial-gradient(ellipse at 40% 40%,#577258,#263e3b 35%,#111722 80%)}.hero h1{font-size:clamp(27px,5vw,46px);line-height:1.12;margin:0;color:#ffe4a9;text-shadow:0 3px 10px #000}.hero small{letter-spacing:.18em;text-transform:uppercase;color:#f2d4a0}.layout{display:grid;grid-template-columns:1fr 245px;gap:18px;margin-top:18px}.story,.side{background:var(--panel);border:1px solid #5c4c3a;border-radius:12px;padding:22px}.story p{margin:0 0 15px}.choices{display:grid;gap:10px;margin-top:20px}.choices button,.action{width:100%;text-align:left;border:1px solid #88704c;border-radius:9px;background:linear-gradient(110deg,#343040,#252739);color:#fbe4ba;padding:12px 16px}.choices button:hover,.action:hover{background:#594534}.choices button:disabled{opacity:.4;cursor:not-allowed}.side h3{margin:0 0 8px;color:var(--gold);font-size:17px}.side p,.side li{font:14px/1.5 system-ui,sans-serif;color:#d0cbd0}.side ul{padding-left:18px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.tabs button{font:13px system-ui}.badge{color:#e5b972;font:12px system-ui;letter-spacing:.1em}.modal{position:fixed;inset:0;background:#080910ed;z-index:5;display:grid;place-items:center;padding:15px}.modal>div{max-width:570px;width:100%;background:#202336;border:1px solid #d3a96b;padding:24px;border-radius:14px}.modal h2{color:#edc98e}.modal button{margin:6px;padding:12px 15px;background:#3a3241;color:#fbe4ba;border:1px solid #c09c68;border-radius:8px}.hidden{display:none}.foot{font:12px system-ui;color:#9c9aa7;text-align:center;margin-top:24px}@media(max-width:700px){.layout{grid-template-columns:1fr}.hero{min-height:220px}.story{padding:17px}.side{padding:15px}}
-</style></head><body><header><strong>⚔ DIE LETZTE TAVERNE</strong><div><button id="journalBtn">📜 Journal</button> <button id="restartBtn">↺</button></div></header><main class="shell"><section class="hero" id="hero"><small id="chapter"></small><h1 id="heading"></h1></section><div class="layout"><section class="story"><div class="badge" id="status"></div><div id="prose"></div><div class="choices" id="choices"></div></section><aside class="side"><h3>🎒 Inventar</h3><ul id="inventory"></ul><h3>🧭 Quest</h3><p id="quest"></p><h3>🎲 Charakter</h3><p id="character"></p></aside></div><p class="foot">Ein eigenständiges, offline spielbares Fantasy-Abenteuer. Alle Handlungswege sind vorab geschrieben.</p></main><div class="modal hidden" id="modal"><div><h2 id="modalTitle"></h2><div id="modalText"></div><div id="modalActions"></div></div></div><script>
-const S={node:'intro',cls:null,items:[],flags:{},visited:[],ending:null};const saved=localStorage.getItem('taverne_v2');if(saved){try{Object.assign(S,JSON.parse(saved))}catch(e){}}const $=id=>document.getElementById(id);function has(i){return S.items.includes(i)}function add(i){if(!has(i))S.items.push(i)}function flag(k){return !!S.flags[k]}function save(){localStorage.setItem('taverne_v2',JSON.stringify(S))}function go(n){S.node=n;if(!S.visited.includes(n))S.visited.push(n);save();render()}function choose(t){if(t.effect)t.effect();go(t.to)}function opts(a){return a.filter(x=>!x.if||x.if()).map(x=>({label:x.label,to:x.to,effect:x.effect}))}
-const N={
-intro:{title:'Die letzte Taverne vor Weihnachten',place:'tavern',chapter:'Prolog · Eine Nacht vor dem Fest',text:()=>`<p>In Frostwinkel wird morgen das Winterfest gefeiert. Zum ersten Mal seit 300 Jahren ist jedoch der Hauptbarde verschwunden. Das wäre normalerweise kein Drama — die letzten drei Hauptbarden waren auch verschwunden, allerdings jeweils unter einem Tisch.</p><p>Doch diesmal schweigt die magische Festglocke. Auf dem Marktplatz hängt ein Zettel: <em>„Wer den Barden findet, erhält 100 Goldstücke und einen Gutschein für Suppe.“</em> Darunter hat jemand „Suppe nur solange Vorrat reicht“ geschrieben.</p><p>Du stehst vor der Taverne Zum Letzten Würfel. Eine Entscheidung liegt vor dir.</p>`,choices:()=>[{label:'Als Barde beginnen — Charisma und ein zweifelhafter Reim',to:'arrival',effect:()=>S.cls='Barde'},{label:'Als Schurke beginnen — Schlösser, Schatten und schlechte Absichten',to:'arrival',effect:()=>S.cls='Schurke'},{label:'Als Barbar beginnen — Probleme sind Türen, die man öffnen kann',to:'arrival',effect:()=>S.cls='Barbar'}]},
-arrival:{title:'Zum Letzten Würfel',place:'tavern',chapter:'Akt I · Die falsche Fährte',text:()=>`<p>Die Taverne riecht nach Bratäpfeln, nassem Fell und einer Entscheidung, die jemand später bereuen wird. Hinter der Theke steht Wirtin Brunhilde. Ein Goblin in einer zu großen Offiziersuniform bewacht einen Käfig voller leerer Bierkrüge.</p><p>„Wenn du wegen des Barden hier bist“, sagt Brunhilde, „war er nie hier.“ Dabei schiebt sie demonstrativ einen Hut mit der Aufschrift <em>HAUPTBARDE</em> unter die Theke.</p><p>Du kannst den Raum frei untersuchen. Manche Hinweise eröffnen neue Wege.</p>`,choices:()=>opts([{label:'Brunhilde befragen',to:'brunhilde'},{label:'Den Goblin ansprechen',to:'goblin'},{label:'Den auffälligen Hut untersuchen',to:'hat'},{label:'Zum Marktplatz gehen',to:'village'},{label:'Den Keller betreten',to:'cellar',if:()=>flag('cellar')||has('Kellerschlüssel')},{label:'Den Spuren in den Wald folgen',to:'forest',if:()=>flag('forest')},{label:'Zurück zur großen Halle',to:'hall',if:()=>flag('hall')}])},
-brunhilde:{title:'Brunhildes Geschichte',place:'tavern',chapter:'Akt I · Befragung',text:()=>`<p>Brunhilde poliert ein Glas, das seit Jahren nicht sauberer geworden ist. „Er wollte die Glocke nicht mehr läuten lassen. Hat irgendwas von einem Vertrag gesagt. Dann kam der Steuereintreiber.“</p><p>Als du nach dem Vertrag fragst, wird sie still. „Unter der Taverne liegt ein alter Archivkeller. Ich habe den Schlüssel verloren. Vermutlich in meiner Tasche.“</p>`,choices:()=>[{label:'Sie höflich um den Schlüssel bitten',to:'key',effect:()=>add('Kellerschlüssel')},{label:'Sie nach dem Steuereintreiber fragen',to:'tax'},{label:'Zur Schankstube zurück',to:'arrival'}]},
-key:{title:'Ein überraschend ehrlicher Handel',place:'tavern',chapter:'Akt I · Fundstück',text:()=>`<p>Brunhilde betrachtet dich lange. „Du willst da wirklich runter? Dann nimm ihn. Und falls du stirbst, sag den Geistern, dass sie ihre Rechnungen begleichen sollen.“</p><p><strong>Erhalten: Kellerschlüssel.</strong></p>`,choices:()=>[{label:'In den Keller',to:'cellar'},{label:'Zur Schankstube',to:'arrival'}]},
-tax:{title:'Der Mann mit dem Stempel',place:'tavern',chapter:'Akt I · Verdacht',text:()=>`<p>„Herr Knöterich“, sagt Brunhilde. „Eintreiber im Namen der Winterkrone. Seit Jahren behauptet er, dass jede gesungene Note steuerpflichtig sei. Ich halte das für Betrug. Vor allem, weil er selbst nur zwei Noten kennt.“</p><p>Sie deutet auf Fußspuren, die aus der Hintertür in den Tannenwald führen.</p>`,choices:()=>[{label:'Spuren merken und in den Wald gehen',to:'forest',effect:()=>S.flags.forest=true},{label:'Zur Schankstube',to:'arrival',effect:()=>S.flags.forest=true}]},
-goblin:{title:'Hauptmann Krätze',place:'tavern',chapter:'Akt I · Ein verdächtiger Verbündeter',text:()=>`<p>„Ich bin Hauptmann Krätze, Leiter der königlichen Antidiebstahlbehörde!“, verkündet der Goblin. „Das ist mein erster Tag. Und meine Behörde besteht aus mir und diesem Stock.“</p><p>Er besitzt eine zerknitterte Karte des Ortes. Er tauscht sie gegen einen überzeugenden Grund, warum du kein Spion bist.</p>`,choices:()=>[{label:'„Ich bin ein staatlich geprüfter Nicht-Spion.“',to:'map',effect:()=>add('Dorfkarte')},{label:'„Ich bin selbst Spion, aber für die Guten.“',to:'goblinfail'},{label:'Zur Schankstube',to:'arrival'}]},
-goblinfail:{title:'Ein Missverständnis',place:'tavern',chapter:'Akt I · Konsequenz',text:()=>`<p>Krätze bläst in eine Trillerpfeife. Nichts passiert. Er bläst noch einmal. „Ich habe keine Verstärkung“, gesteht er. „Aber ich habe Prinzipien!“</p><p>Du erhältst keine Karte. Immerhin hält er dich jetzt für einen sehr schlechten Spion.</p>`,choices:()=>[{label:'Noch einmal mit Krätze reden',to:'goblin'},{label:'Zur Schankstube',to:'arrival'}]},
-map:{title:'Eine Karte, fast maßstabsgetreu',place:'tavern',chapter:'Akt I · Fundstück',text:()=>`<p>Die Karte zeigt Frostwinkel, den Wald und die verfallene Festhalle. Ein Pfeil mit der Beschriftung „GEHEIM“ zeigt auf die Festhalle. Daneben steht „Bitte nicht weitersagen“.</p><p><strong>Erhalten: Dorfkarte.</strong> Die Festhalle ist nun erreichbar.</p>`,choices:()=>[{label:'Zur Festhalle',to:'hall',effect:()=>S.flags.hall=true},{label:'Zur Schankstube',to:'arrival',effect:()=>S.flags.hall=true}]},
-hat:{title:'Der Hut des Hauptbarden',place:'tavern',chapter:'Akt I · Beweisstück',text:()=>`<p>Im Hut steckt ein zusammengefalteter Zettel: <em>„Ich bin nicht entführt worden. Wer den Vertrag findet, wird verstehen, warum ich mich verstecke. Vertraut nicht der Glocke.“</em></p><p>Auf der Rückseite steht eine seltsame Folge: <strong>3 – 1 – 4 – 2</strong>. Vielleicht die Reihenfolge für etwas im Archiv?</p>`,choices:()=>[{label:'Zettel einstecken',to:'arrival',effect:()=>add('Notiz des Barden')}]},
-cellar:{title:'Das Archiv unter der Schankstube',place:'crypt',chapter:'Akt II · Der alte Vertrag',text:()=>`<p>Im Keller flackern grüne Kerzen, obwohl niemand sie angezündet hat. Ein steinerner Schrank trägt vier Symbole: Krone, Laute, Glocke, Münze. Darunter sind vier drehbare Scheiben mit Zahlen.</p><p>Ein Schild warnt: <em>„Falsche Reihenfolge aktiviert die automatische Belehrung über Archivrecht.“</em></p>`,choices:()=>[{label:'Die Zahlenfolge 3 – 1 – 4 – 2 einstellen',to:'archive',if:()=>has('Notiz des Barden')},{label:'Die Reihenfolge 1 – 2 – 3 – 4 ausprobieren',to:'lecture'},{label:'Die Scheiben gewaltsam entfernen',to:'force',if:()=>S.cls==='Barbar'},{label:'Zur Schankstube',to:'arrival'}]},
-lecture:{title:'Die Strafe des Archivs',place:'crypt',chapter:'Akt II · Fehlschlag',text:()=>`<p>Eine geisterhafte Stimme liest dir zwölf Seiten über die ordnungsgemäße Lagerung von Pergament vor. Nach sieben Minuten verlierst du den Lebenswillen, aber keine Lebenspunkte.</p><p>Der Mechanismus setzt sich zurück. Vielleicht gibt es einen Hinweis auf die richtige Reihenfolge.</p>`,choices:()=>[{label:'Erneut versuchen',to:'cellar'},{label:'Nach einem Hinweis suchen',to:'arrival'}]},
-force:{title:'Barbarische Archivwissenschaft',place:'crypt',chapter:'Akt II · Alternative Lösung',text:()=>`<p>Du schlägst den Schrank so fest, dass der Mechanismus aus Angst aufspringt. Eine geisterhafte Stimme seufzt: „Das ist gegen die Hausordnung.“</p>`,choices:()=>[{label:'Den Vertrag lesen',to:'archive'}]},
-archive:{title:'Das Kleingedruckte',place:'crypt',chapter:'Akt II · Die Wahrheit',text:()=>`<p>Im Schrank liegt ein Vertrag, unterzeichnet vor 300 Jahren: Die Winterglocke schenkt Frostwinkel Wärme und Glück. Im Gegenzug gehört ihr jedes Jahr <strong>eine freiwillig dargebotene Stimme</strong>.</p><p>Auf der letzten Seite hat Knöterich handschriftlich „freiwillig“ durchgestrichen. Der Barde wollte die Opferung stoppen. Knöterich will den Vertrag trotzdem durchsetzen, weil er die Glocke für seine Karriere braucht.</p><p>Die Dorfbewohner wissen nichts davon. Du hast jetzt einen Beweis.</p>`,choices:()=>[{label:'Den Vertrag mitnehmen und zur Festhalle gehen',to:'hall',effect:()=>{add('Originalvertrag');S.flags.hall=true}},{label:'Brunhilde konfrontieren',to:'confront',effect:()=>add('Originalvertrag')}]},
-confront:{title:'Brunhildes Schuld',place:'tavern',chapter:'Akt II · Eine unbequeme Wahrheit',text:()=>`<p>Brunhilde lässt das Glas fallen. „Ich wusste, dass die Glocke etwas nimmt. Ich dachte, es sei nur die Erinnerung an ein Lied. Meine Mutter hat mir gesagt, ich solle nie nachfragen.“</p><p>Sie überreicht dir eine kleine Stimmgabel. „Sie kann den Bann brechen. Aber vielleicht auch die Wärme des Dorfes.“</p>`,choices:()=>[{label:'Stimmgabel nehmen und zur Festhalle',to:'hall',effect:()=>{add('Silberne Stimmgabel');S.flags.hall=true}}]},
-village:{title:'Der Marktplatz von Frostwinkel',place:'village',chapter:'Akt I · Spuren im Schnee',text:()=>`<p>Ein Schneemann trägt ein Schild: „Der Barde schuldet mir fünf Goldstücke.“ Kinder verkaufen Lebkuchen in Form von Drachen, die verdächtig nach Kartoffeln aussehen.</p><p>Eine alte Musikerin erzählt, der Barde habe sich in der Festhalle mit Knöterich gestritten. Danach sei er in den Wald geflohen.</p>`,choices:()=>[{label:'Der Spur zur Festhalle folgen',to:'hall',effect:()=>S.flags.hall=true},{label:'Dem Waldweg folgen',to:'forest',effect:()=>S.flags.forest=true},{label:'Zur Taverne zurück',to:'arrival'}]},
-forest:{title:'Der Wald der verlorenen Refrains',place:'forest',chapter:'Akt II · Begegnung',text:()=>`<p>Zwischen den Tannen sitzt eine vermummte Gestalt und spielt auf einer Laute. Die Melodie klingt wie eine Mischung aus Heldensage und dem Geräusch einer kaputten Waschmaschine.</p><p>„Wenn du mich zurückbringen willst, verschwinde“, sagt der Barde. „Ich werde nicht für eine Glocke sterben, damit das Dorf kostenlos Glühwein trinken kann.“</p>`,choices:()=>[{label:'Ihm vom Vertrag erzählen',to:'bardtruth',if:()=>has('Originalvertrag')},{label:'Ihn überzeugen, dass du helfen willst',to:'bardtrust'},{label:'Ihn bedrohen, damit er zurückkommt',to:'bardanger'},{label:'Zur Taverne zurück',to:'arrival'}]},
-bardtrust:{title:'Eine schwierige Allianz',place:'forest',chapter:'Akt II · Verbündeter',text:()=>`<p>Der Barde stellt sich als Lorian vor. „Dann hilf mir, die Glocke zu stoppen. Knöterich wird morgen alle zum Singen zwingen.“ Er gibt dir einen alten Ring, der die Festhalle öffnen kann.</p><p>„Und wenn du mich verrätst, schreibe ich eine Ballade über dich. Eine wirklich schlechte.“</p>`,choices:()=>[{label:'Ring nehmen und zur Festhalle',to:'hall',effect:()=>{add('Ring des Barden');S.flags.bard=true;S.flags.hall=true}},{label:'Erst den Vertrag suchen',to:'arrival',effect:()=>{add('Ring des Barden');S.flags.bard=true}}]},
-bardtruth:{title:'Das Lied der Freiheit',place:'forest',chapter:'Akt II · Verbündeter',text:()=>`<p>Lorian liest die Änderungen im Vertrag und wird bleich. „Ich wusste, dass etwas faul ist. Aber das ist nicht nur Betrug. Die Glocke selbst ist gefangen. Sie war einst ein Wintergeist, den man in Metall eingeschlossen hat.“</p><p>Er gibt dir seinen Ring. „Wenn wir sie befreien, könnte die Magie verschwinden. Vielleicht finden wir einen anderen Weg.“</p>`,choices:()=>[{label:'Gemeinsam zur Festhalle',to:'hall',effect:()=>{add('Ring des Barden');S.flags.bard=true;S.flags.spirit=true;S.flags.hall=true}}]},
-bardanger:{title:'Eine sehr schlechte Idee',place:'forest',chapter:'Akt II · Konsequenz',text:()=>`<p>Lorian wirft eine Handvoll Glitzerpulver. Du niest so laut, dass drei Eichhörnchen die Gewerkschaft gründen. Als du wieder sehen kannst, ist er weg.</p><p>Du kannst die Festhalle trotzdem erreichen, aber der Barde wird dir nicht helfen.</p>`,choices:()=>[{label:'Zur Festhalle',to:'hall',effect:()=>{S.flags.hall=true;S.flags.bardhostile=true}},{label:'Zur Taverne',to:'arrival'}]},
-hall:{title:'Die verlassene Festhalle',place:'stage',chapter:'Akt III · Das letzte Konzert',text:()=>`<p>Die Festhalle ist voller Banner, die „FREIWILLIGE TEILNAHME PFLICHT“ verkünden. Auf der Bühne steht Herr Knöterich in einer Robe aus Quittungen. Über ihm schwebt die stumme Winterglocke.</p><p>„Willkommen zur jährlichen Stimmbesteuerung!“, ruft er. „Wer nicht singt, zahlt eine Bearbeitungsgebühr.“</p><p>${has('Originalvertrag')?'Du hast den Originalvertrag bei dir.':'Du hast noch keinen schriftlichen Beweis für den Betrug.'} ${flag('bard')?'Lorian beobachtet dich aus dem Schatten der Bühne.':'Vom Barden fehlt jede Spur.'}</p>`,choices:()=>opts([{label:'Knöterich mit dem Originalvertrag konfrontieren',to:'trial',if:()=>has('Originalvertrag')},{label:'Die Glocke mit der Stimmgabel befreien',to:'free',if:()=>has('Silberne Stimmgabel')},{label:'Mit Lorian ein Gegenlied anstimmen',to:'song',if:()=>flag('bard')},{label:'Die Glocke zerstören',to:'smash',if:()=>S.cls==='Barbar'},{label:'Knöterichs Stempel stehlen',to:'steal',if:()=>S.cls==='Schurke'},{label:'Knöterichs Angebot anhören',to:'offer'},{label:'Noch einmal nach Hinweisen suchen',to:'arrival'}])},
-trial:{title:'Der Prozess des Jahrhunderts',place:'stage',chapter:'Finale · Das Gesetz spricht',text:()=>`<p>Du liest den Vertrag laut vor. Die Menge murmelt. Knöterich wird rot und behauptet, die Streichung von „freiwillig“ sei ein „redaktioneller Fehler“.</p><p>Krätze, der inzwischen eingetroffen ist, ruft: „Ich bin die Behörde! Und ich kann lesen! Langsam, aber ich kann!“</p><p>Die Glocke beginnt zu leuchten. Die Dorfbewohner verlangen eine Entscheidung.</p>`,choices:()=>[{label:'Den Vertrag öffentlich für ungültig erklären',to:'end_free'},{label:'Den Vertrag neu verhandeln',to:'end_pact'},{label:'Knöterich an die Goblin-Behörde ausliefern',to:'end_law'}]},
-free:{title:'Die Stimme im Metall',place:'stage',chapter:'Finale · Ein riskanter Versuch',text:()=>`<p>Die Stimmgabel singt eine klare Note. Aus der Glocke spricht eine müde Stimme: „Dreihundert Jahre lang musste ich Weihnachtslieder hören. Wisst ihr, wie viele davon in Moll sind?“</p><p>Der Wintergeist bittet dich, ihn zu befreien. Doch ohne ihn könnte das Dorf seine magische Wärme verlieren.</p>`,choices:()=>[{label:'Den Geist befreien, koste es, was es wolle',to:'end_free'},{label:'Ihm eine freiwillige Partnerschaft anbieten',to:'end_pact'}]},
-song:{title:'Die schrecklichste Ballade der Welt',place:'stage',chapter:'Finale · Musik gegen Bürokratie',text:()=>`<p>Lorian springt auf die Bühne. Du begleitest ihn. Eure improvisierte Ballade handelt von Mut, Freiheit und einer Steuererklärung, die niemals eingereicht wurde.</p><p>Die Menge singt mit. Knöterich versucht, die Musik als gewerbliche Veranstaltung anzumelden, doch seine Stempel zerbrechen.</p>`,choices:()=>[{label:'Die Glocke durch das Lied erlösen',to:'end_music'},{label:'Knöterich zu einem Gesangsduell herausfordern',to:'end_duel'}]},
-smash:{title:'Eine sehr direkte Verhandlung',place:'stage',chapter:'Finale · Barbarische Diplomatie',text:()=>`<p>Du greifst einen schweren Stuhl und schlägst auf die Glocke. Ein Riss erscheint. Darin glimmt ein kleines, erschrockenes Licht.</p><p>Knöterich kreischt: „Sachbeschädigung an einer amtlichen Klangvorrichtung!“</p>`,choices:()=>[{label:'Noch einmal zuschlagen',to:'end_smash'},{label:'Dem Licht die Freiheit anbieten',to:'end_free'}]},
-steal:{title:'Die Macht des Stempels',place:'stage',chapter:'Finale · Schurkische Buchhaltung',text:()=>`<p>Mit einer eleganten Bewegung stiehlst du Knöterichs Amtsstempel. Darauf steht: „GENEHMIGT“. Du hältst ihn über den Vertrag. Selbst die Glocke scheint auf eine offizielle Bestätigung zu warten.</p>`,choices:()=>[{label:'„Vertrag aufgehoben“ abstempeln',to:'end_law'},{label:'Dich selbst zum Festdirektor ernennen',to:'end_rogue'}]},
-offer:{title:'Ein unmoralisches Angebot',place:'stage',chapter:'Finale · Die Versuchung',text:()=>`<p>Knöterich beugt sich zu dir. „Hilf mir, den Barden zu finden, und du erhältst 500 Goldstücke, einen lebenslangen Suppengutschein und einen Titel. Etwa: Oberster Festbeauftragter.“</p><p>Hinter ihm flackert die Glocke schwach, als würde sie um Hilfe bitten.</p>`,choices:()=>[{label:'Das Angebot annehmen',to:'end_greed'},{label:'Ablehnen und zurück zur Festhalle',to:'hall'}]},
-end_free:{title:'Ende: Ein Winter ohne Ketten',place:'village',chapter:'Epilog · Freiheit',ending:true,text:()=>`<p>Du zerreißt den Vertrag und befreist den Wintergeist. Zum ersten Mal seit Jahrhunderten fällt gewöhnlicher, unmagischer Schnee auf Frostwinkel.</p><p>Die Dorfbewohner müssen ihre Häuser selbst heizen. Sie sind zunächst empört. Dann stellen sie fest, dass man auch ohne Opfergabe feiern kann.</p><p>Lorian schreibt eine Ballade über dich. Sie hat siebzehn Strophen. Du bittest ihn, vierzehn zu streichen.</p><p><strong>Du hast das Dorf befreit. Und Weihnachten gerettet — ganz ohne Zwangsopfer.</strong></p>`},
-end_pact:{title:'Ende: Der neue Pakt',place:'village',chapter:'Epilog · Kompromiss',ending:true,text:()=>`<p>Du schlägst einen neuen Vertrag vor: Der Wintergeist bleibt freiwillig und erhält jedes Jahr einen Monat Urlaub, das Recht auf Stille und eine garantierte Obergrenze von drei Weihnachtsliedern.</p><p>Die Glocke stimmt zu. Frostwinkel behält seine Wärme, Lorian seine Stimme und Knöterich verliert seine Lizenz.</p><p><strong>Du hast bewiesen, dass sogar uralte Magie vernünftige Arbeitsbedingungen verdient.</strong></p>`},
-end_law:{title:'Ende: Die Bürokratie schlägt zurück',place:'stage',chapter:'Epilog · Gerechtigkeit',ending:true,text:()=>`<p>Hauptmann Krätze erklärt den Vertrag für ungültig und nimmt Knöterich fest. Der protestiert, bis Krätze ihn wegen unerlaubten Protestierens zusätzlich verwarnt.</p><p>Die Glocke verstummt friedlich. Krätze gründet eine neue Behörde für faire Magie. Sie besteht weiterhin aus ihm und einem Stock.</p><p><strong>Du hast das Dorf gerettet. Leider wurde dabei ein Formular erfunden.</strong></p>`},
-end_music:{title:'Ende: Die Ballade der Befreiung',place:'stage',chapter:'Epilog · Triumph',ending:true,text:()=>`<p>Euer Lied wird so laut, dass die alten Runen zerbrechen. Die Glocke gibt die gefangenen Stimmen frei. Hunderte Melodien wirbeln durch den Saal.</p><p>Das Publikum verlangt eine Zugabe. Lorian beginnt sofort mit einem zwanzigminütigen Lautensolo. Du bereust einen Teil deiner Entscheidung.</p><p><strong>Das Winterfest ist gerettet — und du bist Teil einer legendären Band.</strong></p>`},
-end_duel:{title:'Ende: Knöterich unplugged',place:'stage',chapter:'Epilog · Das Duell',ending:true,text:()=>`<p>Knöterich nimmt die Herausforderung an. Sein Lied besteht ausschließlich aus dem Wort „Gebührenordnung“. Nach der dritten Wiederholung flieht das Publikum.</p><p>Die Glocke entscheidet, dass dies eine grausame und ungewöhnliche Bestrafung sei, und befreit sich selbst. Knöterich erhält lebenslanges Auftrittsverbot.</p><p><strong>Du hast gewonnen. Die Musikgeschichte wird dir danken.</strong></p>`},
-end_smash:{title:'Ende: Scherben bringen Winter',place:'village',chapter:'Epilog · Chaos',ending:true,text:()=>`<p>Mit einem letzten Schlag zertrümmerst du die Glocke. Der Wintergeist entkommt, die magische Heizung fällt aus, und Knöterich wird unter einem Berg Quittungen begraben.</p><p>Das Dorf friert eine Nacht lang. Am Morgen machen alle ein riesiges Lagerfeuer. Brunhilde spendiert Suppe — tatsächlich kostenlos.</p><p><strong>Problem gelöst. Architektonisch fragwürdig, aber gelöst.</strong></p>`},
-end_rogue:{title:'Ende: König der Formulare',place:'stage',chapter:'Epilog · Schurkenherrschaft',ending:true,text:()=>`<p>Du stempelst dich zum obersten Festdirektor. Knöterich ist fassungslos. Die Glocke akzeptiert den neuen Vorgesetzten und verlangt sofort Urlaub.</p><p>Du gewährst ihn und führst eine Steuer auf schlechte Reime ein. Lorian ist dein erster Schuldner.</p><p><strong>Du hast das Fest gerettet und eine höchst zweifelhafte Karriere begonnen.</strong></p>`},
-end_greed:{title:'Ende: Der Preis der Suppe',place:'stage',chapter:'Epilog · Verrat',ending:true,text:()=>`<p>Du nimmst das Gold. Knöterich behält die Macht, die Glocke fordert weiter Stimmen, und Lorian verschwindet endgültig.</p><p>Die Suppe ist immerhin ausgezeichnet. Doch jedes Mal, wenn du einen Löffel hebst, hörst du die Glocke flüstern: „War es das wert?“</p><p><strong>Du bist reich geworden. Ein Held bist du nicht.</strong></p>`}
-};
-function render(){let n=N[S.node]||N.intro;$('hero').dataset.place=n.place;$('chapter').textContent=n.chapter;$('heading').textContent=n.title;$('status').textContent=n.ending?'ABENTEUER BEENDET':`GESPIELTE SZENEN: ${S.visited.length} · ${S.cls||'Charakterwahl'}`;$('prose').innerHTML=n.text();$('choices').innerHTML='';(n.choices?n.choices():[{label:'Ein neues Abenteuer beginnen',to:'intro',effect:reset}]).forEach(o=>{let b=document.createElement('button');b.textContent='➜ '+o.label;b.onclick=()=>choose(o);$('choices').appendChild(b)});$('inventory').innerHTML=(S.items.length?S.items:['Noch leer']).map(i=>'<li>'+i+'</li>').join('');$('quest').textContent=n.ending?'Dein Weg hat ein Ende gefunden. Du kannst eine andere Entscheidung ausprobieren.':has('Originalvertrag')?'Entscheide, was mit dem Vertrag und der Winterglocke geschehen soll.':flag('bard')?'Finde den Vertrag und stoppe die Zwangsopferung.':'Finde den verschwundenen Barden und das Geheimnis der Winterglocke.';$('character').textContent=S.cls||'Noch nicht gewählt'}function reset(){localStorage.removeItem('taverne_v2');Object.assign(S,{node:'intro',cls:null,items:[],flags:{},visited:[],ending:null})}function modal(title,html){$('modalTitle').textContent=title;$('modalText').innerHTML=html;$('modalActions').innerHTML='<button onclick="document.getElementById(\'modal\').classList.add(\'hidden\')">Schließen</button>';$('modal').classList.remove('hidden')}$('journalBtn').onclick=()=>modal('Abenteuerjournal',`<p><b>Dein Auftrag:</b> Den verschwundenen Hauptbarden finden und das Geheimnis der Winterglocke lüften.</p><p><b>Besuchte Orte/Szenen:</b> ${S.visited.length}</p><p><b>Hinweise:</b> ${[has('Notiz des Barden')?'Notiz: 3–1–4–2':'',has('Originalvertrag')?'Vertrag: Eine Stimme muss freiwillig sein':'',flag('spirit')?'Die Glocke beherbergt einen gefangenen Wintergeist':''].filter(Boolean).join('; ')||'Noch keine.'}</p>`);$('restartBtn').onclick=()=>{if(confirm('Wirklich neu beginnen? Der Spielstand wird gelöscht.')){reset();save();render()}};render();
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0a0e1c"><title>Die letzte Taverne vor Weihnachten</title>
+<style>
+:root{--gold:#f2c46d;--paper:#f6e6c4;--panel:#1a2038;--panel2:#252d4a;--red:#d1493f;--green:#4a9a72;--muted:#a9adc4}
+*{box-sizing:border-box}
+body{margin:0;background:#0a0e1c;color:var(--paper);font:17px/1.65 Georgia,'Times New Roman',serif;min-height:100vh}
+button{font:inherit;cursor:pointer;color:inherit}
+.hidden{display:none!important}
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+header{position:sticky;top:0;z-index:5;background:#0e1326f2;border-bottom:1px solid #5b4a30}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:9px 4%;gap:8px;flex-wrap:wrap}
+.bar strong{font-size:14px;color:var(--gold);letter-spacing:.09em}
+.bar button{background:var(--panel2);border:1px solid #7a6641;border-radius:8px;padding:6px 10px;font:14px system-ui,sans-serif}
+.bar button:hover{background:#3a3550}
+.lights{display:flex;justify-content:space-between;height:13px;padding:0 1%;overflow:hidden}
+.lights i{width:7px;height:11px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--c);box-shadow:0 0 9px var(--c);animation:tw 2.6s infinite;animation-delay:var(--d)}
+@keyframes tw{50%{opacity:.3}}
+.shell{max-width:980px;margin:auto;padding:16px 14px 60px;position:relative;z-index:2}
+.hero{position:relative;overflow:hidden;min-height:230px;border:1px solid #7a6641;border-radius:16px;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;box-shadow:inset 0 -90px 90px #0a0e1ccc;background:radial-gradient(ellipse at 65% 55%,#b2733a 0%,#5a3f31 22%,#232338 52%,#0f1220 90%)}
+.hero[data-place=village]{background:radial-gradient(ellipse at 70% 20%,#9bb7c8,#3b5068 32%,#182033 66%,#0f1220)}
+.hero[data-place=crypt]{background:radial-gradient(ellipse at 50% 70%,#58a08a,#294548 36%,#0f1620 80%)}
+.hero[data-place=stage]{background:radial-gradient(ellipse at 50% 45%,#b4506b,#512d4c 36%,#151525 82%)}
+.hero[data-place=forest]{background:radial-gradient(ellipse at 40% 40%,#628464,#2b4640 36%,#0f1822 82%)}
+.hero[data-place=hut]{background:radial-gradient(ellipse at 50% 60%,#c98f4a,#5a4030 30%,#1a1a26 75%)}
+.hero[data-place=hall]{background:radial-gradient(ellipse at 50% 50%,#c9a24d,#5c4628 30%,#161522 78%)}
+.hero[data-place=end]{background:radial-gradient(ellipse at 50% 40%,#d9a441,#7a3b38 34%,#18162a 80%)}
+.hero::after{content:attr(data-ic);position:absolute;right:20px;top:8px;font-size:68px;opacity:.28}
+.hero small{letter-spacing:.17em;text-transform:uppercase;color:#f6d9a2;font:12px system-ui,sans-serif}
+.hero h1{margin:4px 0 0;font-size:clamp(26px,5vw,44px);line-height:1.12;color:#ffe6ae;text-shadow:0 3px 10px #000}
+.clock{position:absolute;left:20px;top:14px;font:13px system-ui,sans-serif;color:#f6d9a2;background:#0008;padding:3px 9px;border-radius:12px}
+.acts{display:flex;gap:6px;margin:12px 2px 0;align-items:center;font:12px system-ui,sans-serif;color:var(--muted)}
+.acts span{flex:1;height:5px;border-radius:3px;background:#2b3354}
+.acts span.on{background:var(--gold)}
+.layout{display:grid;grid-template-columns:1fr 245px;gap:18px;margin-top:14px}
+.story,.side{background:var(--panel);border:1px solid #5c4c3a;border-radius:12px;padding:22px}
+.story p{margin:0 0 15px}
+.story blockquote{margin:0 0 15px;padding:10px 14px;border-left:3px solid var(--gold);background:#0003;font-style:italic}
+.story ul{padding-left:20px}
+.note{font:13px system-ui,sans-serif;color:var(--muted)}
+.soup{color:#e8c98c;font-style:italic;border-top:1px dashed #6a5a3c;padding-top:12px}
+.badge{color:#e5b972;font:12px system-ui,sans-serif;letter-spacing:.1em;margin-bottom:8px}
+.choices{display:grid;gap:10px;margin-top:20px}
+.choices button{width:100%;text-align:left;border:1px solid #8c7348;border-radius:9px;background:linear-gradient(110deg,#3a3550,#262d49);color:#fbe4ba;padding:12px 16px}
+.choices button:hover:not(:disabled){background:#5b4634}
+.choices button:disabled{opacity:.55;cursor:not-allowed;border-style:dashed;background:#1f2640}
+.choices small{display:block;font:12.5px system-ui,sans-serif;color:var(--muted);margin-top:3px}
+.side h3{margin:0 0 6px;color:var(--gold);font-size:17px}
+.side p,.side li{font:14px/1.5 system-ui,sans-serif;color:#d3cfdb}
+.side ul{padding-left:18px;margin:0 0 14px}
+.puzzle{margin:18px 0 0;padding:14px;border:1px dashed #8c7348;border-radius:10px;background:#0003;text-align:center}
+.slots{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+.slots div{width:54px;height:54px;border:2px solid #6a5a3c;border-radius:10px;display:grid;place-items:center;font-size:28px;background:#0004}
+.syms{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.puzzle button{background:#3a3550;border:1px solid #8c7348;border-radius:9px;padding:9px 13px;color:#fbe4ba}
+.puzzle button:disabled{opacity:.35;cursor:default}
+.puzzle .row{margin-top:12px;display:flex;gap:8px;justify-content:center}
+.modal{position:fixed;inset:0;background:#05070fee;z-index:9;display:grid;place-items:center;padding:14px}
+.modal>div{max-width:580px;width:100%;max-height:88vh;overflow:auto;background:#1f2540;border:1px solid #d3a96b;padding:22px;border-radius:14px}
+.modal h2{color:#edc98e;margin-top:0}
+.modal li,.modal p{font:15px/1.55 system-ui,sans-serif}
+.modal button{margin:6px 6px 0 0;padding:10px 14px;background:#3a3550;color:#fbe4ba;border:1px solid #c09c68;border-radius:8px}
+.foot{font:12px system-ui,sans-serif;color:#8b8ea6;text-align:center;margin-top:22px}
+@media(max-width:720px){.layout{grid-template-columns:1fr}.hero{min-height:190px;padding:18px}.story{padding:17px}.side{padding:15px}body{font-size:16.5px}}
+@media(prefers-reduced-motion:reduce){.lights i{animation:none}}
+</style></head><body>
+<canvas id="snow"></canvas>
+<header><div class="bar"><strong>🎄 DIE LETZTE TAVERNE</strong><div><button id="hintBtn">💡 Tipp</button> <button id="journalBtn">📜 Journal</button> <button id="restartBtn">↺</button></div></div><div class="lights" id="lights"></div></header>
+<main class="shell">
+<section class="hero" id="hero"><span class="clock" id="clock"></span><small id="chapter"></small><h1 id="heading"></h1></section>
+<div class="acts" id="acts"></div>
+<div class="layout"><section class="story"><div class="badge" id="status"></div><div id="prose"></div><div id="puzzle" class="puzzle hidden"></div><div class="choices" id="choices"></div></section>
+<aside class="side"><h3>🎒 Inventar</h3><ul id="inventory"></ul><h3>🧭 Auftrag</h3><p id="quest"></p><h3>🎲 Charakter</h3><p id="character"></p></aside></div>
+<p class="foot" id="foot"></p></main>
+<div class="modal hidden" id="modal"><div><h2 id="modalTitle"></h2><div id="modalText"></div><div id="modalActions"></div></div></div>
+<script>
+const DEDICATION='Für Kevin · ein Abenteuer zum Fest 🎁';
+const KEY='taverne_v3',KEYE='taverne_v3_enden';
+const ENDINGS={free:'Ein Winter ohne Ketten',pact:'Der neue Pakt',song:'Das Lied der ganzen Gemeinde',hero:'Die letzte Zeile des Barden',voice:'Das letzte Wort heißt Suppe',law:'Die Bürokratie schlägt zurück',rogue:'König der Formulare',smash:'Scherben bringen Winter',greed:'Der Preis der Suppe',bell:'Die vierte Stimme'};
+const PLACES={tavern:'🍺',village:'🏘️',crypt:'🕯️',forest:'🌲',hut:'🛖',stage:'🎭',hall:'🚪',end:'🎄'};
+const ITEMS={
+'Notiz des Barden':'Lorians hastige Warnung aus dem Hutband.',
+'Hut des Hauptbarden':'Glitzerschrift: HAUPTBARDE. Leicht zerdrückt.',
+'Kellerschlüssel':'Öffnet die Falltür zum Archivkeller.',
+'Formular 27b/6':'Antrag auf Betreten amtlicher Räume durch Nicht-Spione.',
+'Suppengutschein':'Gültig, solange der Vorrat reicht. Er reicht nie.',
+'Lebkuchendrache':'Sieht aus wie eine Kartoffel. Schmeckt auch so. Mit Liebe gebacken.',
+'Originalvertrag':'Der Vertrag von Frostwinkel, im Original und mit Randnotiz.',
+'Silberne Stimmgabel':'Gehörte dem ersten Hauptbarden. Kann die Glocke stimmen.',
+'Ring des Barden':'Siegelring des Festdirektors. Öffnet die Künstlertür.',
+'Knöterichs Gold':'100 Goldstücke. Schwerer, als sie sein sollten.',
+'Amtsstempel':'GENEHMIGT. Oder AUFGEHOBEN. Je nach Laune.'};
+const $=id=>document.getElementById(id);
+const S0=()=>({node:'intro',cls:null,items:[],flags:{},n:{trust:0,dorf:0,krae:0,mist:0,wrong:0},visited:[],journal:{},fb:null,seq:[],clock:'19:00',act:0,place:'tavern',chap:''});
+let S=S0();
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r),d=S0();S=Object.assign(d,o);S.n=Object.assign(S0().n,o.n||{})}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let ENDMEM=[];
+function getEnds(){try{const e=JSON.parse(localStorage.getItem(KEYE)||'[]');return e.length>=ENDMEM.length?e:ENDMEM}catch(e){return ENDMEM}}
+function addEnd(k){if(!ENDMEM.includes(k))ENDMEM.push(k);const e=getEnds();if(!e.includes(k))e.push(k);try{localStorage.setItem(KEYE,JSON.stringify(e))}catch(x){}}
+const has=i=>S.items.includes(i);
+const add=i=>{if(!has(i))S.items.push(i)};
+const rem=i=>{S.items=S.items.filter(x=>x!==i)};
+const f=k=>!!S.flags[k];
+const set=(k,v=true)=>{S.flags[k]=v};
+const num=(k,d)=>{S.n[k]=(S.n[k]||0)+d};
+const clue=(k,t)=>{S.journal[k]=t};
+const C=(b,s,r)=>S.cls==='Barde'?b:S.cls==='Schurke'?s:r;
+const bad=(t,x,back)=>()=>{S.fb={t,x,back}};
+const heart=n=>n>0?'♥'.repeat(n):'–';
+const N={};
+/* Beweislage für den Prozess */
+function ev(){return (f('names')?1:0)+(f('brunConf')?1:0)+(S.n.dorf>=1?1:0)+(S.n.dorf>=2?1:0)+(S.n.krae>=1?1:0)+(f('knotdebt')?1:0)-(f('alarm')?1:0)-(f('bribed')&&!f('confessed')?1:0)}
+function knotFate(){
+ if(f('knotdebt')&&f('knotSings'))return '<p>Knöterich steht verloren auf der Bühne. Dann öffnet er den Mund und singt – zwei Töne, beide falsch, aber aus vollem Herzen. Das halbe Dorf klatscht höflich. Krätze verhaftet ihn trotzdem, sehr vorsichtig und mit einem Taschentuch.</p>';
+ if(S.n.krae>=1)return '<p>Hauptmann Krätze verhaftet Knöterich vorschriftsgemäß. Der Stock wird zum Oberwachtmeister befördert.</p>';
+ return '<p>Knöterich flieht in die Nacht, verfolgt von einer Schar Eichhörnchen, die gerade ihre Gewerkschaft gegründet haben.</p>'}
+function lorianFate(){
+ if(f('captured'))return '<p>Die Dorfbewohner lösen Lorians Fesseln. Er sieht dich lange an. „Über das Gold reden wir später“, sagt er. Es ist das freundlichste Drohwort, das du je gehört hast.</p>';
+ if(S.n.trust>=3)return '<p>Lorian schreibt eine Ballade über dich. Sie hat siebzehn Strophen. Du bittest ihn, vierzehn zu streichen. Er streicht zwei.</p>';
+ return '<p>Lorian taucht am nächsten Morgen auf, beschwert sich über sein Honorar und spielt ein Lied, das fast schon wie Musik klingt.</p>'}
+function quest(){
+ const n=N[S.node];if(n&&n.end)return 'Dein Abenteuer ist zu Ende. Andere Entscheidungen führen zu anderen Enden.';
+ if(!has('Originalvertrag')){
+  if(f('trapOpened'))return 'Im Archivkeller steht ein Schrank mit vier Symbolen. Der Vertrag liegt darin.';
+  if(f('trapdoor'))return 'Unter dem Wandtisch liegt eine Falltür. Du brauchst einen Weg hindurch.';
+  return 'Finde heraus, was mit dem Hauptbarden geschah. Sprich mit Brunhilde, untersuche die Taverne und höre dich auf dem Marktplatz um.'}
+ if(!has('Ring des Barden'))return 'Finde Lorian im Wald. Auf dem Marktplatz weiß man, wohin er ging. Gewinne sein Vertrauen.';
+ if(!f('stageSeen'))return 'Mit dem Ring kannst du die Festhalle betreten. Es ist kurz vor Mitternacht.';
+ return 'Stelle dich Knöterich und entscheide, was aus Gerlinde, dem Dorf und der Glocke wird.'}
+function go(id){
+ let n=N[id];if(!n){console.error('Unbekannte Szene',id);id='intro';n=N[id]}
+ S.node=id;if(!S.visited.includes(id))S.visited.push(id);
+ const tm=typeof n.time==='function'?n.time():n.time;if(tm)S.clock=tm;
+ if(n.act!=null)S.act=n.act;if(n.place)S.place=n.place;if(typeof n.chap==='string')S.chap=n.chap;
+ if(n.on)n.on();if(n.end)addEnd(n.end);
+ save();render();window.scrollTo(0,0)}
+function choose(c){if(c.fx)c.fx();const to=typeof c.to==='function'?c.to():c.to;go(to)}
+function reset(){S=S0();save()}
+function endInfo(){const e=getEnds();return '<p class="note">Enden entdeckt: '+e.length+' von '+Object.keys(ENDINGS).length+'<br>'+Object.keys(ENDINGS).map(k=>e.includes(k)?'✔ '+ENDINGS[k]:'? ? ?').join(' · ')+'</p><p class="note">'+DEDICATION+'</p>'}
+const SYM=[{id:'krone',ic:'👑',nm:'Krone'},{id:'laute',ic:'🎻',nm:'Laute'},{id:'glocke',ic:'🔔',nm:'Glocke'},{id:'muenze',ic:'💰',nm:'Münze'}];
+const SEQ_ANS=['krone','laute','glocke','muenze'];
+function renderPuzzle(n){
+ const box=$('puzzle');
+ if(n.puzzle!=='seq'){box.classList.add('hidden');box.innerHTML='';return}
+ box.classList.remove('hidden');box.innerHTML='';
+ const slots=document.createElement('div');slots.className='slots';
+ for(let i=0;i<4;i++){const d=document.createElement('div');const s=SYM.find(x=>x.id===S.seq[i]);d.textContent=s?s.ic:'·';slots.appendChild(d)}
+ box.appendChild(slots);
+ const syms=document.createElement('div');syms.className='syms';
+ SYM.forEach(s=>{const b=document.createElement('button');b.textContent=s.ic+' '+s.nm;b.disabled=S.seq.includes(s.id)||S.seq.length>=4;b.onclick=()=>{S.seq.push(s.id);save();render()};syms.appendChild(b)});
+ box.appendChild(syms);
+ const row=document.createElement('div');row.className='row';
+ const r=document.createElement('button');r.textContent='↺ Zurücksetzen';r.onclick=()=>{S.seq=[];save();render()};
+ const ok=document.createElement('button');ok.textContent='✔ Bestätigen';ok.disabled=S.seq.length<4;
+ ok.onclick=()=>{const good=S.seq.join()===SEQ_ANS.join();S.seq=[];if(good)go('archive_open');else{num('wrong',1);go('lecture')}};
+ row.appendChild(r);row.appendChild(ok);box.appendChild(row)}
+function render(){
+ const n=N[S.node]||N.intro;
+ const title=typeof n.t==='function'?n.t():n.t;
+ const hero=$('hero');const pl=n.end?'end':(S.place||'tavern');hero.dataset.place=pl;hero.dataset.ic=PLACES[pl]||'';
+ $('chapter').textContent=S.chap||'';$('heading').textContent=title||'';$('clock').textContent='🕰 '+S.clock+' Uhr';
+ const a=S.act||0;const lab=['Prolog','Akt I','Akt II','Akt III','Akt IV','Epilog'][a];
+ $('acts').innerHTML='<b style="color:#e5b972;min-width:58px">'+lab+'</b>'+[1,2,3,4].map(i=>'<span class="'+((a>=5||i<=a)?'on':'')+'"></span>').join('');
+ $('status').textContent=n.end?'ABENTEUER BEENDET':(S.cls?S.cls.toUpperCase()+' · SZENEN: '+S.visited.length:'CHARAKTERWAHL');
+ $('prose').innerHTML=n.text()+(n.end?endInfo():'');
+ renderPuzzle(n);
+ const box=$('choices');box.innerHTML='';
+ const list=n.ch?n.ch():[{l:'Noch einmal spielen – andere Entscheidungen führen zu anderen Enden',to:'intro',fx:reset}];
+ list.forEach(c=>{
+  if(c.hide&&c.hide())return;
+  const ok=!c.if||c.if();
+  if(!ok&&!c.lock)return;
+  const b=document.createElement('button');
+  if(!ok){b.disabled=true;b.textContent='🔒 '+c.l;const s=document.createElement('small');s.textContent=c.lock;b.appendChild(s)}
+  else{b.textContent='➜ '+c.l;b.onclick=()=>choose(c)}
+  box.appendChild(b)});
+ $('inventory').innerHTML=(S.items.length?S.items:['Noch leer']).map(i=>'<li>'+i+'</li>').join('');
+ $('quest').textContent=quest();
+ $('character').textContent=S.cls?({Barde:'Barde – Charme, Reime, gutes Gehör',Schurke:'Schurke – Schlösser, Schatten, flinke Finger',Barbar:'Barbar – Muskeln, Mut, Möbelkunde'})[S.cls]:'Noch nicht gewählt';
+ $('foot').textContent=DEDICATION}
+function modal(title,html,btns){
+ $('modalTitle').textContent=title;$('modalText').innerHTML=html;const a=$('modalActions');a.innerHTML='';
+ btns.forEach(b=>{const e=document.createElement('button');e.textContent=b.l;e.onclick=()=>{$('modal').classList.add('hidden');if(b.fn)b.fn()};a.appendChild(e)});
+ $('modal').classList.remove('hidden')}
+function journalHTML(){
+ const cl=Object.values(S.journal);
+ let h='<p><b>Auftrag:</b> '+quest()+'</p><p><b>Hinweise:</b></p>'+(cl.length?'<ul>'+cl.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'<p>Noch keine.</p>');
+ h+='<p><b>Gegenstände:</b></p>'+(S.items.length?'<ul>'+S.items.map(i=>'<li><b>'+i+'</b> – '+(ITEMS[i]||'')+'</li>').join('')+'</ul>':'<p>Noch keine.</p>');
+ h+='<p><b>Beziehungen:</b> Dorf '+heart(S.n.dorf)+(f('lorianMet')?' · Lorian '+heart(S.n.trust):'')+(S.n.krae?' · Krätze '+heart(S.n.krae):'')+'</p>';
+ h+='<p><b>Enden entdeckt:</b> '+getEnds().length+' von '+Object.keys(ENDINGS).length+'</p>';
+ return h}
+$('journalBtn').onclick=()=>modal('📜 Abenteuerjournal',journalHTML(),[{l:'Schließen'}]);
+$('hintBtn').onclick=()=>{const n=N[S.node];let h=n&&n.hint?(typeof n.hint==='function'?n.hint():n.hint):'Hier gibt es kein Rätsel. Sieh dich um, sprich mit allen und lies das Journal – dort steht, was du schon weißt.';modal('💡 Tipp','<p>'+h+'</p>',[{l:'Danke'}])};
+$('restartBtn').onclick=()=>modal('Neu beginnen?','<p>Dein Spielstand wird gelöscht. Die entdeckten Enden bleiben erhalten.</p>',[{l:'Ja, neu beginnen',fn:()=>{reset();go('intro')}},{l:'Abbrechen'}]);
+/* Lichterkette & Schnee */
+(function(){const L=$('lights'),cols=['#d1493f','#f2c46d','#4a9a72','#5aa0e0'];for(let i=0;i<46;i++){const e=document.createElement('i');e.style.setProperty('--c',cols[i%4]);e.style.setProperty('--d',(i*0.37%2.6)+'s');L.appendChild(e)}
+ const c=$('snow'),x=c.getContext('2d');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;let W,H,fl=[];
+ function rs(){W=c.width=innerWidth;H=c.height=innerHeight}rs();addEventListener('resize',rs);
+ for(let i=0;i<60;i++)fl.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2+.6,v:Math.random()*.6+.25,d:Math.random()*6.3});
+ (function t(){x.clearRect(0,0,W,H);x.fillStyle='rgba(255,255,255,.7)';fl.forEach(p=>{p.y+=p.v;p.d+=.01;p.x+=Math.sin(p.d)*.4;if(p.y>H){p.y=-5;p.x=Math.random()*W}x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill()});requestAnimationFrame(t)})()})();
+const fbNode={t:()=>S.fb.t,text:()=>`<p>${S.fb.x}</p>`,ch:()=>[{l:'Noch einmal versuchen',to:S.fb.back}]};
+Object.assign(N,{
+fb:fbNode,
+intro:{act:0,place:'tavern',time:'19:00',chap:'Prolog · Die Nacht vor dem Fest',t:'Die letzte Taverne vor Weihnachten',
+hint:'Wähle eine Klasse. Jede löst manche Hindernisse auf ihre eigene Weise, aber jede kann das ganze Abenteuer schaffen.',
+text:()=>`<p>Frostwinkel liegt unter einer Schneedecke, so dick, dass sich sogar der Kirchturm hineinkuscheln möchte. Morgen ist Winterfest. Um Mitternacht soll die magische Festglocke läuten, wie jedes Jahr seit dreihundert Jahren, und wie jedes Jahr unter der Leitung des Hauptbarden.</p><p>Nur gibt es dieses Jahr keinen Hauptbarden mehr. Das wäre normalerweise kein Drama: Die letzten drei Hauptbarden sind auch verschwunden, jeweils „unter einem Tisch“. Doch diesmal schweigt die Glocke, und das Dorf ist nervös. Am Marktplatz hängt ein Zettel: <em>„Wer den Barden findet, erhält 100 Goldstücke und einen Gutschein für Suppe.“</em> Darunter, in anderer Handschrift: <em>„Suppe nur, solange der Vorrat reicht.“</em></p><p>Du stehst vor der Taverne <b>Zum Letzten Würfel</b>. Der Schnee knirscht. Irgendwo bimmelt etwas, das nicht bimmeln sollte.</p><p class="note">Etwa 45 Minuten · Alle Enden sind eingebaut · Oben findest du Tipp, Journal und Neustart · Dein Fortschritt wird automatisch gespeichert.</p><p>Wer bist du?</p>`,
+ch:()=>[
+ {l:'Barde: Charme, Reime und ein Ego mit eigener Postleitzahl',to:'arrival',fx:()=>{S.cls='Barde'}},
+ {l:'Schurke: Schlösser, Schatten und flexible Moral',to:'arrival',fx:()=>{S.cls='Schurke'}},
+ {l:'Barbar: Probleme sind nur Türen, die noch nicht kaputt sind',to:'arrival',fx:()=>{S.cls='Barbar'}}]},
+
+arrival:{act:1,place:'tavern',time:()=>has('Ring des Barden')?'23:25':has('Originalvertrag')?'22:05':'19:30',chap:'Akt I · Zum Letzten Würfel',t:'Zum Letzten Würfel',
+hint:()=>f('trapdoor')?'Die Falltür unter dem Wandtisch braucht einen Schlüssel. Brunhilde gibt ihn nur dem, dem der Barde vertraut. Schurken und Barbaren finden notfalls eigene Wege.':'Sprich mit allen. Der Hut unter der Theke steckt voller Hinweise, und Brunhilde erzählt, wo man Dinge „vergisst“. Dann schau dir die Tische genau an.',
+text:()=>`<p>Die Taverne riecht nach Bratäpfeln, nassem Fell und einer Entscheidung, die jemand später bereuen wird. Der Kamin knistert, ein windschiefer Tannenbaum trägt Lichterketten und drei Dutzend Bierdeckel als Weihnachtskugeln. Hinter der Theke poliert Wirtin <b>Brunhilde</b> ein Glas, das seit Jahren nicht sauberer geworden ist. Neben dem Kamin bewacht ein Goblin in einer viel zu großen Offiziersuniform einen Käfig voller leerer Bierkrüge.</p><p>${C('Als Barde fällt dir sofort auf: schlechte Akustik, gute Geheimnisse.','Als Schurke zählst du automatisch die Ausgänge. Zwei Türen, ein Fenster und ein verdächtig sauberer Fleck am Boden.','Als Barbar stellst du fest, dass die Möbel sehr solide sind. Du schätzt das. Du wirst es später bedauern.')}</p>${has('Originalvertrag')?'<p>Der Vertrag in deiner Tasche wiegt wie ein Amboss. Brunhilde blickt immer wieder zu deiner Jacke.</p>':''}`,
+ch:()=>[
+ {l:'Mit Brunhilde sprechen',to:'brunhilde'},
+ {l:'Hauptmann Krätze ansprechen',to:'goblin'},
+ {l:'Den Hut unter der Theke untersuchen',to:'hat_scene',if:()=>!has('Hut des Hauptbarden')&&!f('hatTaken')},
+ {l:'Die vier Tische untersuchen',to:'tables',if:()=>!f('trapdoor')},
+ {l:'Zur Falltür unter dem Wandtisch',to:()=>has('Kellerschlüssel')?'trap_open':'trap_locked',if:()=>f('trapdoor')&&!f('trapOpened')},
+ {l:'Hinab in den Archivkeller',to:'cellar',if:()=>f('trapOpened')},
+ {l:'Brunhilde mit dem Vertrag zur Rede stellen',to:'brun_confront',if:()=>has('Originalvertrag')&&!f('brunConf')},
+ {l:'Zum Marktplatz gehen',to:()=>f('knotSeen')?'village':'knot_intro'}]},
+
+brunhilde:{act:1,place:'tavern',chap:'Akt I · Befragung',t:'Brunhilde',
+hint:'Frag sie nach allem. Den Schlüssel gibt sie nur her, wenn der Barde dir seine Notiz anvertraut hat. Die liegt im Hut.',
+text:()=>`<p>„Er war nie hier“, sagt Brunhilde, bevor du den Mund aufgemacht hast. „Falls doch, hat er bezahlt. Falls er nicht bezahlt hat, war er nie hier.“ Das Glas in ihrer Hand kämpft tapfer weiter.</p><p>Hinter ihr schaut ein Zipfel Glitzerstoff unter der Theke hervor. Auf dem Stoff steht in Goldschrift: <em>HAUPTBARDE</em>.</p>`,
+ch:()=>[
+ {l:'„Wann hast du ihn zuletzt gesehen?“',to:'brun_when'},
+ {l:'„Was weißt du über diesen Knöterich?“',to:'brun_tax'},
+ {l:'„Hast du einen Schlüssel für den Archivkeller?“',to:()=>has('Notiz des Barden')?'key_yes':'key_no',if:()=>f('archive')&&!has('Kellerschlüssel')},
+ {l:'Zurück in die Schankstube',to:'arrival'}]},
+brun_when:{place:'tavern',t:'Drei Tage her',
+text:()=>`<p>„Vor drei Tagen. Er kam aus der Festhalle gestürmt, rot im Gesicht, und sagte, er läute die Glocke nicht mehr. Irgendwas von einem Vertrag.“ Sie senkt die Stimme. „Weißt du, wie viele Hauptbarden wir in den letzten drei Jahren hatten? Drei. Und weißt du, wie viele man gefunden hat? Keinen. Wir haben sie immer ‚unterm Tisch‘ gesucht, das sagt man so. Gefunden hat sie nie jemand.“</p><p>Sie poliert wieder. „Unter dieser Taverne liegt ein Archivkeller. Die Gemeinde hat ihn vor Jahren versiegelt. Ich hab den Schlüssel. Theoretisch. Praktisch ist er … verlegt.“</p>`,
+on:()=>{set('archive')},
+ch:()=>[{l:'Zurück zu Brunhilde',to:'brunhilde'}]},
+brun_tax:{place:'tavern',t:'Der Mann mit dem Stempel',
+text:()=>`<p>„Herr Knöterich. Eintreiber im Namen der Winterkrone. Seit drei Jahren hier, und seit drei Jahren ist jedes Jahr ein Hauptbarde weg. Zufall? Ich glaube nicht an Zufälle. Ich glaube an Bratäpfel und daran, dass er nur zwei Noten kennt.“</p><p>„Er behauptet, jede gesungene Note sei steuerpflichtig. Gestern hat er ein Kind für ein Summen verwarnt. Schau dir mal an, wie er auf dem Marktplatz auftritt.“</p>`,
+on:()=>{clue('tax','Knöterich ist Eintreiber der Winterkrone. Seit er im Dorf ist, verschwindet jedes Jahr ein Hauptbarde.')},
+ch:()=>[{l:'Zurück zu Brunhilde',to:'brunhilde'}]},
+key_no:{place:'tavern',t:'Kein Schlüssel für Fremde',
+hint:'Im Hut des Hauptbarden steckt eine Notiz. Wenn Brunhilde sie sieht, vertraut sie dir.',
+text:()=>`<p>„Einen Schlüssel? Zum Keller? Wer will das wissen?“ Brunhilde mustert dich wie ein Zollbeamter einen Koffer voller Käse. „Ich gebe doch keinem Fremden einen Schlüssel zu etwas, das ich selbst nicht verstehe. Zeig mir, dass der Barde dir vertraut. Dann reden wir.“</p>`,
+ch:()=>[{l:'Zurück zu Brunhilde',to:'brunhilde'}]},
+key_yes:{place:'tavern',t:'Ein überraschend ehrlicher Handel',
+text:()=>`<p>Brunhilde liest die Notiz. Ihr Gesicht wird weich, dann hart, dann wieder weich. „Er hat dir vertraut. Dann tu ich es auch.“ Sie greift unter die Theke und zieht einen schweren Eisenschlüssel hervor. „Der ist übrigens nie verloren gegangen. Ich wollte nur nicht, dass jemand fragt.“</p><p>„Wenn du da unten stirbst, sag den Geistern, sie sollen ihre Rechnungen begleichen.“</p><p><b>Erhalten: Kellerschlüssel.</b></p>`,
+on:()=>{add('Kellerschlüssel')},
+ch:()=>[{l:'Zurück zu Brunhilde',to:'brunhilde'}]},
+
+goblin:{act:1,place:'tavern',chap:'Akt I · Ein verdächtiger Verbündeter',t:'Hauptmann Krätze',
+hint:'Krätze will für wichtig gehalten werden. Wer an seine Behörde glaubt, bekommt mehr als nur ein Formular.',
+text:()=>`<p>„Hauptmann Krätze, Leiter der königlichen Antidiebstahlbehörde!“, verkündet der Goblin und salutiert mit einem Stock. „Heute ist mein erster Tag. Meine Behörde besteht aus mir und diesem Stock. Der Stock ist bereits befördert worden.“</p><p>Er mustert dich misstrauisch. „Ich suche Spione, Diebe und Leute, die zu laut ‚Weihnachten‘ sagen.“ ${f('gobDone')?'Er nickt dir inzwischen respektvoll zu.':''}</p>`,
+ch:()=>[
+ {l:'„Ich bin ein staatlich geprüfter Nicht-Spion.“',to:'goblin_ok',if:()=>!f('gobDone')},
+ {l:'„Ich bin Spion, aber für die Guten.“',to:'goblin_spy',if:()=>!f('gobDone')},
+ {l:'„Deine Behörde sollte wachsen. Ich helfe dir dabei.“',to:'goblin_help',if:()=>!f('gobDone')},
+ {l:'Zurück in die Schankstube',to:'arrival'}]},
+goblin_spy:{place:'tavern',t:'Ein Missverständnis',
+text:()=>`<p>Krätze bläst in eine Trillerpfeife. Nichts passiert. Er bläst noch einmal. „Ich habe keine Verstärkung“, gesteht er. „Aber ich habe Prinzipien!“ Er richtet den Stock auf dich. „Du bist verdächtig. Versuch es nochmal mit einer besseren Geschichte.“</p>`,
+ch:()=>[{l:'Noch einmal mit Krätze reden',to:'goblin'}]},
+goblin_ok:{place:'tavern',t:'Ein gestempeltes Papier',
+text:()=>`<p>„Staatlich geprüft? Das klingt ordentlich.“ Krätze kramt in seiner Uniform, zieht ein zerknittertes Papier hervor und stempelt es mit einem Stempel, der nur noch „GE“ sagt. „Antrag 27b/6: Betreten amtlicher Räume durch Nicht-Spione. Gültig, solange niemand fragt.“</p><p><b>Erhalten: Formular 27b/6.</b></p>`,
+on:()=>{add('Formular 27b/6');set('gobDone')},
+ch:()=>[{l:'Zurück zu Krätze',to:'goblin'}]},
+goblin_help:{place:'tavern',t:'Der erste Gläubige',
+text:()=>`<p>Krätze lässt den Stock sinken. „Du bist der Erste, der an meine Behörde glaubt.“ Seine Augen glänzen verdächtig. „Hier. Antrag 27b/6, Betreten amtlicher Räume. Und mein Dienstgutschein für Suppe.“ Er überlegt. „Der Gutschein ist mein Gehalt. Die andere Hälfte meines Gehalts ist der Stock.“</p><p><b>Erhalten: Formular 27b/6, Suppengutschein.</b> Krätze steht jetzt auf deiner Seite.</p>`,
+on:()=>{if(!f('gobDone')){add('Formular 27b/6');add('Suppengutschein');num('krae',1);set('gobDone')}},
+ch:()=>[{l:'Zurück zu Krätze',to:'goblin'}]},
+
+hat_scene:{act:1,place:'tavern',chap:'Akt I · Der Hut',t:'Der Hut des Hauptbarden',
+hint:'Jede Klasse hat eine eigene Methode. Wenn du Krätze schon kennst, kann auch er helfen.',
+text:()=>`<p>Der Hut liegt halb versteckt unter der Theke. Brunhilde steht davor wie eine Wand mit Schürze. „Welcher Hut?“, sagt sie, ohne dass du gefragt hast.</p><p>Wie kommst du ran?</p>`,
+ch:()=>[
+ {l:'Eine Ballade über Bratäpfel anstimmen',to:'hat_bard',if:()=>S.cls==='Barde'},
+ {l:'Den Hut mit flinken Fingern entwenden',to:'hat_rogue',if:()=>S.cls==='Schurke'},
+ {l:'Die Theke anheben',to:'hat_barb',if:()=>S.cls==='Barbar'},
+ {l:'Krätze bitten, den Hut zu beschlagnahmen',to:'hat_krae',if:()=>f('gobDone'),lock:'Du kennst Krätze noch nicht gut genug.'},
+ {l:'Höflich nach dem Hut fragen',to:'fb',fx:bad('Eine höfliche Absage','„Welcher Hut?“, fragt Brunhilde. „Hier gibt es keinen Hut. Hier gab es nie einen Hut. Und falls doch, ist er verkauft.“ Höflichkeit allein bringt dich hier nicht weiter.','hat_scene')},
+ {l:'Zurück in die Schankstube',to:'arrival'}]},
+hat_bard:{place:'tavern',t:'Ein Lied für Brunhilde',
+text:()=>`<p>Du räusperst dich, stellst dich in Pose und beginnst: <em>„O Apfel, gebraten, im Ofen so heiß …“</em> Brunhilde hört zu. Nach der zweiten Strophe wischt sie sich über die Augen. Nach der dritten sagt sie: „Das ist der schlechteste Reim, den ich je gehört habe. Nimm den Hut. Bitte hör auf.“</p>`,
+ch:()=>[{l:'Den Hut nehmen',to:'hat_get'}]},
+hat_rogue:{place:'tavern',t:'Zwei Sekunden',
+text:()=>`<p>Brunhilde dreht sich um, um ein Fass anzustechen. Zwei Sekunden. Für dich eine Ewigkeit. Als sie sich umdreht, steckt der Hut in deiner Jacke und du bewunderst intensiv die Decke. „Du siehst aus wie jemand, der Dinge einsteckt“, sagt sie nur. „Behalt ihn. Aber bring ihn heil zurück.“</p>`,
+ch:()=>[{l:'Den Hut ansehen',to:'hat_get'}]},
+hat_barb:{place:'tavern',t:'Eine Eichentheke und ihre Familie',
+text:()=>`<p>Du packst die Theke an beiden Enden und hebst sie an. Gläser, Krüge und eine Katze rutschen herunter. Brunhilde schaut dich an. Du schaust zurück. Dann bückst du dich, nimmst den Hut und stellst die Theke wieder ab. „Das war eine Eichentheke“, sagt Brunhilde leise. „Sie hatte eine Familie.“ Immerhin: Du hast den Hut.</p>`,
+ch:()=>[{l:'Den Hut ansehen',to:'hat_get'}]},
+hat_krae:{place:'tavern',t:'Im Namen des Gesetzes',
+text:()=>`<p>„Hauptmann Krätze!“, rufst du. „Beschlagnahmen Sie diesen Hut im Namen der Antidiebstahlbehörde!“ Krätze salutiert so heftig, dass ihm der Stock aus der Hand fällt, marschiert zur Theke und verkündet: „Beschlagnahmt!“ Brunhilde seufzt. „Dafür zahlst du das Bier.“ Du hast kein Geld. Krätze notiert das als Schuld.</p>`,
+ch:()=>[{l:'Den Hut ansehen',to:'hat_get'}]},
+hat_get:{place:'tavern',t:'Die Notiz im Hutband',
+text:()=>`<p>Im Hutband steckt ein Zettel in hektischer Schrift:</p><blockquote>„Ich wurde nicht entführt. Ich bin geflohen. Der Vertrag liegt dort, wo man in dieser Taverne gern Dinge vergisst. Vertraut nicht der Glocke. Und niemals dem Mann mit dem Stempel. – L.“</blockquote><p>„Wo man Dinge vergisst.“ Das könnte ein Tisch sein. Oder ein Keller. Oder beides.</p><p><b>Erhalten: Hut des Hauptbarden, Notiz des Barden.</b></p>`,
+on:()=>{add('Hut des Hauptbarden');add('Notiz des Barden');set('hatTaken');clue('hat','Notiz des Barden: Der Vertrag liegt dort, wo man in der Taverne gern Dinge vergisst. Vertraut nicht der Glocke, nicht dem Mann mit dem Stempel.')},
+ch:()=>[{l:'Zurück in die Schankstube',to:'arrival'}]},
+
+tables:{act:1,place:'tavern',chap:'Akt I · Unter dem Tisch',t:'Vier Tische',
+hint:'Such den Tisch, an dem etwas regelmäßig bewegt wird. Spuren auf dem Boden verraten mehr als Schilder.',
+text:()=>`<p>Vier Tische, vier Möglichkeiten, sich zu blamieren. Du gehst in die Hocke und schaust genau hin. Brunhilde beobachtet dich wie eine Henne ein verdächtiges Ei.</p><ul><li><b>Der Kamintisch:</b> warm, rußig, mit Brandspuren und einer erstaunlichen Menge Würfel.</li><li><b>Der Wandtisch:</b> ein Bierfass als Mittelfuß, ein festgenagelter Teppich, aber auf den Dielen daneben ein blank gescheuerter Halbkreis, als würde dort regelmäßig etwas aufschwingen.</li><li><b>Der Fenstertisch:</b> wackelt. Ein Bierdeckel stützt ein Bein.</li><li><b>Der Stammtisch an der Tür:</b> ein Messingschild: „Reserviert für Herrn Knöterich“. Der Platz darunter ist verdächtig frei von Krümeln.</li></ul>`,
+ch:()=>[
+ {l:'Den Kamintisch durchsuchen',to:'fb',fx:bad('Ein Zahn und eine Brezel','Unter dem Kamintisch findest du: eine Brezel von 1893, zwei Würfel, die nur Einsen zeigen, und einen Zahn, der niemandem mehr gehören möchte. Der Boden darunter ist massiv.','tables')},
+ {l:'Den Wandtisch durchsuchen',to:()=>has('Kellerschlüssel')?'trap_open':'trap_locked',fx:()=>{set('trapdoor')}},
+ {l:'Den Fenstertisch durchsuchen',to:'fb',fx:bad('Ein Bierdeckel mit Geschichte','Der Bierdeckel unter dem Tischbein ist ein Steuerbescheid. Du überlegst, ihn zu ersetzen, aber dann wackelt der Tisch noch mehr. Sonst gibt es hier nichts.','tables')},
+ {l:'Den Stammtisch durchsuchen',to:'fb',fx:bad('Knöterichs Stammplatz','Unter dem Stammtisch klebt nichts, aber an der Wand hängt ein Rahmen: „Steuereintreiber des Jahres, 3. Mal in Folge“. Der Boden ist solide. Knöterich sitzt hier gern. Er versteckt hier nichts.','tables')},
+ {l:'Zurück in die Schankstube',to:'arrival'}]},
+trap_locked:{place:'tavern',chap:'Akt I · Die Falltür',t:'Eine verschlossene Falltür',
+hint:'Der Kellerschlüssel liegt bei Brunhilde. Schurke und Barbar können die Tür aber auch anders öffnen.',
+text:()=>`<p>Du kniest neben dem Wandtisch. Der Halbkreis hat eine Kante, und die Kante hat Scharniere. Unter dem Teppich liegt eine Falltür aus schwerem Eichenholz, mit einem Schloss, das aussieht wie ein beleidigtes Gesicht. Von unten kommt kalte Luft und, ganz leise, ein dreistimmiger Akkord, der in keiner Tonleiter vorkommt.</p><p>Hier also „verschwinden“ die Hauptbarden. Ohne Schlüssel kommst du nicht durch. Es sei denn …</p>`,
+on:()=>{set('trapdoor')},
+ch:()=>[
+ {l:'Das Schloss knacken',to:'trap_open',if:()=>S.cls==='Schurke'},
+ {l:'Die Falltür aufbrechen',to:'trap_open',if:()=>S.cls==='Barbar'},
+ {l:'Brunhilde nach dem Schlüssel fragen',to:'brunhilde'},
+ {l:'Zurück in die Schankstube',to:'arrival'}]},
+trap_open:{act:2,place:'crypt',time:'21:30',chap:'Akt II · Der alte Vertrag',t:'Hinab',
+text:()=>`<p>${has('Kellerschlüssel')?'Der Schlüssel dreht sich mit einem Seufzer, als hätte das Schloss drei Jahre auf Besuch gewartet.':S.cls==='Schurke'?'Das Schloss ergibt sich nach elf Sekunden. Du bist ein bisschen beleidigt, dass es so leicht ging.':'Die Falltür gibt unter deinen Händen nach. Das Holz splittert höflich.'}</p><p>Eine steinerne Treppe führt hinab. Grüne Kerzen flackern von selbst an. Von unten weht Pergamentgeruch herauf und der leise, dreistimmige Akkord, der dir eine Gänsehaut macht.</p>`,
+on:()=>{set('trapOpened');set('trapdoor')},
+ch:()=>[{l:'Die Treppe hinabsteigen',to:'cellar'},{l:'Doch noch zurück in die Schankstube',to:'arrival'}]},
+
+knot_intro:{act:1,place:'village',time:'20:15',chap:'Akt I · Der Marktplatz',t:'Die Notensteuer',
+hint:'Du kannst dem Kind helfen, Knöterich bloßstellen oder nur zusehen. Die Reaktion des Dorfes merkst du dir besser, als du denkst.',
+text:()=>`<p>Auf dem Marktplatz drängt sich eine Menschentraube. In der Mitte steht ein hagerer Mann in einer Robe aus zusammengenähten Quittungen: Herr Knöterich. Vor ihm ein Kind mit roten Wangen.</p><p>„Du hast soeben acht Takte gesummt“, sagt er und blättert in einem dicken Buch. „Notensteuer: zwei Kupfer pro Takt. Das macht … zwanzig. Zahlbar sofort, sonst wird gesummt unter Aufsicht.“</p><p>Das Kind sieht aus, als hätte es noch nie zwanzig Kupfer gesehen. Seine Mutter flüstert: „Zahl nicht, Liese. Er rechnet falsch.“</p>`,
+ch:()=>[
+ {l:'Die Kupfer für das Kind bezahlen',to:'knot_bribe',fx:()=>{set('paidChild');num('dorf',1)}},
+ {l:'Nachrechnen: „Acht mal zwei sind sechzehn, nicht zwanzig.“',to:'knot_bribe',fx:()=>{set('mathed');num('dorf',1)}},
+ {l:'Zusehen und nichts tun',to:'knot_bribe'}]},
+knot_bribe:{place:'village',t:'Ein freundliches Angebot',
+text:()=>`${f('paidChild')?'<p>Das Kind strahlt und rennt davon, die Mutter nickt dir zu. Knöterich schnaubt: „Wohltätigkeit ist steuerlich nicht absetzbar.“</p>':f('mathed')?'<p>Die Menge lacht. Knöterichs Ohren werden dunkelrot. „Bearbeitungsgebühr!“, zischt er, aber alle haben es gehört.</p>':'<p>Die Menge zerstreut sich zögerlich. Das Kind weint leise, die Mutter zahlt. Du hast das Gefühl, du hättest hier etwas tun können.</p>'}<p>Als der Platz sich leert, tritt Knöterich neben dich. Er riecht nach Tinte und Zimtseife. „Du suchst den Barden“, sagt er. Es ist keine Frage. „Ich auch. Aus Sorge, selbstverständlich. Sollte er dir begegnen, wäre ich dankbar. Sehr dankbar. Hundert Goldstücke dankbar, bar, ohne Quittung.“</p><p>Er lächelt wie jemand, der gerade ein Formular erfolgreich gelocht hat.</p>`,
+on:()=>{set('knotSeen')},
+ch:()=>[
+ {l:'Das Gold annehmen: „Ich halte die Augen offen.“',to:'bribe_yes'},
+ {l:'Ablehnen: „Ich werde sehen, was ich finde.“',to:'bribe_no'}]},
+bribe_yes:{place:'village',t:'Schweres Gold',
+text:()=>`<p>Das Gold ist schwer und kalt. Knöterich verbeugt sich so tief, dass der Quittungsmantel raschelt. „Ich wusste, du bist vernünftig.“ Er geht, und hinter ihm schwingt ein leises Klingeln, als hätte jemand eine Rechnung zugeschickt.</p><p>Du hast nun 100 Goldstücke. Dein Gewissen ist leichter. Noch.</p><p><b>Erhalten: Knöterichs Gold.</b></p>`,
+on:()=>{add('Knöterichs Gold');set('bribed')},
+ch:()=>[{l:'Auf dem Marktplatz umsehen',to:'village'}]},
+bribe_no:{place:'village',t:'Eine höfliche Absage',
+text:()=>`<p>„Ich werde sehen, was ich finde“, sagst du. Knöterich nickt langsam. „Sehr bedauerlich. Ich notiere mir das.“ Er klappt sein Buch zu. „Notiert ist notiert.“</p>`,
+ch:()=>[{l:'Auf dem Marktplatz umsehen',to:'village'}]},
+
+village:{act:1,place:'village',time:()=>has('Ring des Barden')?'23:20':has('Originalvertrag')?'22:15':'20:30',chap:'Akt I · Der Marktplatz',t:'Der Marktplatz von Frostwinkel',
+hint:()=>!has('Originalvertrag')?'Die Dorfbewohner wissen, wohin Lorian geflohen ist. Hör dir an, was Oma Trude und die Kinder sagen, und schreib es ins Journal.':!has('Ring des Barden')?'Wenn du die Wege kennst, geh in den Wald. Lorian hilft nur, wenn er dir vertraut.':'Du hast den Ring. Das Siegel der Festhalle wartet.',
+text:()=>`<p>Der Marktplatz glitzert: Lichterketten, Lebkuchenbuden, ein Schneemann mit einer Karotte, die offensichtlich eine Meinung hat. Am Ende des Platzes ragt die Festhalle auf wie ein Wal aus Fachwerk. In ihrem Turm hängt die Festglocke, und sie sieht aus wie ein schweigender Vorwurf.</p>${has('Ring des Barden')?'<p>Es ist kurz vor Mitternacht. Das Dorf strömt langsam Richtung Festhalle. Niemand lacht.</p>':''}`,
+ch:()=>[
+ {l:'Mit Oma Trude sprechen, die auf der Bank sitzt',to:'trude'},
+ {l:'Zu den Lebkuchen-Kindern gehen',to:'kids'},
+ {l:'Den Schneemann mit dem Schild ansehen',to:'snowman'},
+ {l:'In den Tannenwald gehen',to:'forest0',if:()=>f('forestOpen')},
+ {l:'Zur Festhalle gehen',to:'hall_door',if:()=>has('Ring des Barden'),lock:'Das Siegel an der Tür reagiert nur auf den Ring des Hauptbarden.'},
+ {l:'Zurück zur Taverne',to:'arrival'}]},
+trude:{place:'village',t:'Oma Trude',
+hint:'Notiere dir, in welche Richtung Lorian lief und wie sein Lautenspiel klingt.',
+text:()=>`<p>Auf einer Bank sitzt Oma Trude, 83, Akkordeon, so viele Zähne wie Illusionen. „Der Lorian? Hat sich mit Knöterich in der Festhalle angebrüllt, dann ist er in den Wald. Ich hab ihn gesehen: nasse Stiefel, und er ist <em>gegen</em> den Bach gelaufen. Dickschädel. Wasser fließt bergab, sagt der Mensch. Ich geh hoch, sagt der Lorian.“</p><p>Sie lacht, bis das Akkordeon hustet. „Und hören wirst du ihn, wenn du nah dran bist. Der spielt Laute wie eine Waschmaschine im Schleudergang. Selbst die Glocke Gerlinde hat früher schöner geklungen. Mein Mann sagte immer: Wenn das Ding schweigt, hat jemand dem Metall etwas abgenommen.“</p>`,
+on:()=>{if(!f('trudeDone')){num('dorf',1);set('trudeDone')}clue('trude','Oma Trude: Lorian ging dem Bach entgegen, bergauf. Sein Lautenspiel klingt wie eine Waschmaschine im Schleudergang. Die Glocke heißt Gerlinde.')},
+ch:()=>[{l:'Zurück zum Marktplatz',to:'village'}]},
+kids:{place:'village',t:'Die Lebkuchen-Kinder',
+hint:'Die Kinder verraten, wohin Lorian wollte. Und sie haben etwas Essbares.',
+text:()=>`<p>Drei Kinder verkaufen Lebkuchen in Drachenform, die verdächtig nach Kartoffeln aussehen. „Der Barde? Der hat uns einen Kartoffeldrachen abgekauft“, sagt das größte. „Und gefragt, wo es am stillsten ist. Wir haben gesagt: in der Senke, wo man nicht mal sich selbst hört. Echo-Felsen mag er nicht, da ruft alles zurück.“</p><p>${f('kidsDone')?'„Mehr haben wir nicht!“':'Das kleinste Kind drückt dir einen Drachen in die Hand. „Für dich. Der sieht aus wie eine Kartoffel, aber mit Liebe gebacken.“<br><b>Erhalten: Lebkuchendrache.</b>'}</p>`,
+on:()=>{if(!f('kidsDone')){add('Lebkuchendrache');set('kidsDone')}clue('kids','Die Kinder: Lorian wollte dorthin, wo es am stillsten ist, in die Senke. Nicht zum Echo-Felsen.')},
+ch:()=>[{l:'Zurück zum Marktplatz',to:'village'}]},
+snowman:{place:'village',t:'Der Schneemann mit Meinung',
+text:()=>`<p>Ein Schneemann trägt ein Schild: <em>„Der Barde schuldet mir fünf Goldstücke.“</em> Du sprichst mit ihm. Er antwortet nicht. Das ist erstaunlich entspannend.</p><p>${C('Du verbeugst dich vor ihm, aus Respekt vor Kollegen, die Schulden machen.','Du tastest nach Wertsachen. Der Schneemann hat die Karotte, seine Würde und ein Stück Kohle. Du lässt es.','Du überlegst kurz, ihn umzuwerfen. Er sieht dich an. Du lässt es.')}</p>`,
+ch:()=>[{l:'Zurück zum Marktplatz',to:'village'}]}
+});
+Object.assign(N,{
+cellar:{act:2,place:'crypt',time:'21:40',chap:'Akt II · Der alte Vertrag',t:'Das Archiv unter der Schankstube',
+hint:()=>f('ledger')?'Das Protokoll nennt eine Reihenfolge. Lies jeden Eintrag genau: Was kommt vor, was nach was?':'Lies das Zeremonienprotokoll an der Wand. Dort steht, in welcher Reihenfolge die vier Symbole berührt werden müssen.',
+text:()=>`<p>Der Archivkeller ist eine Kapelle für Papier: Regale, Rollen, Truhen. Mitten im Raum steht ein steinerner Schrank mit vier Symbolfeldern: <b>👑 Krone</b>, <b>🎻 Laute</b>, <b>🔔 Glocke</b>, <b>💰 Münze</b>. An der Wand hängt ein Rahmen mit Einträgen, daneben eine Gedenktafel.</p><p>Und über allem schwebt, durchsichtig und streng, der Archivar <b>Pergamentus</b>. Er sieht dich an, als hättest du ein Eselsohr in sein Gewissen gemacht. Der dreistimmige Akkord ist hier unten deutlicher.</p>`,
+ch:()=>[
+ {l:'Das Zeremonienprotokoll im Rahmen lesen',to:'ledger'},
+ {l:'Die Gedenktafel lesen',to:'plaque'},
+ {l:'Den Schrank mit den vier Symbolen öffnen',to:'cabinet',if:()=>!has('Originalvertrag')},
+ {l:'Hinauf in die Taverne',to:'arrival'}]},
+ledger:{place:'crypt',t:'Das Protokoll der Zeremonie',
+text:()=>`<p>Der Rahmen zeigt ein Protokoll in Tinte, die immer noch ein bisschen beleidigt wirkt:</p><blockquote>§1: Zuerst erschien die <b>Krone</b>, um den Vertrag zu eröffnen.<br>§2: Die <b>Glocke</b> läutete erst, nachdem der Barde gesungen hatte.<br>§3: Die <b>Münze</b> wurde als Letztes übergeben, denn „zuerst das Lied, dann das Geld, dann die Reue“.</blockquote><p>Sonst steht nichts da. Ordnung scheint hier wichtig zu sein. Der Barde singt auf einer <b>Laute</b>, vermutlich.</p>`,
+on:()=>{set('ledger');clue('ledger','Protokoll der Zeremonie: Zuerst die Krone. Die Glocke läutet erst, nachdem der Barde (Laute) gesungen hat. Die Münze kommt zuletzt.')},
+ch:()=>[{l:'Zurück im Archiv',to:'cellar'}]},
+plaque:{place:'crypt',t:'Zum Gedenken',
+text:()=>`<p>Eine Gedenktafel aus dunklem Stein: <em>„Zum Gedenken an die Stimmen von Frostwinkel.“</em> Darunter drei frisch gemeißelte Namen, noch ohne Moos: <b>Kunibert der Zungenfertige</b>, <b>Wiltrud Dreiklang</b> und <b>Haddo Hochton</b>, „die letzten drei Hauptbarden“. Darunter in winziger Schrift: <i>Anhang: 297 Freiwillige. Anmerkung: Die Freiwilligkeit wurde nicht überprüft.</i></p><p>Du merkst dir die Namen. Dir wird kalt. Der leise Akkord aus drei Stimmen scheint direkt von der Tafel zu kommen.</p>`,
+on:()=>{set('names');clue('names','Die letzten drei Hauptbarden: Kunibert der Zungenfertige, Wiltrud Dreiklang und Haddo Hochton. Ihre Stimmen singen noch.')},
+ch:()=>[{l:'Zurück im Archiv',to:'cellar'}]},
+cabinet:{place:'crypt',t:'Der Archivschrank',
+hint:'Zuerst kommt die Krone. Die Glocke läutet erst nach dem Lied des Barden. Die Münze kommt zuletzt. Wie spielt der Barde? Mit einer Laute.',
+puzzle:'seq',
+text:()=>`<p>Vier Felder, vier Symbole, eine Reihenfolge. Du musst sie in der richtigen Ordnung berühren. Pergamentus räuspert sich vorwurfsvoll. Falsche Reihenfolgen hasst er persönlich.</p><p class="note">Tippe die Symbole nacheinander an und bestätige.</p>`,
+ch:()=>[
+ {l:'Das Schloss lautlos knacken',to:'cab_pick',if:()=>S.cls==='Schurke'},
+ {l:'Den Schrank gewaltsam aufbrechen',to:'cab_force',if:()=>S.cls==='Barbar'},
+ {l:'Zurück im Archiv',to:'cellar'}]},
+lecture:{place:'crypt',t:'Die Strafe des Archivs',
+text:()=>`<p>Eine geisterhafte Stimme liest dir zwölf Seiten über die ordnungsgemäße Lagerung von Pergament vor. Nach sieben Minuten verlierst du den Lebenswillen, aber keine Lebenspunkte.</p><p>${S.n.wrong>=2?'Pergamentus murmelt, fast beiläufig: „Wer das Protokoll liest, merkt: Die Glocke kommt <em>nach</em> dem Lied. Und die Münze kommt immer zuletzt. Jeder Idiot weiß das.“':'Der Mechanismus setzt sich zurück. Vielleicht hilft das Protokoll an der Wand.'}</p>`,
+ch:()=>[{l:'Es noch einmal versuchen',to:'cabinet'},{l:'Das Protokoll lesen',to:'ledger'}]},
+cab_pick:{place:'crypt',t:'Eine unhöfliche Lösung',
+text:()=>`<p>Du schiebst zwei Dietriche ins Schloss. Pergamentus schnappt nach Luft. „Das ist unhöflich!“ Der Mechanismus klickt trotzdem. Während du das Pergament herausnimmst, hält er dir einen zwölfseitigen Vortrag über Archivrecht. Du hörst nicht zu. Du bist ein Schurke.</p>`,
+ch:()=>[{l:'Den Vertrag lesen',to:'archive_open'}]},
+cab_force:{place:'crypt',t:'Barbarische Archivwissenschaft',
+text:()=>`<p>Du schlägst so fest gegen den Schrank, dass der Mechanismus vor Schreck aufspringt. Pergamentus stößt einen Laut aus, den man nur bei Archivaren hört, wenn man ihnen das Lieblingsregal anzündet. „Das ist gegen die Hausordnung“, flüstert er. „Das ist gegen alle Hausordnungen.“</p>`,
+ch:()=>[{l:'Den Vertrag lesen',to:'archive_open'}]},
+archive_open:{place:'crypt',time:'21:55',chap:'Akt II · Die Wahrheit',t:'Das Kleingedruckte',
+text:()=>`<p>Im Schrank liegt ein einziges Pergament mit goldenem Rand: <b>Der Vertrag von Frostwinkel.</b> Du liest, und mit jeder Zeile wird dir kälter.</p><blockquote>§1 Die Winterglocke (Geist: Gerlinde) schenkt dem Dorf Wärme und Glück.<br>§2 Dafür gehört ihr jährlich <s>eine freiwillig</s> eine dargebotene Stimme.<br>§7 Eine Stimme kann ersetzt werden durch ein <b>Lied, das die ganze Gemeinde freiwillig anstimmt</b>.</blockquote><p>Das Wort „freiwillig“ in §2 ist handschriftlich durchgestrichen. Am Rand steht: <i>„Redaktionell berichtigt. – K.“</i></p><p>Du verstehst. Die Glocke ist kein Zauber, sie ist ein gefangener Wintergeist: Gerlinde. Jede Stimme, die sie bekommt, wird in sie eingewoben. Der Akkord, den du hörst, sind Kunibert, Wiltrud und Haddo. Knöterich hat sie nicht „verloren“. Er hat sie hinabgeführt, durch die Falltür, unter dem Tisch.</p><p>Und Lorian? Der hat das alles gefunden, bevor er die Glocke läuten ließ. Er ist nicht entführt worden. Er hat Nein gesagt.</p>`,
+on:()=>{add('Originalvertrag');set('forestOpen');clue('contract','Der Vertrag: Die Glocke (Gerlinde) bekommt jährlich eine Stimme. Knöterich hat „freiwillig“ gestrichen. §7: Ein Lied, das die ganze Gemeinde freiwillig singt, ersetzt die Stimme. Die drei Hauptbarden stecken in der Glocke.')},
+ch:()=>[{l:'Mit dem Vertrag hinauf in die Taverne',to:'arrival'}]},
+brun_confront:{act:2,place:'tavern',chap:'Akt II · Eine unbequeme Wahrheit',t:'Brunhildes Schuld',
+hint:'Brunhilde steht später im Saal auf, wenn du sie hier gewinnst. Das zählt als Beweis.',
+text:()=>`<p>Du legst den Vertrag auf die Theke. Brunhilde liest. Das Glas in ihrer Hand fällt zu Boden und ist zum ersten Mal seit Jahren wirklich sauber, in tausend Splittern.</p><p>„Meine Mutter hat gesagt: Frag nie, warum die Glocke so schön klingt. Ich hab nie gefragt. Drei Jahre lang hab ich den Barden Bratäpfel gebracht, bevor Knöterich sie hinuntergeführt hat.“ Sie wischt sich die Augen mit dem Schürzenzipfel. „Hier. Die Stimmgabel des ersten Hauptbarden. Sie kann die Glocke stimmen. Befreien oder binden, das weiß ich nicht.“ Sie hebt das Kinn. „Und wenn es so weit ist, stehe ich auf. Vor allen.“</p><p><b>Erhalten: Silberne Stimmgabel.</b></p>`,
+on:()=>{add('Silberne Stimmgabel');set('brunConf')},
+ch:()=>[{l:'Zurück in die Schankstube',to:'arrival'}]},
+
+forest0:{act:3,place:'forest',time:'22:30',chap:'Akt III · Der Wald der verlorenen Refrains',t:'Der Tannenwald',
+hint:()=>f('hutKnown')?'Du kennst jetzt den Weg zur Hütte.':'Oma Trude und die Kinder haben dir Wegbeschreibungen gegeben. Sie stehen im Journal.',
+text:()=>`<p>Der Tannenwald hinter dem Dorf schluckt Geräusche. Jeder Schritt klingt, als hätte jemand einen Teppich über die Welt gelegt. Zwischen den Stämmen hängen Eiszapfen wie Kronleuchter, und irgendwo zwitschert ein Vogel, der offensichtlich seinen Beruf verfehlt hat.</p><p>Spuren führen zu einem Bach. Dort beginnt der Weg.</p>`,
+ch:()=>[
+ {l:'Dem Weg am Bach folgen',to:'forest1',if:()=>!f('hutKnown')},
+ {l:'Die Spuren im Schnee lesen',to:'f_track',if:()=>S.cls==='Schurke'&&!f('hutKnown')},
+ {l:'Eine Schneise durchs Unterholz schlagen',to:'f_chop',if:()=>S.cls==='Barbar'&&!f('hutKnown')},
+ {l:'Den bekannten Weg zur Hütte gehen',to:'lorian',if:()=>f('hutKnown')},
+ {l:'Zurück zum Marktplatz',to:'village'}]},
+forest1:{place:'forest',t:'Der Bach teilt den Weg',
+hint:'Oma Trude hat gesagt, in welche Richtung Lorian dem Bach folgte.',
+text:()=>`<p>Der Bach plätschert unter einer dünnen Eisschicht. Der Pfad folgt ihm in beide Richtungen, und zwischen den Tannen gibt es einen dritten Weg, der aus Dornen besteht. Spuren gibt es überall, weil im Dorf jeder einmal diesen Weg gegangen ist, meist um Pilze zu finden oder sich zu streiten.</p><p>Wohin?</p>`,
+ch:()=>[
+ {l:'Dem Bach talwärts folgen',to:'fb',fx:bad('Der Dorfteich','Nach zwanzig Minuten stehst du am Dorfteich. Ein Karpfen sieht dich an wie ein Steuerprüfer. Offenbar ging der Barde nicht mit der Strömung.','forest1')},
+ {l:'Dem Bach entgegen, bergauf',to:'forest2'},
+ {l:'Quer durch das Dickicht',to:'fb',fx:bad('Ein Dornbusch mit Ansprüchen','Der Dornbusch behauptet, du schuldest ihm Respekt und etwa einen halben Ärmel. Er behält beides. Das kann nicht der Weg des Barden gewesen sein.','forest1')},
+ {l:'Zurück zum Dorf',to:'village'}]},
+forest2:{place:'forest',t:'Der Wegweiser',
+hint:'Die Kinder haben dir gesagt, wo es am stillsten ist und was Lorian nicht mag.',
+text:()=>`<p>Auf einer Lichtung steht ein Wegweiser mit drei Schildern, so schief, dass er sich bei jemandem zu entschuldigen scheint:</p><ul><li>→ <b>Rufender Felsen</b> (Echo garantiert)</li><li>→ <b>Stille Senke</b></li><li>→ <b>Zum Ende der Welt</b> (geschlossen bis Frühling)</li></ul>`,
+ch:()=>[
+ {l:'Zum Rufenden Felsen',to:'fb',fx:bad('Ein Felsen mit Mitteilungsbedürfnis','Du rufst „Lorian?“. Der Felsen antwortet „Lorian? Lorian? Wer fragt? Wer fragt?“. Nach elf Wiederholungen gibst du auf. Hier hat sich bestimmt niemand versteckt, der Ruhe sucht.','forest2')},
+ {l:'In die Stille Senke',to:'forest3'},
+ {l:'Zum Ende der Welt',to:'fb',fx:bad('Geschlossen','Ein Schild: „Wegen Weltuntergang vorübergehend nicht erreichbar. Wir bitten um Verständnis.“ Dahinter ist nichts, aber sehr viel davon.','forest2')},
+ {l:'Zurück zum Bach',to:'forest1'}]},
+forest3:{place:'forest',t:'Drei Hütten in der Senke',
+hint:'Oma Trude hat beschrieben, wie Lorians Lautenspiel klingt. Hör genau hin.',
+text:()=>`<p>In der Senke ist es so still, dass du deinen eigenen Gedanken zuhören kannst. Das ist unangenehm. Drei Hütten stehen im Schnee:</p><ul><li>eine mit rauchender Esse und Suppengeruch,</li><li>eine mit einem Hufeisen über der Tür und völliger Stille,</li><li>eine, aus der es rattert, scheppert und seltsam jault.</li></ul>`,
+ch:()=>[
+ {l:'Zur Hütte mit der Esse',to:'fb',fx:bad('Ein Köhler namens Heinz','Ein Köhler öffnet. „Ja? Ich koche Suppe.“ Mehr hat er nicht zu sagen. Er füllt dir einen Becher ein. Es ist die beste Suppe der Welt. Du gehst trotzdem, weil du eine Mission hast.','forest3')},
+ {l:'Zur stillen Hütte mit dem Hufeisen',to:'fb',fx:bad('Wirklich still','Du klopfst. Nichts. Du klopfst nochmal. Nichts. Du lauschst. Absolute Stille. Ein Schild an der Tür sagt: „Hier wohnt niemand. Bitte nicht klopfen.“ Du hast geklopft.','forest3')},
+ {l:'Zur ratternden, jaulenden Hütte',to:'hut_arrive'},
+ {l:'Dem Klang folgen, du hast ein feines Gehör',to:'hut_arrive',if:()=>S.cls==='Barde'},
+ {l:'Zurück zum Wegweiser',to:'forest2'}]},
+f_track:{place:'forest',t:'Spuren im Schnee',
+text:()=>`<p>Du kniest dich in den Schnee. Stiefelabdrücke, tief auf der Hacke: ein Mann, der es eilig hatte und trotzdem stolz bleiben wollte. Sie führen gegen den Bach, an einem Wegweiser vorbei, der von einem Echo-Felsen wegzeigt, und enden in einer Senke. Du hast zwei Gabelungen nicht erlebt und bist stolz darauf.</p>`,
+ch:()=>[{l:'In die Senke gehen',to:'forest3'}]},
+f_chop:{place:'forest',t:'Eine Schneise',
+text:()=>`<p>Du schlägst eine Schneise durchs Unterholz. Alle Vögel verlassen die Gegend. Drei Bäume stehen empört da, ein vierter fällt aus Protest um. Deine Schneise führt direkt in eine stille Senke.</p><p>Der Nachteil: Der Lärm war in drei Tälern zu hören. Wer sich hier versteckt, wird nervös sein.</p>`,
+on:()=>{set('noisy')},
+ch:()=>[{l:'In die Senke gehen',to:'forest3'}]},
+
+hut_arrive:{act:3,place:'hut',time:'22:50',chap:'Akt III · Der Barde',t:'Die schiefe Hütte',
+text:()=>`<p>Die Hütte steht schief, als würde sie sich bei jemandem entschuldigen. Von drinnen dringt Lautenspiel, das klingt wie eine Waschmaschine im Schleudergang, die versucht, Mozart zu spielen. Du klopfst. Das Spiel verstummt. Eine Stimme sagt: „Wir haben nichts! Wir sind nicht da!“</p><p>Die Tür geht einen Spalt weit auf. Ein Mann mit Bartstoppeln, Glitzerumhang und dem Blick eines Menschen, der drei Nächte nicht geschlafen hat. „Wenn du mich zurückbringen willst“, sagt Lorian, „vergiss es. Ich sterbe nicht für eine Glocke, damit das Dorf kostenlos Glühwein trinken kann.“${f('noisy')?'<br>Er späht an dir vorbei. „Und du hast eine Schneise geschlagen? Mitten durch meine Aussicht?“':''}</p>`,
+on:()=>{set('hutKnown');set('lorianMet');if(f('noisy')&&!f('noisyApplied')){num('trust',-1);set('noisyApplied')}},
+ch:()=>[{l:'Reden',to:'lorian'},{l:'Zurück in den Wald',to:'forest0'}]},
+lorian:{act:3,place:'hut',chap:'Akt III · Der Barde',t:'Lorian, Hauptbarde a. D.',
+hint:'Vertrauen gewinnst du durch Wahrheit, Namen und kleine Gesten: den Vertrag zeigen, die Namen deiner Vorgänger, etwas zu essen, den Hut zurückgeben. Zwei Punkte reichen für den Ring.',
+text:()=>`<p>Lorian lässt dich in die Hütte. Drinnen: ein Feldbett, eine Laute mit zwei gerissenen Saiten, ein Berg leerer Konservendosen und ein Zettel an der Wand: <em>„Ballade über meine Flucht: Strophe 1 von 41.“</em></p><p>„Also“, sagt er und setzt sich auf den Bettrand wie ein Richter auf eine Kiste. „Warum sollte ich dir glauben? Knöterich hat auch nette Leute.“</p><p class="note">Vertrauen: ${heart(S.n.trust)} (mindestens zwei, damit er dir seinen Ring gibt)</p>`,
+ch:()=>[
+ {l:'„Ich habe den Originalvertrag gefunden.“',to:'l_contract',if:()=>has('Originalvertrag')&&!f('l_con')},
+ {l:'„Ich kenne die Namen deiner drei Vorgänger.“',to:'l_namesq',if:()=>f('names')&&!f('l_names')},
+ {l:'„Ich habe dir etwas zu essen mitgebracht.“',to:'l_gift',if:()=>has('Lebkuchendrache')&&!f('l_gift')},
+ {l:'„Hier ist dein Hut.“',to:'l_hat',if:()=>has('Hut des Hauptbarden')&&!f('l_hat')},
+ {l:'„Wir brauchen deine Hilfe, Lorian.“',to:'l_ring',hide:()=>has('Ring des Barden'),if:()=>S.n.trust>=2,lock:'Er vertraut dir noch nicht genug. Zeig ihm, dass du die Wahrheit kennst: Vertrag, Namen, Hut, eine Geste.'},
+ {l:'Die Hütte verlassen',to:()=>has('Ring des Barden')&&f('bribed')&&!f('tailDone')?'tail':(has('Ring des Barden')?'village':'forest0')}]},
+l_contract:{place:'hut',t:'Der Vertrag',
+text:()=>`<p>Du legst den Vertrag auf das Feldbett. Lorian liest, und sein Gesicht verliert Farbe, bis es nur noch aus Bartstoppeln besteht. „Du hast ihn gefunden. Ich dachte, den gäbe es nur in meinem Kopf.“ Er tippt auf die Randnotiz. „Siehst du? ‚Redaktionell berichtigt.‘ Dieser Schuft.“</p><p>Er sieht dich anders an. Nicht freundlich, aber nicht mehr wie einen Steuerprüfer.</p>`,
+on:()=>{if(!f('l_con')){set('l_con');num('trust',1)}},
+ch:()=>[{l:'Weiter mit Lorian reden',to:'lorian'}]},
+l_namesq:{place:'hut',t:'Die Namen',
+hint:'Die Namen stehen auf der Gedenktafel im Archivkeller. Dein Journal hat sie auch.',
+text:()=>`<p>Lorian verschränkt die Arme. „Wenn du wirklich weißt, was passiert ist, sag mir die Namen meiner drei Vorgänger. Nur wer sie gesehen hat, kennt sie.“</p>`,
+ch:()=>[
+ {l:'„Kunibert, Wilfried und Hadubrand.“',to:'fb',fx:bad('Fast, aber nicht ganz','Lorian zieht die Augenbrauen hoch. „Wilfried? Hadubrand? Das sind die Namen auf meiner Steuerklärung.“ Er schüttelt den Kopf. „Denk nochmal nach, wie sie wirklich hießen.“','l_namesq')},
+ {l:'„Kunibert, Wiltrud und Haddo.“',to:'l_namesok'},
+ {l:'„Knöterich, Krätze und Brunhilde.“',to:'fb',fx:bad('Ein sehr mutiger Tipp','„Das sind die Leute, die ich nicht mag“, sagt Lorian. „Nicht die, die ich vermisse.“ Er schüttelt den Kopf. „Versuch es nochmal.“','l_namesq')}]},
+l_namesok:{place:'hut',t:'Drei Namen',
+text:()=>`<p>Lorian schließt die Augen. „Kunibert der Zungenfertige. Wiltrud Dreiklang. Haddo Hochton.“ Er flüstert es, als wären es Gebete. „Ich hab sie gekannt. Haddo hat mir meine erste Laute geschenkt. Eine wunderbare Laute, die auch niemand spielen konnte.“</p><p>Als er die Augen öffnet, glänzen sie. „Du hast sie nicht vergessen. Das ist mehr, als ich vom Dorf behaupten kann.“</p>`,
+on:()=>{if(!f('l_names')){set('l_names');num('trust',1)}},
+ch:()=>[{l:'Weiter mit Lorian reden',to:'lorian'}]},
+l_gift:{place:'hut',t:'Ein Kartoffeldrache',
+text:()=>`<p>Du reichst Lorian den Lebkuchendrachen. Er starrt ihn an wie einen Verbündeten. „Seit zwei Tagen hab ich nichts als Konserven gegessen“, murmelt er und beißt hinein. „Das schmeckt wie eine Kartoffel. Das ist die beste Kartoffel meines Lebens.“ Er kaut, schluckt und sieht dich dankbar an. „Ich wurde noch nie von einem Fremden gefüttert, der nichts wollte.“</p>`,
+on:()=>{if(!f('l_gift')){set('l_gift');rem('Lebkuchendrache');num('trust',1)}},
+ch:()=>[{l:'Weiter mit Lorian reden',to:'lorian'}]},
+l_hat:{place:'hut',t:'Der Hut',
+text:()=>`<p>Du setzt ihm den Hut mit der Glitzerschrift auf. Lorian lässt ihn sich gefallen. „Ich dachte, ich hätte ihn verloren“, sagt er leise. „Ich dachte, ich hätte alles verloren.“ Er rückt den Hut gerade. „Brunhilde hat ihn dir gegeben? Dann hat sie dir vertraut. Dann ist das kein Zufall.“</p>`,
+on:()=>{if(!f('l_hat')){set('l_hat');rem('Hut des Hauptbarden');num('trust',1)}},
+ch:()=>[{l:'Weiter mit Lorian reden',to:'lorian'}]},
+l_ring:{place:'hut',t:'Der Ring des Festdirektors',
+text:()=>`<p>Lorian steht auf und nimmt den Ring vom Finger, einen schweren, goldenen Siegelring. „Der Festdirektor-Ring. Öffnet die Künstlertür der Festhalle, an jedem Wachposten vorbei. Knöterich hat es nie gewagt, ihn mir abzunehmen, weil er Angst vor Papierkram hatte.“</p><p>„Hast du §7 gelesen?“, fragt er. „Ein Lied, das die ganze Gemeinde freiwillig singt. Ich hab nie genug Leute gefunden. Aber vielleicht müssen wir nur anfangen, und sie fallen ein. Ich komme nach. Sobald ich meine Laute gestimmt habe.“ Er zögert. „Und falls ich es mir anders überlege, such mich in der Festhalle. Im Tannenbaum. Ich tarne mich schlecht.“</p><p><b>Erhalten: Ring des Barden.</b></p>`,
+on:()=>{add('Ring des Barden');set('lorianComes');clue('ring','Lorian gab dir den Ring des Festdirektors. Damit öffnest du die Künstlertür der Festhalle. Er will nachkommen.')},
+ch:()=>[{l:'Mit dem Ring zurück ins Dorf',to:()=>f('bribed')&&!f('tailDone')?'tail':'village'}]},
+tail:{act:3,place:'forest',time:'23:05',chap:'Akt III · Der Preis des Goldes',t:'Fackeln zwischen den Bäumen',
+hint:'Du hast Knöterichs Gold genommen. Jetzt entscheidest du, ob du es Lorian sagst.',
+text:()=>`<p>Als ihr aus der Hütte tretet, flackern zwischen den Bäumen Fackeln. Pfeifen, Stiefel, das Klappern von Büroklammern an Uniformgürteln: Knöterichs Quittungskobolde. In der Münze, die du aus Neugier aus der Tasche ziehst, ist ein winziger Stempel eingeprägt: <em>VERFOLGBAR</em>.</p><p>Lorian sieht dich an. Dann das Gold. Dann dich. „Du hast …?“ Seine Stimme bricht nicht, sie schrumpft einfach.</p>`,
+ch:()=>[
+ {l:'Alles gestehen und gemeinsam durch den Schnee fliehen',to:'tail_warn'},
+ {l:'Schweigen und die Kobolde gewähren lassen',to:'tail_silent'}]},
+tail_warn:{place:'forest',t:'Ein Geständnis',
+text:()=>`<p>„Ich habe sein Gold genommen“, sagst du. „Hundert Stück. Ich wollte … ich weiß nicht, was ich wollte. Es tut mir leid.“</p><p>Lorian schweigt so lange, dass die Eiszapfen sich zu langweilen beginnen. Dann: „Zehn Minuten früher hätte ich dir eine Ballade gewidmet. Jetzt widme ich dir eine Fußnote.“ Er packt die Laute. „Aber du hast es gesagt. Das zählt. Lauf!“ Ihr rennt. Die Kobolde verlaufen sich im Schnee, weil sie ihre Dienstkarte nur im Maßstab 1:500 lesen können.</p>`,
+on:()=>{if(!f('tailDone')){set('tailDone');set('confessed');num('trust',-1)}},
+ch:()=>[{l:'Zurück ins Dorf',to:'village'}]},
+tail_silent:{place:'forest',t:'Drei Sekunden Schweigen',
+text:()=>`<p>Du schweigst. Das ist das Schlimmste, was du je getan hast, und es dauert nur drei Sekunden. Die Kobolde stürzen sich auf Lorian, Netze aus Akten fliegen, die Laute landet im Schnee. „Der Ring!“, ruft Lorian noch, „du hast den Ring, versteck ihn!“, dann schleppen sie ihn weg.</p><p>Zurück bleibt Stille. In deiner Tasche das Gold, das plötzlich sehr schwer ist. Du weißt, wohin sie ihn bringen: in die Festhalle. Zur Glocke.</p>`,
+on:()=>{if(!f('tailDone')){set('tailDone');set('captured');set('lorianComes',false);num('trust',-2)}},
+ch:()=>[{l:'Zurück ins Dorf. Du hast eine Stunde.',to:'village'}]}
+});
+Object.assign(N,{
+hall_door:{act:3,place:'hall',time:'23:35',chap:'Akt III · Hinter den Kulissen',t:'Das Siegel der Festhalle',
+text:()=>`<p>Die Festhalle ragt vor dir auf. Das goldene Siegel an der Tür summt, als du dich näherst, wie ein beleidigter Kühlschrank. Du hältst den Ring des Hauptbarden an die Klinke, und das Siegel gibt ein erleichtertes „Endlich“ von sich, wie jemand, der nach drei Jahren seine Post bekommt.</p><p>Die Tür schwingt auf. Dahinter liegt ein Künstlerflur, der nach Kerzenwachs und Verwaltung riecht. Weit hinten, durch die Wände, schiebt sich eine Menge in den Festsaal. Es ist kurz vor Mitternacht.</p>${f('lorianComes')&&!f('captured')?'<p>Hinter dir raschelt ein Tannenbaum. Er ist kein Tannenbaum. Es ist Lorian, schlecht getarnt. „Geh vor“, flüstert er. „Ich komme nach.“</p>':''}${f('captured')?'<p>Du weißt, wohin sie Lorian gebracht haben. Auf die Bühne.</p>':''}`,
+ch:()=>[{l:'In den Künstlerflur treten',to:()=>f('guardPassed')?'backstage':'guard'},{l:'Doch noch zurück zum Marktplatz',to:'village'}]},
+guard:{place:'hall',t:'Der Wachposten',
+hint:'Das Schild nennt drei Wege: Formular, Verpflegung, Darbietung. Dein Inventar und deine Klasse bestimmen, welcher davon dir offensteht.',
+text:()=>`<p>Im Künstlerflur sitzt an einem winzigen Schreibtisch ein Kobold mit Armschonern und dem Gesichtsausdruck, als wäre Freude ein Verwaltungsfehler. Sein Namensschild: <b>Obergefreiter Stempelfuß</b>. Davor ein Schild:</p><blockquote>„Zutritt zur Bühne nur gegen: (1) einen ordnungsgemäßen Antrag, Formular 27b/6, (2) Verpflegung, Suppe nur gegen Gutschein, (3) eine künstlerische Darbietung von höchstens zwei Strophen. Andere Methoden sind unerwünscht und werden verwaltet.“</blockquote><p>Stempelfuß sieht dich an. „Ja?“</p>`,
+ch:()=>[
+ {l:'Das Formular 27b/6 vorzeigen',to:'guard_form',if:()=>has('Formular 27b/6')},
+ {l:'Den Suppengutschein überreichen',to:'guard_soup',if:()=>has('Suppengutschein')},
+ {l:'Zwei Strophen vortragen',to:'guard_song',if:()=>S.cls==='Barde'},
+ {l:'Durch den Lüftungsschacht kriechen',to:'guard_vent',if:()=>S.cls==='Schurke'},
+ {l:'Die Tür eintreten',to:'guard_smash',if:()=>S.cls==='Barbar'},
+ {l:'Zurück zum Marktplatz, um etwas zu besorgen',to:'village'}]},
+guard_form:{place:'hall',t:'Ein ordentlicher Antrag',
+text:()=>`<p>Stempelfuß nimmt das Formular entgegen, prüft es von allen Seiten, hält es gegen das Licht und stempelt es dreimal. Seine Augen glänzen. „Das ist der schönste Antrag, den ich dieses Jahr gesehen habe.“ Er seufzt zufrieden. „Gültig, solange niemand fragt. Durchgang gewährt.“</p>`,
+on:()=>{rem('Formular 27b/6');set('guardPassed')},
+ch:()=>[{l:'Weiter',to:'backstage'}]},
+guard_soup:{place:'hall',t:'Verpflegung',
+text:()=>`<p>Stempelfuß starrt den Gutschein an. Sein Magen knurrt wie ein Aktenschrank. „Das … ist Suppe.“ Er schluckt. „Ich habe seit vorgestern nur Verwaltungsvorschriften gegessen.“ Er winkt dich durch, ohne dich anzusehen. „Und danke. Sag keinem, dass ich gerührt war.“</p>`,
+on:()=>{rem('Suppengutschein');set('guardPassed')},
+ch:()=>[{l:'Weiter',to:'backstage'}]},
+guard_song:{place:'hall',t:'Zwei Strophen',
+text:()=>`<p>Du singst zwei Strophen über Armschoner, Aktenordner und das stille Leid derer, die zu viele Formulare kennen. Stempelfuß hält die Luft an. Bei der zweiten Strophe weint er. „Niemand“, flüstert er, „hat je ein Lied über uns geschrieben.“ Er winkt dich durch. „Vergessen Sie nicht, die Gebühr für Rührung zu entrichten. Aber in diesem Fall: erlassen.“</p>`,
+on:()=>{set('guardPassed')},
+ch:()=>[{l:'Weiter',to:'backstage'}]},
+guard_vent:{place:'hall',t:'Ein Schacht, ein Gespräch',
+text:()=>`<p>Der Schacht ist eng, staubig und riecht nach alten Quittungen. Zwischen Ruß und Spinnweben hörst du eine Stimme: Knöterich, der mit sich selbst redet, als probe er eine Rede. „Wenn die Glocke bis Mitternacht keine Stimme hat, ruft die Winterkrone die Schulden ein. Drei Jahre Rückstand. Mein Amt, mein Stempel, mein Hamster …“ Er schluchzt kurz. „Reiß dich zusammen, Knöterich. Du hast nur zwei Töne, aber du hast Haltung.“</p><p>Du kriechst weiter, leise, und kommst hinter einem Vorhang heraus. Du hast etwas Wichtiges erfahren: Knöterich steht selbst unter Druck.</p>`,
+on:()=>{set('guardPassed');set('knotdebt');set('knotSings');clue('knotdebt','Knöterich steht selbst unter Druck: Ohne Stimme bis Mitternacht pfändet ihn die Winterkrone, samt Amt, Stempel und Hamster.')},
+ch:()=>[{l:'Weiter',to:'backstage'}]},
+guard_smash:{place:'hall',t:'Eine Tür weniger',
+text:()=>`<p>Du trittst die Tür ein. Sie fliegt aus den Angeln, durch den Flur und trifft einen Stapel Formulare, der stolz in der Luft explodiert. Stempelfuß verschwindet unter seinem Schreibtisch. „Alarm!“, quietscht er. „Ich bin nicht zuständig!“</p><p>Der Lärm hallt durch das ganze Gebäude. Auf der Bühne wird jemand sehr aufmerksam.</p>`,
+on:()=>{set('guardPassed');set('alarm')},
+ch:()=>[{l:'Weiter',to:'backstage'}]},
+backstage:{act:4,place:'hall',time:'23:45',chap:'Akt IV · Das Winterfest',t:'Hinter dem Vorhang',
+hint:'Knöterichs Aktentasche verrät mehr über ihn. Was du hier erfährst, zählt später als Beweis.',
+text:()=>`<p>Hinter dem Samtvorhang liegt die Seitenbühne. Durch einen Spalt siehst du den Saal: Hunderte Dorfbewohner auf Bänken, unter einem Banner mit der Aufschrift <em>FREIWILLIGE TEILNAHME PFLICHT</em>. Auf der Bühne steht Knöterich in seiner Quittungsrobe. Über ihm schwebt die Glocke, matt glühend.</p><p>Auf einem Stuhl neben dir steht Knöterichs Aktentasche. Sie ist nicht verschlossen. Natürlich nicht: Wer würde so etwas Unordentliches stehlen?</p>`,
+ch:()=>[
+ {l:'Die Aktentasche durchsuchen',to:'desk',if:()=>!f('deskDone')},
+ {l:'Auf die Bühne treten',to:'stage'},
+ {l:'Zurück zum Marktplatz',to:'village'}]},
+desk:{place:'hall',t:'Knöterichs Aktentasche',
+text:()=>`<p>In der Aktentasche liegen: drei Stempel, ein Apfel (ordentlich beschriftet), eine Brille mit Staubflusen und ein Brief mit rotem Rand. <b>„Letzte Mahnung der Winterkrone an K. Knöterich. Stundung abgelaufen. Ohne Stimme bis Mitternacht: Pfändung von Amt, Stempel und Hamster.“</b></p><p>Darunter ein zerknittertes Notenblatt: <em>„Stille Nacht“</em>, in kindlicher Schrift. Am Rand steht: <em>„Ich kann nur zwei Töne. Warum bin ich so?“</em></p><p>Du faltest alles zusammen. Das ist kein Beweis für ein Verbrechen. Aber es erklärt vieles.</p><p><b>Erhalten: Mahnbescheid.</b></p>`,
+on:()=>{add('Mahnbescheid');set('deskDone');set('knotdebt');set('knotSings');clue('knotdebt','Knöterich steht selbst unter Druck: Ohne Stimme bis Mitternacht pfändet ihn die Winterkrone. Und er schreibt heimlich Noten, kann aber nur zwei Töne.')},
+ch:()=>[{l:'Zurück hinter den Vorhang',to:'backstage'}]}
+});
+const badm=(t,x,back)=>()=>{num('mist',1);S.fb={t,x,back}};
+Object.assign(N,{
+stage:{act:4,place:'stage',time:'23:55',chap:'Akt IV · Das Winterfest',t:'Die Festhalle',
+hint:'Wenn du genug Beweise und Verbündete hast, glaubt das Dorf dir. Fehlt etwas, kannst du jederzeit zum Marktplatz zurück.',
+on:()=>{set('stageSeen')},
+text:()=>`<p>Du trittst ins Scheinwerferlicht, das aus dreihundert Kerzen besteht. Der Saal ist voll: Bäcker, Bauern, Kinder auf den Schultern ihrer Eltern, alle mit dem Gesichtsausdruck von Menschen, die nicht wissen, ob sie feiern oder weglaufen sollen. Über der Bühne schwebt die Glocke, matt glühend. In ihrem Metall bewegt sich etwas, das sehr müde ist.</p><p>Knöterich breitet die Arme aus. „Willkommen zur jährlichen Stimmbesteuerung! Wer nicht singt, zahlt eine Bearbeitungsgebühr!“ Dann sieht er dich. Seine Augen verengen sich zu zwei Schlitzen aus Kleingedrucktem.</p>${f('brunConf')?'<p>In der dritten Reihe sitzt Brunhilde, die Schürze noch an. Sie nickt dir zu.</p>':''}${S.n.krae>=1?'<p>An der Tür steht Hauptmann Krätze stramm, den Stock in der Hand.</p>':''}${f('captured')?'<p>An der Glocke hängt Lorian in einem Käfig aus Aktenordnern. Er sieht dich an. Er sagt nichts. Das ist schlimmer als jeder Satz.</p>':f('lorianComes')?'<p>Ganz hinten bewegt sich ein Tannenbaum, der schlecht gelaunt aussieht. Lorian ist da.</p>':''}`,
+ch:()=>[
+ {l:'Den Vertrag öffentlich verlesen',to:'trial',if:()=>has('Originalvertrag')},
+ {l:'Lorian aus dem Käfig befreien',to:'rescue',if:()=>f('captured')},
+ {l:'Die Glocke mit einem Stuhl bearbeiten',to:'smash',if:()=>S.cls==='Barbar'},
+ {l:'Knöterichs Amtsstempel stehlen',to:'steal',if:()=>S.cls==='Schurke'},
+ {l:'Knöterichs Angebot anhören',to:'offer'},
+ {l:'Noch nicht bereit: zurück zum Marktplatz',to:'village'}]},
+rescue:{place:'stage',t:'Der Käfig aus Akten',
+text:()=>`<p>Lorian hängt zwischen Aktenordnern, die Klammern straff gespannt. „Machst du mich los, oder bist du hier, um das Gold zu zählen?“</p><p>${C('Mit einem sanften Wiegenlied bringst du die Ordner zum Einschlafen, und die Klammern lösen sich.','Zwei Handgriffe, ein Klick. Büroklammern sind keine Schlösser, sondern Beleidigungen.','Du reißt den Käfig auseinander. Die Ordner flattern wie erschrockene Tauben.')}</p><p>Lorian reibt sich die Handgelenke. „Ich hab dich gehört, im Wald. Du hast zugesehen.“ Er atmet aus. „Ich bin trotzdem hier, weil das Dorf mehr verdient als meine Wut.“</p>`,
+on:()=>{set('captured',false);set('lorianComes');if(S.n.trust<1)S.n.trust=1},
+ch:()=>[{l:'Zurück zur Bühne',to:'stage'}]},
+trial:{place:'stage',time:'23:57',t:'Der Prozess des Jahrhunderts',
+hint:()=>`Das Dorf glaubt dir, wenn genug Beweise und Verbündete zusammenkommen: die Namen der Barden, Brunhilde, Krätze, Hilfe auf dem Marktplatz, Knöterichs Schulden. Betrug an Lorian kostet Glaubwürdigkeit. (Dein Stand: ${ev()} von mindestens 3)`,
+text:()=>{const L=[];
+ L.push('Du liest den Vertrag laut vor. Die Menge murmelt. Knöterich wird rot und behauptet, die Streichung von „freiwillig“ sei ein „redaktioneller Fehler“.');
+ if(f('names'))L.push('Du nennst die Namen Kunibert, Wiltrud und Haddo, und der Saal wird still. Mehrere Gesichter werden blass.');
+ if(f('brunConf'))L.push('Brunhilde steht auf, wischt die Hände an der Schürze ab. „Ich hab es gewusst. Ich hab nie gefragt. Jetzt frage ich.“');
+ if(S.n.dorf>=1)L.push('Einige Dorfbewohner, die dich vom Marktplatz kennen, nicken und rücken näher.');
+ if(S.n.dorf>=2)L.push('Oma Trude hebt ihr Akkordeon wie eine Fahne.');
+ if(S.n.krae>=1)L.push('Krätze marschiert vor, den Stock präsentierend. „Ich bin die Behörde! Und ich kann lesen! Langsam, aber ich kann!“');
+ if(f('knotdebt'))L.push('Du sagst leise, aber hörbar: „Auch er steht unter Druck. Ohne Stimme bis Mitternacht pfändet ihn die Winterkrone.“ Knöterich erbleicht.');
+ if(f('alarm'))L.push('Der Lärm aus dem Künstlerflur hat Knöterich Zeit gegeben, sich vorzubereiten. Er wirkt unangenehm gefasst.');
+ if(f('bribed')&&!f('confessed'))L.push('Knöterich zischt: „Dieser Mensch hat mein Gold genommen!“ Ein Raunen geht durch den Saal. Das kostet dich Glaubwürdigkeit.');
+ return L.map(x=>'<p>'+x+'</p>').join('')+'<p>Die Glocke beginnt zu leuchten. Das Dorf verlangt eine Entscheidung.</p>'},
+ch:()=>[{l:'Abwarten, wie der Saal reagiert',to:()=>ev()>=3?'trial_ok':'trial_fail'}]},
+trial_ok:{place:'stage',t:'Der Saal kippt',
+text:()=>`<p>Es kippt. Man spürt es physisch, wie ein Boot, das über den Punkt hinaus kippt, an dem es noch zu retten wäre. Die Dorfbewohner stehen auf. Nicht alle auf einmal: erst einer, dann zwei, dann der Bäcker mit dem Teig noch an den Händen. „Wir haben das nie gewollt“, sagt jemand. „Wir haben nie gefragt“, sagt jemand anderes.</p><p>Knöterich zieht den Stempel wie ein Schwert. Doch niemand hört mehr zu. ${f('captured')?'Mehrere Männer klettern auf die Bühne und lösen Lorians Fesseln. Er ist blass, aber auf den Beinen.':'Lorian tritt aus dem Schatten, Laute im Arm, und seine Haltung sagt: Ich bin der Hauptbarde, und ich bleibe es.'}</p><p>Aber die Glocke schweigt nicht. Gerlinde schwebt tiefer, ihr Licht tastet durch den Saal. Dreihundert Jahre Gewohnheit lassen sich nicht in drei Minuten abschütteln.</p>${knotFate()}`,
+on:()=>{set('trialWon');set('captured',false);set('lorianComes');set('songRisk',false)},
+ch:()=>[{l:'Zu Gerlinde treten',to:'bellDecision'}]},
+trial_fail:{place:'stage',t:'Es reicht nicht',
+text:()=>`<p>Es reicht nicht. Du spürst es an den Blicken: Misstrauen, Müdigkeit, Angst. „Und wenn die Glocke nicht läutet?“, ruft jemand. „Wer garantiert uns den Winter?“ Knöterich nutzt die Pause: „Redaktioneller Fehler! Meine Herrschaften, die Zeremonie beginnt!“</p><p>Gerlinde beginnt zu leuchten. Ihr Licht tastet durch den Saal, auf der Suche nach einer Stimme. Du hast noch ein paar Minuten, in denen du Dinge tun kannst, die du später bereuen oder feiern wirst.</p>`,
+ch:()=>[
+ {l:'Zeit schinden und mehr Beweise sammeln',to:'village'},
+ {l:'Mit Lorian ein Gegenlied wagen (ohne Mehrheit)',to:'song_start',if:()=>f('lorianComes')&&!f('captured'),fx:()=>{set('songRisk')}},
+ {l:'Deine eigene Stimme geben',to:()=>(S.n.trust>=3&&f('lorianComes')&&!f('captured'))?'voice_try':'end_voice'},
+ {l:'Knöterichs Angebot annehmen',to:'end_greed'},
+ {l:'Nichts tun und hoffen, dass es jemand anderes regelt',to:'end_bell'}]},
+
+bellDecision:{place:'stage',time:'23:59',chap:'Finale · Die Entscheidung',t:'Gerlinde',
+hint:'Sprich zuerst mit Gerlinde, dann erkennst du ihre Bedingungen. Es gibt mehrere Auswege, und nicht jeder lässt dich unbeschadet.',
+text:()=>`<p>Gerlinde schwebt vor dir, eine Gestalt aus Eis und Müdigkeit. „Eine Stimme bis Mitternacht“, sagt sie. Es klingt nicht böse, es klingt wie ein Vorwurf an das Universum. „Oder ich gehe, und mit mir die Wärme von Frostwinkel. So steht es im Vertrag. Ich habe ihn nicht gemacht.“</p><p>Die Uhr schlägt Viertel vor. Dann Zehn vor. Was tust du?</p>`,
+ch:()=>[
+ {l:'Mit Gerlinde sprechen',to:'gerlinde',if:()=>!f('gerTalk')},
+ {l:'Gerlinde mit der Silbernen Stimmgabel befreien',to:'end_free',if:()=>has('Silberne Stimmgabel')},
+ {l:'Gerlinde einen neuen Vertrag anbieten',to:'end_pact',if:()=>f('gerTalk'),lock:'Du kennst Gerlindes Bedingungen noch nicht. Sprich zuerst mit ihr.'},
+ {l:'Das Lied nach §7 anstimmen: Lorian und das ganze Dorf',to:'song_start',if:()=>f('lorianComes')&&!f('captured'),fx:()=>{set('songRisk',false)}},
+ {l:'Den Vertrag per Amtsstempel für nichtig erklären',to:'end_law',if:()=>S.n.krae>=1||has('Amtsstempel')},
+ {l:'Die Glocke mit einem Stuhl bearbeiten',to:'smash',if:()=>S.cls==='Barbar'},
+ {l:'Deine eigene Stimme geben',to:()=>(S.n.trust>=3&&f('lorianComes')&&!f('captured'))?'voice_try':'end_voice'}]},
+gerlinde:{place:'stage',t:'Dreihundert Jahre Dienst',
+text:()=>`<p>„Gerlinde“, sagt sie. „Dienstälteste Wintergeistin von Frostwinkel. Dreihundert Jahre am Stück. Kein Urlaub. Keine Pause. Und immer diese Lieder, in Moll! Weißt du, wie schwer es ist, bei ‚Stille Nacht‘ nicht zu weinen?“</p><p>„Ich habe die Stimmen nie gewollt. Sie kommen, ich muss sie nehmen. Es ist wie Steuern, nur dass ich sie nicht mal abschreiben kann.“ Sie sieht dich an. „Ich kann frei sein, aber dann wird es kalt. Ich kann bleiben, aber nicht so. Und ich kann ein Lied nehmen, wenn es alle singen, die mich brauchen. Sag mir, was du willst. Aber sag es freiwillig.“</p>`,
+on:()=>{set('gerTalk');clue('gerlinde','Gerlinde: Befreien ist möglich, aber das Dorf verliert die Wärme. Sie bleibt, wenn sich die Bedingungen ändern. Ein Lied aller, die sie brauchen, ersetzt die Stimme.')},
+ch:()=>[{l:'Zurück zur Entscheidung',to:'bellDecision'}]},
+voice_try:{place:'stage',t:'„Das ist meine Rolle“',
+text:()=>`<p>„Nimm meine“, sagst du. Doch Lorian ist schneller. Er legt dir die Hand auf die Schulter. „Nein“, sagt er. „Das ist meine Rolle. Ich bin der Hauptbarde.“ Er sieht dich an, und zum ersten Mal sieht er nicht nach Flucht aus.</p>`,
+ch:()=>[
+ {l:'Lorian den Vortritt lassen',to:'end_hero'},
+ {l:'Darauf bestehen: „Es ist meine Entscheidung.“',to:'end_voice'}]},
+steal:{place:'stage',t:'Die Macht des Stempels',
+text:()=>`<p>Mit einer eleganten Bewegung ziehst du Knöterich den Amtsstempel aus der Robe, während er mit der Menge streitet. Auf dem Stempelgriff steht in goldenen Buchstaben: <b>GENEHMIGT</b>. Du hältst ihn über den Vertrag. Selbst die Glocke scheint auf eine offizielle Bestätigung zu warten.</p><p><b>Erhalten: Amtsstempel.</b></p>`,
+on:()=>{add('Amtsstempel')},
+ch:()=>[
+ {l:'„VERTRAG AUFGEHOBEN“ abstempeln',to:'end_law'},
+ {l:'Dich selbst zum Festdirektor ernennen',to:'end_rogue'},
+ {l:'Den Stempel behalten und weiterverhandeln',to:()=>f('trialWon')?'bellDecision':'stage'}]},
+smash:{place:'stage',t:'Eine sehr direkte Verhandlung',
+text:()=>`<p>Du greifst einen Festhallenstuhl, dreihundert Jahre alt, mit Rückenlehne aus Gesetzestext, und schlägst auf die Glocke. Ein Riss erscheint. Dahinter flackert ein kleines, erschrockenes Licht. „Sachbeschädigung an einer amtlichen Klangvorrichtung!“, kreischt Knöterich.</p>`,
+ch:()=>[
+ {l:'Noch einmal zuschlagen',to:'end_smash'},
+ {l:'Dem Licht die Hand reichen',to:'end_free'},
+ {l:'Den Stuhl sinken lassen',to:()=>f('trialWon')?'bellDecision':'stage'}]},
+offer:{place:'stage',t:'Ein unmoralisches Angebot',
+text:()=>`<p>Knöterich beugt sich zu dir, so nah, dass du sein Zimtseifenparfüm riechst. „Hilf mir, den Barden zu finden, und du erhältst 500 Goldstücke, einen lebenslangen Suppengutschein und einen Titel. ‚Oberster Festbeauftragter‘. Mit Dienstausweis.“</p><p>Hinter ihm flackert die Glocke schwach, als würde sie um Hilfe bitten.</p>`,
+ch:()=>[{l:'Das Angebot annehmen',to:'end_greed'},{l:'Ablehnen und zur Bühne zurück',to:'stage'}]},
+
+song_start:{place:'stage',time:'23:58',chap:'Finale · Musik gegen Bürokratie',t:'Das Gegenlied',
+hint:'Wähle das Wort, das sich auf die vorherige Zeile reimt und zum Sinn passt. Falsche Wörter kosten nur Würde.',
+on:()=>{S.n.mist=0},
+text:()=>`${f('songRisk')?'<p>Du hast keine Mehrheit hinter dir. Nur Lorian, seine Laute und ein Versprechen, das hoffentlich reicht.</p>':''}<p>Lorian tritt neben dich, die Laute im Arm. „§7“, flüstert er. „Ein Lied, das die ganze Gemeinde freiwillig singt. Ich spiele. Du dichtest. Und wenn wir gut sind, singen sie mit. Wenn nicht, singen sie trotzdem, aber über uns.“</p><p>Er nickt dir zu. Dreihundert Kerzen halten die Luft an.</p>`,
+ch:()=>[{l:'Die erste Strophe beginnen',to:'r1'}]},
+r1:{place:'stage',t:'Strophe 1',
+text:()=>`<p><em>Lorian spielt drei Akkorde und nickt. Du holst Luft:</em></p><blockquote>„Der Winter kam, die Welt wird weiß,<br>Frostwinkel singt jetzt laut, nicht ___“</blockquote><p>Welches Wort passt?</p>`,
+ch:()=>[
+ {l:'„still“',to:'fb',fx:badm('Kein Reim','Es reimt sich nicht auf „weiß“. Lorian verzieht das Gesicht wie bei saurer Milch. „Noch mal. Mit Reim, bitte.“','r1')},
+ {l:'„leis’“',to:'r2'},
+ {l:'„Gebührenordnung“',to:'fb',fx:badm('Eine Drohung','Knöterich zuckt zusammen, als hätte jemand seinen Namen gesagt. Lorian flüstert: „Das ist keine Strophe, das ist eine Drohung.“','r1')}]},
+r2:{place:'stage',t:'Strophe 2',
+text:()=>`<p>Die erste Zeile sitzt. Im Saal rührt sich ein Fuß, der mitwippt. Lorian grinst und greift in die Saiten.</p><blockquote>„Wer einem andern die Stimme stiehlt,<br>hat nie ein richtiges Lied ___“</blockquote>`,
+ch:()=>[
+ {l:'„gesungen“',to:'fb',fx:badm('Fast!','Der Sinn stimmt, aber „gesungen“ reimt sich nicht auf „stiehlt“. Lorians Laute klingt, als würde sie die Stirn runzeln.','r2')},
+ {l:'„Steuerbescheid“',to:'fb',fx:badm('Ein Bescheid','Im Saal lacht jemand, aber nicht freundlich. Knöterich nickt anerkennend. Das ist definitiv das falsche Publikum.','r2')},
+ {l:'„gespielt“',to:'r3'}]},
+r3:{place:'stage',t:'Strophe 3',
+text:()=>`<p>Jetzt singt jemand leise mit. Dann zwei. Du spürst es: Das Lied hat eine Mitte gefunden.</p><blockquote>„Die Glocke läutet, kalt und klar,<br>wir singen frei, dies ganze ___“</blockquote>`,
+ch:()=>[
+ {l:'„Dorf“',to:'fb',fx:badm('Fast, aber …','„Dies ganze Dorf“ klingt schön, reimt sich aber nicht auf „klar“. Lorian presst die Lippen zusammen. „Noch einmal, Poet.“','r3')},
+ {l:'„Jahr“',to:'song_result'},
+ {l:'„Gebühr“',to:'fb',fx:badm('Gebühr','Der Saal stöhnt auf. „Gebühr“ reimt sich nicht auf „klar“ und auf nichts, das Menschen lieben.','r3')}]},
+song_result:{place:'stage',t:'Das Lied erklingt',
+text:()=>`<p>${S.n.mist===0?'Die Strophen sitzen. Der Reim trägt. Es ist, als hätte das Lied nur darauf gewartet, gesungen zu werden.':S.n.mist===1?'Ein Reim hinkt ein wenig, aber der Saal verzeiht es. Man singt eben nicht auf Hochglanz, sondern zusammen.':'Die Reime holpern wie ein Karren auf Eis, aber das ist egal: Sie kommen von Herzen, und Herzen sind freiwillig.'}</p><p>Erst singt Brunhilde, dann Oma Trude, dann die Kinder vom Marktplatz. Der Bäcker. Der Schmied. Selbst der Schneemann draußen scheint zu wippen. ${f('songRisk')?'Es ist knapp. Ohne den Rückhalt, den du nicht hattest, könnte es kippen.':''}</p>`,
+ch:()=>[{l:'Das Lied zu Ende singen',to:()=>(f('songRisk')&&S.n.mist>=2)?'end_bell':'end_song'}]},
+
+end_song:{act:5,place:'end',end:'song',chap:'Epilog · Triumph',t:'Das Lied der ganzen Gemeinde',
+text:()=>`<p>Das Lied wird lauter. Es füllt den Saal, die Kerzen, die Balken. Die Glocke antwortet: nicht mit Zwang, sondern mit einem klaren, freundlichen Ton. Dreihundert Jahre Gewohnheit lösen sich auf wie Zucker in heißem Glühwein. Gerlinde nimmt das Lied entgegen wie jemand, der nach Jahrhunderten zum ersten Mal Blumen bekommt.</p><p>Die drei gefangenen Stimmen steigen aus der Glocke. Kunibert, Wiltrud und Haddo singen den Refrain mit, ein einziges Mal, dann verklingen sie friedlich.</p>${knotFate()}${lorianFate()}<p>Lorian beginnt sofort mit einem zwanzigminütigen Lautensolo. Das Publikum verlangt eine Zugabe. Du bereust einen Teil deiner Entscheidung.</p><p><b>Das Winterfest ist gerettet. Gerlinde bleibt, freiwillig, und Frostwinkel hat zum ersten Mal ein Lied, das niemandem gehört außer allen.</b></p><p class="soup">Und die Suppe? Brunhilde hat einen Kessel für alle gekocht. Der Vorrat reichte nicht ganz, aber das hat diesmal niemanden gestört.</p>`},
+end_free:{act:5,place:'end',end:'free',chap:'Epilog · Freiheit',t:'Ein Winter ohne Ketten',
+text:()=>`<p>${has('Silberne Stimmgabel')?'Die Stimmgabel singt eine einzige, klare Note. Und Gerlinde, die dreihundert Jahre lang jede Note hören musste, die man ihr aufzwang, hört zum ersten Mal eine, die sie sich aussuchen darf.':'Du reichst dem Licht in der Glocke die Hand, und das Licht nimmt an.'} Das Metall wird still, dann weich, dann … Schnee. Gewöhnlicher, unmagischer, feuchter Schnee.</p><p>Die Wärme des Dorfes fällt aus. Frostwinkel friert eine Nacht lang. Dann baut Brunhilde ein Feuer auf dem Marktplatz, und alle bringen mit, was sie haben: Holz, Decken, Lieder. Die drei Stimmen, die Gerlinde festhielt, steigen als Akkord in den Himmel und verstummen nicht traurig, sondern fertig.</p>${knotFate()}${lorianFate()}<p><b>Du hast Gerlinde befreit. Das Dorf muss jetzt selbst für Wärme sorgen und stellt fest, dass es das kann.</b></p><p class="soup">Und die Suppe? Brunhilde spendiert sie. Kostenlos. Der Vorrat reichte nicht, aber das war plötzlich allen egal.</p>`},
+end_pact:{act:5,place:'end',end:'pact',chap:'Epilog · Kompromiss',t:'Der neue Pakt',
+text:()=>`<p>Du schlägst Gerlinde einen neuen Vertrag vor: ohne Opfer, ohne Zwang, mit Betriebsrat. Gerlinde hört zu wie jemand, der seit dreihundert Jahren auf genau diesen Satz gewartet hat. Neue Bedingungen: ein Monat Urlaub im Jahr (den Dezember behält sie, sie verhandelt hart), das Recht auf Stille und eine garantierte Obergrenze von drei Weihnachtsliedern pro Abend. In Dur.</p><p>Die drei gefangenen Stimmen werden freigelassen und singen einen letzten Akkord, der Gänsehaut macht und ein bisschen nach Dankbarkeit klingt.</p>${knotFate()}${lorianFate()}<p><b>Du hast bewiesen, dass sogar uralte Magie vernünftige Arbeitsbedingungen verdient.</b></p><p class="soup">Und die Suppe? Gerlinde bekommt jetzt auch einen Gutschein. „Solange der Vorrat reicht“, sagt sie. „Ich erkläre ihn zum unerschöpflichen Vorrat.“ Das ist rechtlich bindend.</p>`},
+end_hero:{act:5,place:'end',end:'hero',chap:'Epilog · Opfer',t:'Die letzte Zeile des Barden',
+text:()=>`<p>Lorian steigt die Stufen zur Glocke hinauf, die Laute auf dem Rücken. Dann dreht er sich um. „Ich wollte nie für eine Glocke sterben“, sagt er laut, damit alle es hören. „Aber für Leute, die mir einen Platz im Tannenbaum frei halten? Vielleicht.“</p><p>Er singt. Es ist die beste Ballade seines Lebens, und sie hat nur eine Strophe. Gerlinde nimmt sie entgegen, freiwillig gegeben, wirklich freiwillig, und etwas in ihr zerbricht. Der Vertrag zerreißt von selbst. Die drei alten Stimmen steigen aus der Glocke, und im letzten Akkord klingt auch Lorians Stimme mit, sauber und klar, kein bisschen wie eine Waschmaschine.</p><p>Dann ist die Halle still. Das Dorf weint, summt, schweigt, und schließlich fängt Oma Trude auf ihrem Akkordeon die einzige Strophe an. Alle singen sie. Jedes Jahr wieder.</p>${knotFate()}<p><b>Der Hauptbarde ist zurückgekehrt, nur anders, als irgendjemand es wollte. Seine Ballade wird noch in hundert Jahren gesungen. Sie hat einen Reim, der nie ganz stimmt, und niemand wird ihn korrigieren.</b></p><p class="soup">Und die Suppe? Brunhilde stellt jeden Winter einen Teller auf Lorians Platz. Er bleibt immer leer, und das ist der Beweis, dass er trotzdem kommt.</p>`},
+end_voice:{act:5,place:'end',end:'voice',chap:'Epilog · Selbstlosigkeit',t:'Das letzte Wort heißt Suppe',
+text:()=>`<p>„Nimm meine“, sagst du. Es ist das Leiseste, was du je gesagt hast, und das Lauteste. Gerlinde schweigt lange. „Wirklich freiwillig?“, fragt sie. „Wirklich“, sagst du. Und da ist etwas in ihrem Licht, das du noch nie gesehen hast: Staunen.</p><p>Sie nimmt deine Stimme sanft wie einen Schneeball. Die Bindung reißt. Die drei alten Stimmen steigen aus der Glocke, Kunibert, Wiltrud, Haddo, und einer von ihnen sagt: „Das war … nett.“</p>${knotFate()}<p>Du kannst nicht mehr sprechen. Aber Brunhilde hat ein Notizbuch für dich, Lorian schreibt eine Ballade mit einundvierzig Strophen (du kannst nicht widersprechen), und das einzige Wort, das du noch flüstern kannst, ist: „Suppe.“</p><p><b>Du hast eine Stimme gegeben, damit vier andere weitersingen. Und du lernst, dass man mit einem Wort erstaunlich viel sagen kann. Zum Beispiel: „Suppe?“ Oder: „Suppe!“</b></p><p class="soup">Und die Suppe? Wird dir jetzt täglich gebracht. Von Leuten, die sich bedanken wollen, ohne zu wissen, wie.</p>`},
+end_law:{act:5,place:'end',end:'law',chap:'Epilog · Gerechtigkeit',t:'Die Bürokratie schlägt zurück',
+text:()=>`<p>${has('Amtsstempel')?'Du stempelst „AUFGEHOBEN“ über den Vertrag. Die Tinte leuchtet kurz auf, wie ein erleichtertes Feuerwerk.':'Hauptmann Krätze tritt vor, reibt den Stock an seiner Uniform blank und erklärt den Vertrag kraft seines Amtes für nichtig.'} Die Glocke zuckt, scheint zu zögern … und akzeptiert. Es ist ein Formular. Magie gehorcht Formularen, wenn sie richtig gestempelt sind.</p><p>Gerlinde ist frei, offiziell. Sie bekommt einen Dienstausweis und einen Parkplatz. Die drei Stimmen werden vorschriftsgemäß entlassen: mit Zeugnis und einer kurzen Dankesrede.</p>${knotFate()}${lorianFate()}<p>Hauptmann Krätze gründet die „Behörde für faire Magie“. Sie besteht weiterhin aus ihm und einem Stock.</p><p><b>Du hast das Dorf gerettet. Leider wurde dabei ein Formular erfunden.</b></p><p class="soup">Und die Suppe? Muss jetzt beantragt werden. Formular 27c/9. Bearbeitungszeit: bis Frühling.</p>`},
+end_rogue:{act:5,place:'end',end:'rogue',chap:'Epilog · Schurkenherrschaft',t:'König der Formulare',
+text:()=>`<p>Du stempelst dich zum obersten Festdirektor. Knöterich ist fassungslos. Die Glocke akzeptiert den neuen Vorgesetzten und verlangt sofort Urlaub. Du gewährst ihn und führst eine Steuer auf schlechte Reime ein. Lorian ist dein erster Schuldner.</p><p>Knöterich wird dein Buchhalter. Er findet es schrecklich und liebt es heimlich. Die Winterkrone schickt eine Mahnung, die du mit „GENEHMIGT: ZURÜCK AN ABSENDER“ beantwortest.</p>${lorianFate()}<p><b>Du hast das Fest gerettet und eine höchst zweifelhafte Karriere begonnen.</b></p><p class="soup">Und die Suppe? Ist jetzt gebührenpflichtig. Aber sehr gut.</p>`},
+end_smash:{act:5,place:'end',end:'smash',chap:'Epilog · Chaos',t:'Scherben bringen Winter',
+text:()=>`<p>Mit einem letzten Schlag zertrümmerst du die Glocke. Der Wintergeist entweicht als blauer Blitz durch das Dach. Die magische Wärme fällt aus, und Knöterich wird unter einem Berg Quittungen begraben, die plötzlich vom Dach rieseln.</p><p>Das Dorf friert eine Nacht lang. Am Morgen machen alle ein riesiges Lagerfeuer aus Festhallenbänken. Die drei gefangenen Stimmen steigen aus den Scherben und singen den Sonnenaufgang an.</p>${knotFate()}${lorianFate()}<p><b>Problem gelöst. Architektonisch fragwürdig, aber gelöst.</b></p><p class="soup">Und die Suppe? Brunhilde kocht sie auf dem Lagerfeuer. Kostenlos. Weil niemand mehr eine Kasse hat.</p>`},
+end_greed:{act:5,place:'end',end:'greed',chap:'Epilog · Verrat',t:'Der Preis der Suppe',
+text:()=>`<p>Du nimmst das Angebot an. Knöterich schüttelt dir die Hand, feucht und bürokratisch, und gibt ein Zeichen. Die Glocke läutet, und eine vierte Stimme verstummt: ${f('captured')?'Lorian, den du ihm bereits geliefert hast.':'Lorian, den Knöterichs Kobolde noch in dieser Nacht im Wald finden.'}</p><p>Das Dorf feiert. Es weiß nicht, wofür. Die Suppe ist ausgezeichnet. Doch jedes Mal, wenn du einen Löffel hebst, hörst du aus der Ferne vier Stimmen, die Akkorde singen, die es in keiner Tonleiter gibt. „War es das wert?“, fragen sie.</p><p><b>Du bist reich geworden. Ein Held bist du nicht.</b></p><p class="soup">Und die Suppe? Sie reichte für alle. Nur für dich nie.</p>`},
+end_bell:{act:5,place:'end',end:'bell',chap:'Epilog · Tragödie',t:'Die vierte Stimme',
+text:()=>`<p>Du zögerst, du hoffst, dass jemand anderes etwas tut. Niemand tut etwas. Gerlinde schwebt durch den Saal, ihr Licht wandert über die Gesichter, dann bleibt es stehen: bei Lorian. Er hat nicht einmal Zeit für einen letzten Reim. Die Glocke nimmt seine Stimme wie ein Stück Kuchen: bedauernd, aber gründlich.</p><p>Das Fest findet statt. Es ist ein ziemlich gutes Fest. Knöterich wird befördert. Aber im Akkord der Glocke singt jetzt eine vierte Stimme, und manchmal, nur manchmal, klingt sie wie eine Waschmaschine im Schleudergang.</p><p><b>Du hast das Dorf nicht gerettet. Du hast es nur beruhigt.</b></p><p class="soup">Und die Suppe? Sie reichte. Aber niemand hatte Hunger.</p>`}
+});
+
+load();go(S.node);
 </script></body></html>
