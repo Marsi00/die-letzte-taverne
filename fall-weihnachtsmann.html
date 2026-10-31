@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1020"><title>Der Fall Weihnachtsmann – Ein Fall für die Nordpol-Kripo</title>
+<style>
+:root{--gold:#f2c46d;--paper:#f3ead6;--panel:#151c32;--panel2:#222c4a;--red:#e0493f;--green:#4a9a72;--muted:#a3abc4}
+*{box-sizing:border-box}
+body{margin:0;background:#0b1020;color:var(--paper);font:17px/1.65 Georgia,'Times New Roman',serif;min-height:100vh}
+button{font:inherit;cursor:pointer;color:inherit}
+.hidden{display:none!important}
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+header{position:sticky;top:0;z-index:5;background:#0e1326f2;border-bottom:1px solid #5b4a30}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:9px 4%;gap:8px;flex-wrap:wrap}
+.bar strong{font-size:14px;color:var(--gold);letter-spacing:.09em}
+.bar button{background:var(--panel2);border:1px solid #7a6641;border-radius:8px;padding:6px 10px;font:14px system-ui,sans-serif}
+.bar button:hover{background:#3a3550}
+.lights{display:flex;justify-content:space-between;height:13px;padding:0 1%;overflow:hidden}
+.lights i{width:7px;height:11px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--c);box-shadow:0 0 9px var(--c);animation:tw 2.6s infinite;animation-delay:var(--d)}
+@keyframes tw{50%{opacity:.3}}
+.shell{max-width:980px;margin:auto;padding:16px 14px 60px;position:relative;z-index:2}
+.hero{position:relative;overflow:hidden;min-height:230px;border:1px solid #8a6a4a;border-radius:16px;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;box-shadow:inset 0 -90px 90px #0b1020cc;background:radial-gradient(ellipse at 65% 45%,#e8a050 0%,#6a3a30 24%,#1c2038 56%,#0b1020 92%)}
+.hero[data-place=tatort]{background:radial-gradient(ellipse at 65% 45%,#e8a050 0%,#6a3a30 24%,#1c2038 56%,#0b1020 92%)}
+.hero[data-place=kueche]{background:radial-gradient(ellipse at 50% 55%,#f0b080,#7a4a3a 30%,#1c1a28 80%)}
+.hero[data-place=stall]{background:radial-gradient(ellipse at 40% 40%,#9fb4c8,#44566a 32%,#121a28 80%)}
+.hero[data-place=werkstatt]{background:radial-gradient(ellipse at 55% 50%,#a8c870,#4a5a38 32%,#141a18 80%)}
+.hero[data-place=salon]{background:radial-gradient(ellipse at 50% 40%,#d080b0,#5a2a50 34%,#161226 80%)}
+.hero[data-place=kranken]{background:radial-gradient(ellipse at 50% 50%,#80d0e0,#2a5a6a 32%,#101a24 80%)}
+.hero[data-place=flug]{background:radial-gradient(ellipse at 50% 30%,#90b8f0,#3a4a8a 34%,#0e1228 82%)}
+.hero[data-place=saal]{background:radial-gradient(ellipse at 50% 45%,#f06050,#7a2030 34%,#16101e 80%)}
+.hero[data-place=end]{background:radial-gradient(ellipse at 50% 40%,#f2c46d,#8a3a3a 34%,#16122a 80%)}
+.hero::after{content:attr(data-ic);position:absolute;right:20px;top:8px;font-size:68px;opacity:.28}
+.hero small{letter-spacing:.17em;text-transform:uppercase;color:#f6d9a2;font:12px system-ui,sans-serif}
+.hero h1{margin:4px 0 0;font:italic 700 clamp(26px,5vw,44px)/1.12 Georgia,serif;color:#ffe6ae;text-shadow:0 2px 0 #7a1c1c,0 5px 14px #000}
+.clock{position:absolute;left:20px;top:14px;font:13px system-ui,sans-serif;color:#f6d9a2;background:#0008;padding:3px 9px;border-radius:12px}
+.acts{display:flex;gap:6px;margin:12px 2px 0;align-items:center;font:12px system-ui,sans-serif;color:var(--muted)}
+.acts span{flex:1;height:5px;border-radius:3px;background:#2b3354}
+.acts span.on{background:var(--gold)}
+.layout{display:grid;grid-template-columns:1fr 245px;gap:18px;margin-top:14px}
+.story,.side{background:var(--panel);border:1px solid #5c4c3a;border-radius:12px;padding:22px}
+.story p{margin:0 0 15px}
+.story blockquote{margin:0 0 15px;padding:10px 14px;border-left:3px solid var(--red);background:#0003;font-style:italic}
+.story ul{padding-left:20px}
+.note{font:13px system-ui,sans-serif;color:var(--muted)}
+.soup{color:#e8c98c;font-style:italic;border-top:1px dashed #6a5a3c;padding-top:12px}
+.badge{color:#e5b972;font:12px system-ui,sans-serif;letter-spacing:.1em;margin-bottom:8px}
+.choices{display:grid;gap:10px;margin-top:20px}
+.choices button{width:100%;text-align:left;border:1px solid #8c7348;border-radius:9px;background:linear-gradient(110deg,#3a3550,#262d49);color:#fbe4ba;padding:12px 16px}
+.choices button:hover:not(:disabled){background:#5b4634}
+.choices button:disabled{opacity:.55;cursor:not-allowed;border-style:dashed;background:#1f2640}
+.choices small{display:block;font:12.5px system-ui,sans-serif;color:var(--muted);margin-top:3px}
+.side h3{margin:0 0 6px;color:var(--gold);font-size:17px}
+.side p,.side li{font:14px/1.5 system-ui,sans-serif;color:#d3cfdb}
+.side ul{padding-left:18px;margin:0 0 14px}
+.puzzle{margin:18px 0 0;padding:14px;border:1px dashed #8c7348;border-radius:10px;background:#0003;text-align:center}
+.slots{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+.slots div{width:54px;height:54px;border:2px solid #6a5a3c;border-radius:10px;display:grid;place-items:center;font-size:28px;background:#0004}
+.syms{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.puzzle button{background:#3a3550;border:1px solid #8c7348;border-radius:9px;padding:9px 13px;color:#fbe4ba}
+.puzzle button:disabled{opacity:.35;cursor:default}
+.puzzle .row{margin-top:12px;display:flex;gap:8px;justify-content:center}
+.modal{position:fixed;inset:0;background:#05070fee;z-index:9;display:grid;place-items:center;padding:14px}
+.modal>div{max-width:580px;width:100%;max-height:88vh;overflow:auto;background:#1f2540;border:1px solid #d3a96b;padding:22px;border-radius:14px}
+.modal h2{color:#edc98e;margin-top:0}
+.modal li,.modal p{font:15px/1.55 system-ui,sans-serif}
+.modal button{margin:6px 6px 0 0;padding:10px 14px;background:#3a3550;color:#fbe4ba;border:1px solid #c09c68;border-radius:8px}
+.foot{font:12px system-ui,sans-serif;color:#8b8ea6;text-align:center;margin-top:22px}
+@media(max-width:720px){.layout{grid-template-columns:1fr}.hero{min-height:190px;padding:18px}.story{padding:17px}.side{padding:15px}body{font-size:16.5px}}
+@media(prefers-reduced-motion:reduce){.lights i{animation:none}}
+</style></head><body>
+<canvas id="snow"></canvas>
+<header><div class="bar"><strong>🎅 DER FALL WEIHNACHTSMANN</strong><div><button id="hintBtn">💡 Tipp</button> <button id="journalBtn">📜 Journal</button> <button id="restartBtn">↺</button></div></div><div class="lights" id="lights"></div></header>
+<main class="shell">
+<section class="hero" id="hero"><span class="clock" id="clock"></span><small id="chapter"></small><h1 id="heading"></h1></section>
+<div class="acts" id="acts"></div>
+<div class="layout"><section class="story"><div class="badge" id="status"></div><div id="prose"></div><div id="puzzle" class="puzzle hidden"></div><div class="choices" id="choices"></div></section>
+<aside class="side"><h3>🎒 Inventar</h3><ul id="inventory"></ul><h3>🧭 Auftrag</h3><p id="quest"></p><h3>🎲 Charakter</h3><p id="character"></p></aside></div>
+<p class="foot" id="foot"></p></main>
+<div class="modal hidden" id="modal"><div><h2 id="modalTitle"></h2><div id="modalText"></div><div id="modalActions"></div></div></div>
+<script>
+const DEDICATION='Für Kevin · Fall Nr. 3 🎅🔍';
+const KEY='fall_weihnachtsmann_v1',KEYE='fall_weihnachtsmann_v1_enden';
+const ENDINGS={perfect:'Die Bescherung ist gerettet',retire:'Weihnachten ohne Weihnachtsmann',kevin:'Der rote Mantel',rudolf:'Rudolf übernimmt',drone:'Santa Prime',frau:'Falsche Verhaftung',hase:'Weihnachtsostern',tyrann:'Der Chef-Elf im roten Mantel',deal:'Das Angebot des Elfen',blackmail:'Schweigegeld in Keksen'};
+const PLACES={tatort:'🕯️',kueche:'🍪',stall:'🦌',werkstatt:'🔨',salon:'🐇',kranken:'🩺',flug:'✈️',saal:'🎭',end:'🎄'};
+const ITEMS={
+'Seychellen-Ticket':'Nur Hinflug. Gate 7, 23:10. Reisename: „Herr Weiß“.',
+'Tagebuch':'Nicks Tagebuch. Er hat sich 1700 Jahre lang nichts gegönnt.',
+'Keksprobe':'Ein Zimtstern vom Tatort-Teller, mit winzigen blauen Blütenresten.',
+'Laborbefund':'Dr. Schneeflocke: Eisenhut. Tödlich in zwanzig Minuten.',
+'Eisenhut-Strauß':'Getrocknet, in der Werkstatt des Chef-Elfen versteckt.',
+'Notizbuch':'Pimpernuss’ Notizbuch: „Kostümprobe: Größe XL“.',
+'Drohnenplan':'Rudolf 2.0: LED-Nase, kein Gehalt, keine Meinung.'};
+const $=id=>document.getElementById(id);
+const S0=()=>({node:'intro',cls:null,items:[],flags:{},n:{gert:0,rud:0,nick:0,wrong:0},visited:[],journal:{},fb:null,seq:[],clock:'18:00',act:0,place:'tatort',chap:''});
+let S=S0();
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r),d=S0();S=Object.assign(d,o);S.n=Object.assign(S0().n,o.n||{})}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let ENDMEM=[];
+function getEnds(){try{const e=JSON.parse(localStorage.getItem(KEYE)||'[]');return e.length>=ENDMEM.length?e:ENDMEM}catch(e){return ENDMEM}}
+function addEnd(k){if(!ENDMEM.includes(k))ENDMEM.push(k);const e=getEnds();if(!e.includes(k))e.push(k);try{localStorage.setItem(KEYE,JSON.stringify(e))}catch(x){}}
+const has=i=>S.items.includes(i);
+const add=i=>{if(!has(i))S.items.push(i)};
+const rem=i=>{S.items=S.items.filter(x=>x!==i)};
+const f=k=>!!S.flags[k];
+const set=(k,v=true)=>{S.flags[k]=v};
+const num=(k,d)=>{S.n[k]=(S.n[k]||0)+d};
+const clue=(k,t)=>{S.journal[k]=t};
+const C=(a,b,c)=>S.cls==='Analytiker'?a:S.cls==='Charmeur'?b:c;
+const bad=(t,x,back)=>()=>{S.fb={t,x,back}};
+const heart=n=>n>0?'♥'.repeat(Math.min(n,6)):'–';
+const N={};
+function sus(){return ['gertTalked','rudTalked','pimpTalked','haseTalked'].filter(k=>f(k)).length}
+function gateReady(){return f('wax')&&f('hatch')&&sus()>=2}
+function missing(){const m=[];if(!f('wax'))m.push('den Beweis, dass die „Leiche“ nicht echt ist');if(!f('hatch'))m.push('den Fluchtweg des Weihnachtsmanns');if(sus()<2)m.push('Gespräche mit mindestens zwei Verdächtigen');return m}
+function clockNow(){const m=18*60+S.visited.length*5;return String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+function pimpProof(){return has('Laborbefund')&&(has('Eisenhut-Strauß')||f('pimpConfessed'))}
+function quest(){
+ const n=N[S.node];if(n&&n.end)return 'Dein Fall ist abgeschlossen. Andere Entscheidungen führen zu anderen Enden.';
+ if(f('santaBack'))return 'Alle sind im Festsaal. Rekonstruiere die Ereignisse und nenne den Schuldigen. Dann entscheide, wie Weihnachten weitergeht.';
+ if(f('wax')&&f('hatch'))return gateReady()?'Der Weihnachtsmann lebt und wartet am Flughafen, Gate 7. Rede mit ihm, bevor um 23:10 sein Flug geht.':'Der Weihnachtsmann lebt vermutlich. Sprich noch mit mehr Verdächtigen, bevor du ihn am Flughafen stellst.';
+ return 'Untersuche den Tatort und sprich mit den Verdächtigen. Wie kam jemand in ein verschlossenes Zimmer? Und wer wollte den Weihnachtsmann tot sehen?'}
+function go(id){
+ let n=N[id];if(!n){console.error('Unbekannte Szene',id);id='intro';n=N[id]}
+ S.node=id;if(!S.visited.includes(id))S.visited.push(id);
+ const tm=typeof n.time==='function'?n.time():n.time;S.clock=tm||clockNow();
+ if(n.act!=null)S.act=n.act;if(n.place)S.place=n.place;if(typeof n.chap==='string')S.chap=n.chap;
+ if(n.on)n.on();if(n.end)addEnd(n.end);
+ save();render();window.scrollTo(0,0)}
+function choose(c){if(c.fx)c.fx();const to=typeof c.to==='function'?c.to():c.to;go(to)}
+function reset(){S=S0();save()}
+function endInfo(){const e=getEnds();return '<p class="note">Enden entdeckt: '+e.length+' von '+Object.keys(ENDINGS).length+'<br>'+Object.keys(ENDINGS).map(k=>e.includes(k)?'✔ '+ENDINGS[k]:'? ? ?').join(' · ')+'</p><p class="note">'+DEDICATION+'</p>'}
+function renderPuzzle(n){
+ const box=$('puzzle'),P=n.puzzle;
+ if(!P){box.classList.add('hidden');box.innerHTML='';return}
+ box.classList.remove('hidden');box.innerHTML='';
+ const slots=document.createElement('div');slots.className='slots';
+ for(let i=0;i<P.ans.length;i++){const d=document.createElement('div');const s=P.syms.find(x=>x.id===S.seq[i]);d.textContent=s?s.ic:'·';slots.appendChild(d)}
+ box.appendChild(slots);
+ const syms=document.createElement('div');syms.className='syms';
+ P.syms.forEach(s=>{const b=document.createElement('button');b.textContent=s.ic+' '+s.nm;b.disabled=S.seq.includes(s.id)||S.seq.length>=P.ans.length;b.onclick=()=>{S.seq.push(s.id);save();render()};syms.appendChild(b)});
+ box.appendChild(syms);
+ const row=document.createElement('div');row.className='row';
+ const r=document.createElement('button');r.textContent='↺ Zurücksetzen';r.onclick=()=>{S.seq=[];save();render()};
+ const ok=document.createElement('button');ok.textContent='✔ Bestätigen';ok.disabled=S.seq.length<P.ans.length;
+ ok.onclick=()=>{const good=S.seq.join()===P.ans.join();S.seq=[];if(good){go(P.ok)}else{num('wrong',1);go(P.bad)}};
+ row.appendChild(r);row.appendChild(ok);box.appendChild(row)}
+function render(){
+ const n=N[S.node]||N.intro;
+ const title=typeof n.t==='function'?n.t():n.t;
+ const hero=$('hero');const pl=n.end?'end':(S.place||'tatort');hero.dataset.place=pl;hero.dataset.ic=PLACES[pl]||'';
+ $('chapter').textContent=S.chap||'';$('heading').textContent=title||'';$('clock').textContent='🕰 '+S.clock+' Uhr';
+ const a=S.act||0;const lab=['Prolog','Akt I','Akt II','Akt III','Akt IV','Epilog'][a];
+ $('acts').innerHTML='<b style="color:#e5b972;min-width:58px">'+lab+'</b>'+[1,2,3,4].map(i=>'<span class="'+((a>=5||i<=a)?'on':'')+'"></span>').join('');
+ $('status').textContent=n.end?'FALL ABGESCHLOSSEN':(S.cls?S.cls.toUpperCase()+' · SZENEN: '+S.visited.length:'KLASSENWAHL');
+ $('prose').innerHTML=n.text()+(n.end?endInfo():'');
+ renderPuzzle(n);
+ const box=$('choices');box.innerHTML='';
+ const list=n.ch?n.ch():[{l:'Noch einmal ermitteln – andere Entscheidungen führen zu anderen Enden',to:'intro',fx:reset}];
+ list.forEach(c=>{
+  if(c.hide&&c.hide())return;
+  const ok=!c.if||c.if();
+  if(!ok&&!c.lock)return;
+  const b=document.createElement('button');
+  if(!ok){b.disabled=true;b.textContent='🔒 '+c.l;const s=document.createElement('small');s.textContent=typeof c.lock==='function'?c.lock():c.lock;b.appendChild(s)}
+  else{b.textContent='➜ '+c.l;b.onclick=()=>choose(c)}
+  box.appendChild(b)});
+ $('inventory').innerHTML=(S.items.length?S.items:['Noch leer']).map(i=>'<li>'+i+'</li>').join('');
+ $('quest').textContent=quest();
+ $('character').textContent=S.cls?({Analytiker:'Analytiker – Details, Fusseln, Widersprüche',Charmeur:'Charmeur – Gespräche, Vertrauen, Tränen',Raubein:'Raubein – Druck, Muskeln, Tischkanten'})[S.cls]:'Noch nicht gewählt';
+ $('foot').textContent=DEDICATION}
+function modal(title,html,btns){
+ $('modalTitle').textContent=title;$('modalText').innerHTML=html;const a=$('modalActions');a.innerHTML='';
+ btns.forEach(b=>{const e=document.createElement('button');e.textContent=b.l;e.onclick=()=>{$('modal').classList.add('hidden');if(b.fn)b.fn()};a.appendChild(e)});
+ $('modal').classList.remove('hidden')}
+function journalHTML(){
+ const cl=Object.values(S.journal);
+ let h='<p><b>Auftrag:</b> '+quest()+'</p><p><b>Ermittlungsakte:</b></p>'+(cl.length?'<ul>'+cl.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'<p>Noch leer.</p>');
+ h+='<p><b>Beweisstücke:</b></p>'+(S.items.length?'<ul>'+S.items.map(i=>'<li><b>'+i+'</b> – '+(ITEMS[i]||'')+'</li>').join('')+'</ul>':'<p>Noch keine.</p>');
+ h+='<p><b>Befragte:</b> '+['gertTalked:Frau Claus','rudTalked:Rudolf','pimpTalked:Pimpernuss','haseTalked:Osterhase'].map(x=>{const[k,v]=x.split(':');return v+(f(k)?' ✔':' ✘')}).join(' · ')+'</p>';
+ h+='<p><b>Enden entdeckt:</b> '+getEnds().length+' von '+Object.keys(ENDINGS).length+'</p>';
+ return h}
+$('journalBtn').onclick=()=>modal('📜 Ermittlungsakte',journalHTML(),[{l:'Schließen'}]);
+$('hintBtn').onclick=()=>{const n=N[S.node];let h=n&&n.hint?(typeof n.hint==='function'?n.hint():n.hint):'Hier gibt es kein Rätsel. Sieh dich um, sprich mit allen und lies die Ermittlungsakte: Dort steht, was du schon weißt.';modal('💡 Tipp','<p>'+h+'</p>',[{l:'Danke'}])};
+$('restartBtn').onclick=()=>modal('Neu beginnen?','<p>Dein Spielstand wird gelöscht. Die entdeckten Enden bleiben erhalten.</p>',[{l:'Ja, neu beginnen',fn:()=>{reset();go('intro')}},{l:'Abbrechen'}]);
+(function(){const L=$('lights'),cols=['#e0493f','#f2c46d','#4a9a72','#6ab0f0'];for(let i=0;i<46;i++){const e=document.createElement('i');e.style.setProperty('--c',cols[i%4]);e.style.setProperty('--d',(i*0.37%2.6)+'s');L.appendChild(e)}
+ const c=$('snow'),x=c.getContext('2d');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;let W,H,fl=[];
+ function rs(){W=c.width=innerWidth;H=c.height=innerHeight}rs();addEventListener('resize',rs);
+ for(let i=0;i<60;i++)fl.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2+.6,v:Math.random()*.6+.25,d:Math.random()*6.3});
+ (function t(){x.clearRect(0,0,W,H);x.fillStyle='rgba(255,255,255,.7)';fl.forEach(p=>{p.y+=p.v;p.d+=.01;p.x+=Math.sin(p.d)*.4;if(p.y>H){p.y=-5;p.x=Math.random()*W}x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill()});requestAnimationFrame(t)})()})();
+const fbNode={t:()=>S.fb.t,text:()=>`<p>${S.fb.x}</p>`,ch:()=>[{l:'Weiter',to:S.fb.back}]};
+Object.assign(N,{
+fb:fbNode,
+intro:{act:0,place:'tatort',time:'18:00',chap:'Prolog · Heiligabend, Nordpol',t:'Der Fall Weihnachtsmann',
+hint:'Wähle eine Klasse. Jede findet Hinweise auf ihre eigene Weise, aber jede kann den Fall lösen.',
+text:()=>`<p>Heiligabend, 18:00 Uhr. Draußen minus vierzig Grad, drinnen der Mord des Jahrhunderts. Der Weihnachtsmann ist tot. Man hat ihn vor einer Stunde in seinem Arbeitszimmer gefunden, im Sessel, das Gesicht neben einem Teller mit Zimtsternen. Die Tür war von innen verschlossen. Das Fenster zugefroren. In fünfeinhalb Stunden soll der Schlitten starten, und niemand hat mehr Lust auf Bescherung.</p><p>Du bist Kommissar der <b>Nordpol-Kripo, Dezernat für saisonale Delikte</b>. Du hast den Fall bekommen, weil alle anderen krank sind, im Urlaub oder Rentiere. Fünf Verdächtige. Ein Raum, den niemand betreten haben kann. Und die Villa riecht nach Lebkuchen und Lüge.</p><p class="note">Etwa 45 Minuten · Alle Enden sind eingebaut · Oben: Tipp, Ermittlungsakte, Neustart · Fortschritt wird automatisch gespeichert.</p><p>Wer bist du?</p>`,
+ch:()=>[
+ {l:'Analytiker: Du siehst Fusseln, Staubränder und Widersprüche, bevor andere „Guten Tag“ sagen',to:'ankunft',fx:()=>{S.cls='Analytiker'}},
+ {l:'Charmeur: Du bringst jeden zum Reden, auch Rentiere und Elfen im Dienst',to:'ankunft',fx:()=>{S.cls='Charmeur'}},
+ {l:'Raubein: Du lässt Tatsachen sprechen. Gern mit der Faust auf dem Tisch',to:'ankunft',fx:()=>{S.cls='Raubein'}}]},
+ankunft:{act:1,place:'tatort',time:'18:00',chap:'Akt I · Die Villa am Nordpol',t:'Ankunft am Tatort',
+text:()=>`<p>Die Villa des Weihnachtsmanns ist ein Fachwerkpalast aus Lebkuchen, Fichtenholz und schlechtem Gewissen. Im Flur kommt dir eine kleine, runde Frau entgegen, die Schürze voller Mehl und Tränen: <b>Gertrud Claus</b>, die Witwe, zumindest bis auf Weiteres.</p><p>„Mein Nick!“, schluchzt sie. „Mein armer, dicker Nick!“ Sie hält dir ein Taschentuch hin, das du nicht brauchst. Hinter ihr schimpft ein Rentier mit goldener Nase, <b>Rudolf</b>, auf einen Elf mit Klemmbrett, <b>Chef-Elf Pimpernuss</b>. Aus dem Gästesalon späht ein <b>Osterhase</b> in einem Schokoladenmantel. Und irgendwo hustet ein Arzt, der auf der Toilette gewesen sein soll.</p><p>„Wer immer es war“, sagt Gertrud, „der Mörder ist noch hier.“ Dann schaut sie zu schnell weg.</p>`,
+ch:()=>[{l:'Die Ermittlungen beginnen',to:'villa'}]},
+villa:{act:1,place:'tatort',chap:'Akt I · Die Villa am Nordpol',t:'Die Weihnachtsmann-Villa',
+hint:()=>'Fünf Verdächtige: Frau Claus (Küche), Rudolf (Stall), Chef-Elf Pimpernuss (Werkstatt), der Osterhase (Gästesalon) und Dr. Schneeflocke (Krankenstation). Dazu der Tatort im Arbeitszimmer. Fang dort an und notiere, was nicht passt.',
+text:()=>`<p>Die Villa ist ein Labyrinth aus Fluren, in denen es nach Zimt, Tannennadeln und Angst riecht. An den Wänden hängen Fotos des Weihnachtsmanns: Nick mit Kindern, Nick mit Schlitten, Nick mit einem Teller Kekse. Auf keinem lächelt er richtig.</p><p>${f('santaBack')?'Der Weihnachtsmann ist inzwischen im Festsaal, hinter einem Vorhang.':''}</p>`,
+ch:()=>[
+ {l:'Zum Arbeitszimmer (Tatort)',to:'tatort'},
+ {l:'In die Küche: Frau Claus',to:'kueche'},
+ {l:'In den Stall: Rudolf',to:'stall'},
+ {l:'In die Werkstatt: Chef-Elf Pimpernuss',to:'werkstatt'},
+ {l:'In den Gästesalon: der Osterhase',to:'salon'},
+ {l:'Zur Krankenstation: Dr. Schneeflocke',to:'kranken'},
+ {l:'Zum Flughafen Nordpol International',to:'gate1',if:()=>gateReady()&&!f('santaBack'),hide:()=>f('santaBack'),lock:()=>'Noch nicht. Es fehlt: '+missing().join(', ')+'.'},
+ {l:'In den Festsaal',to:'festsaal',if:()=>f('santaBack')}]},
+
+tatort:{act:1,place:'tatort',chap:'Akt I · Der Tatort',t:'Das Arbeitszimmer',
+hint:()=>f('diary')&&!f('hatch')?'Das Tagebuch nennt eine Reihenfolge: Rente, Reiseziel, Frau, Wunschzettel. Die Bücher im Regal passen dazu.':'Untersuche alles: Leiche, Schreibtisch, Teller, Tür und Fenster. Etwas stimmt nicht mit dem Weihnachtsmann.',
+text:()=>`<p>Das Arbeitszimmer ist ein Paradies für Bürokratie: Wunschzettel in Archivkästen, eine Wandkarte mit Millionen Lichtern, ein Kamin, in dem Holzscheite brennen, die nach Zimt riechen. An der Tür, die vor einer Stunde aufgebrochen wurde, hängt noch der Schlüssel, innen im Schloss. Das Fenster ist von innen zugefroren.</p><p>Im Sessel hinter dem Schreibtisch sitzt der Weihnachtsmann, in rotem Mantel und weißem Bart, das Gesicht neben einem Teller mit Zimtsternen, ein Glas Milch daneben. Er sieht aus wie jemand, der einfach nur eingeschlafen ist. Er rührt sich nicht.</p>${f('wax')?'<p>Du weißt inzwischen: Das da ist nicht der Weihnachtsmann.</p>':''}`,
+ch:()=>[
+ {l:'Die Leiche untersuchen',to:'body'},
+ {l:'Den Schreibtisch durchsuchen',to:'desk'},
+ {l:'Den Teller mit den Zimtsternen untersuchen',to:'cookies'},
+ {l:'Tür, Fenster und Kamin prüfen',to:'room'},
+ {l:'Das Bücherregal ansehen',to:'shelf',if:()=>f('diary')&&!f('hatch')},
+ {l:'Die Geheimluke hinter dem Regal ansehen',to:'hatch_view',if:()=>f('hatch')},
+ {l:'Zurück zur Villa',to:'villa'}]},
+body:{place:'tatort',t:'Der tote Weihnachtsmann',
+hint:'Was die Klasse sieht, hängt davon ab, wie sie hinschaut. Danach lässt sich der Puls prüfen.',
+text:()=>`<p>Du trittst an den Sessel. Der Weihnachtsmann hat die Hände gefaltet, der Bart liegt wie gekämmt, die Wangen sind rosig. Kein Atem. Kein Blinzeln. Kein Geruch von Rentierfutter, den du von Weihnachtsmännern erwarten würdest.</p>${f('wax')?'<p>Und du weißt jetzt, warum.</p>':'<p>Etwas stimmt nicht, aber du kannst nicht sagen, was.</p>'}`,
+ch:()=>[
+ {l:'Genau hinsehen: Bart, Haut, Haltung',to:'body_look',if:()=>S.cls==='Analytiker',hide:()=>S.cls!=='Analytiker'},
+ {l:'Mit dem Weihnachtsmann sprechen',to:'body_talk',if:()=>S.cls==='Charmeur',hide:()=>S.cls!=='Charmeur'},
+ {l:'Am Bart ziehen',to:'body_pull',if:()=>S.cls==='Raubein',hide:()=>S.cls!=='Raubein'},
+ {l:'Den Puls fühlen',to:'body_wax',if:()=>f('odd')&&!f('wax'),lock:'Dir ist noch nichts aufgefallen, das einen Pulscheck rechtfertigt. Sieh dir die Leiche auf deine Art genauer an.'},
+ {l:'Zurück zum Tatort',to:'tatort'}]},
+body_look:{place:'tatort',t:'Zu perfekt',
+text:()=>`<p>Du betrachtest ihn, wie du alles betrachtest: im Detail. Der Bart sitzt zu perfekt. Kein einziges Haar bewegt sich im Luftzug des Kamins. Die Haut hat keine Poren. Die Hände sind rosig, aber die Fingernägel gleich lang, gleich glatt, wie gedrechselt. Und es riecht nach Kerzenwachs, nicht nach Mensch.</p><p>Du notierst: <em>Etwas ist falsch an diesem Weihnachtsmann.</em></p>`,
+on:()=>{set('odd');clue('odd','Die „Leiche“ wirkt zu perfekt: kein Haar bewegt sich, keine Poren, Geruch nach Kerzenwachs.')},
+ch:()=>[{l:'Zurück zur Leiche',to:'body'}]},
+body_talk:{place:'tatort',t:'Ein kurzes Gespräch',
+text:()=>`<p>„Nick?“, sagst du sanft. „Aufwachen. Bescherung.“ Nichts. „Nicht mal für Plätzchen?“ Immer noch nichts. Du berührst seine Hand, um ihn zu wecken. Sie ist kalt, glatt und merkwürdig hart, wie eine Kerze, die man zu lange in der Kälte gelassen hat.</p><p>Du ziehst die Hand zurück. Etwas in deinem Bauch sagt: <em>Das war nicht Nick.</em></p>`,
+on:()=>{set('odd');clue('odd','Die Hand der „Leiche“ ist kalt, glatt und hart wie eine Kerze.')},
+ch:()=>[{l:'Zurück zur Leiche',to:'body'}]},
+body_pull:{place:'tatort',t:'Kein Respekt vor Toten',
+text:()=>`<p>Du fasst den Bart und ziehst. Er kommt ab, samt Schnurrbart, mit einem leisen Schmatzen. Darunter: glattes, gelbliches Wachs. Es glänzt im Kaminlicht. Der Bart ist angeklebt.</p><p>Du hast soeben einem Toten den Bart abgerissen, und der hat nicht protestiert. Du bist nicht sicher, ob das ein gutes oder ein schlechtes Zeichen ist.</p>`,
+on:()=>{set('odd');clue('odd','Der Bart der „Leiche“ ist aufgeklebt. Darunter glattes Wachs.')},
+ch:()=>[{l:'Zurück zur Leiche',to:'body'}]},
+body_wax:{place:'tatort',chap:'Akt II · Der Schock',t:'Das ist kein Mensch',
+text:()=>`<p>Du legst zwei Finger an den Hals des Weihnachtsmanns, um den Puls zu fühlen, und deine Finger sinken ein. Nicht tief, nur ein bisschen. Das Material gibt nach wie warmes Wachs. Auf der Rückseite des Halses, unter dem Kragen, findest du eine kleine Prägung: <em>„Madame Schnees Wachsfigurenkabinett. Modell: Santa Deluxe.“</em></p><p>Der Weihnachtsmann ist eine <b>Wachsfigur</b>. Der echte Nick war nie tot. Er war einfach nicht da.</p><p>Was bleibt, sind zwei Fragen: Wo ist er? Und warum hat jemand eine Wachsfigur in einen verschlossenen Raum gesetzt?</p>`,
+on:()=>{set('wax');clue('wax','Die „Leiche“ ist eine Wachsfigur („Santa Deluxe“, Madame Schnees Kabinett). Der echte Weihnachtsmann ist verschwunden.')},
+ch:()=>[{l:'Zurück zum Tatort',to:'tatort'}]},
+desk:{place:'tatort',t:'Der Schreibtisch',
+text:()=>`<p>Der Schreibtisch ist bedeckt mit Wunschzetteln, Stempeln, Heftklammern und einem Becher mit der Aufschrift <em>„Bester Chef der Welt (vom Chef)“</em>. Im Papierkorb liegt, halb zerknüllt, ein <b>Ticket</b>: <em>Nordpol International, Gate 7, nach Mahé (Seychellen), 24.12., 23:10 Uhr. Nur Hinflug. Reisename: „Herr Weiß“.</em></p><p>In der untersten Schublade, unter einem Karton mit Kratzbäumen für Rentiere, liegt ein ledergebundenes <b>Tagebuch</b>. ${C('Du hast beides in zehn Sekunden gefunden, weil du weißt, wo Menschen Dinge verstecken, die sie nicht verstecken wollen.','Du hast beides gefunden, indem du dem Papierkorb freundlich zugenickt hast. Er hat sich geöffnet.','Du hast die Schubladen so lange aufgerissen, bis eine nachgab. Das Möbelstück hatte keine Chance.')}</p><p><b>Erhalten: Seychellen-Ticket, Tagebuch.</b></p>`,
+on:()=>{add('Seychellen-Ticket');add('Tagebuch');clue('ticket','Ticket im Papierkorb: Nur Hinflug Nordpol–Seychellen, Gate 7, 23:10 Uhr, Reisename „Herr Weiß“.');set('ticketSeen')},
+ch:()=>[{l:'Das Tagebuch lesen',to:'diary'},{l:'Zurück zum Tatort',to:'tatort'}]},
+diary:{place:'tatort',t:'Nicks Tagebuch',
+hint:'Die Reihenfolge im Tagebuch gibt die Reihenfolge der Bücher im Regal vor.',
+text:()=>`<p>Die letzten Einträge sind in zittriger, aber fester Schrift:</p><blockquote><b>12. Januar:</b> Siebzehnhundert Jahre. Keine Woche Urlaub. Die Kinder sind inzwischen alle bei Online-Händlern. Ich bin ein Folkloreeffekt.<br><b>3. März:</b> Ich habe einen Plan. Zuerst muss ich mich schlaumachen: der Rentner-Ratgeber. Dann das Reiseziel: Seychellen, das Paradies für Faule. Danach muss ich es Gertrud sagen. Und zuletzt, ganz zuletzt, ein Brief an die Kinder, einen Wunschzettel, den ich selbst schreibe.<br><b>20. Dezember:</b> Das Regal klemmt, wenn man die Reihenfolge nicht einhält. Ich habe sie mir als Eselsbrücke gemerkt. Morgen ist es so weit.</blockquote><p>Du blätterst um. Auf der letzten Seite steht nur: <em>„Verzeih mir, Gertrud. Ich hoffe, du backst trotzdem weiter.“</em></p>`,
+on:()=>{set('diary');clue('diary','Nicks Tagebuch: Er wollte in Rente. Plan: erst der Rentner-Ratgeber, dann das Reiseziel Seychellen, dann es Gertrud sagen, zuletzt ein Wunschzettel an die Kinder. Das Regal klemmt bei falscher Reihenfolge.')},
+ch:()=>[{l:'Zurück zum Tatort',to:'tatort'}]},
+cookies:{place:'tatort',t:'Zwölf Zimtsterne',
+text:()=>`<p>Der Teller steht neben dem Sessel: zwölf Zimtsterne, ordentlich in zwei Reihen angeordnet, mit Puderzucker bestäubt. Dazwischen liegen winzige blaue Blütenreste, die du für Dekoration gehalten hättest.</p><p>${f('cookiesNoted')?'':'Du zählst: <b>Alle zwölf sind noch da.</b> Niemand hat einen gegessen. Die Milch im Glas ist ebenfalls unberührt.'}</p><p>${has('Keksprobe')?'Du hast bereits eine Probe eingesteckt.':'Du könntest eine Probe nehmen. Oder, wenn du lebensmüde bist, einen probieren.'}</p>`,
+on:()=>{if(!f('cookiesNoted')){set('cookiesNoted');clue('cookies','Der Teller hat zwölf Zimtsterne, alle unberührt. Zwischen ihnen liegen winzige blaue Blütenreste.')}},
+ch:()=>[
+ {l:'Eine Keksprobe nehmen',to:'cookie_take',if:()=>!has('Keksprobe')&&!has('Laborbefund')},
+ {l:'Einen Zimtstern probieren',to:'cookie_eat'},
+ {l:'Zurück zum Tatort',to:'tatort'}]},
+cookie_take:{place:'tatort',t:'Beweissicherung',
+text:()=>`<p>Du steckst einen Zimtstern in eine Tüte, beschriftest sie und lässt die blauen Blütenreste mit hineinfallen. Ein Fall für Dr. Schneeflocke, der sich auskennt mit Dingen, die man nicht essen sollte.</p><p><b>Erhalten: Keksprobe.</b></p>`,
+on:()=>{add('Keksprobe')},
+ch:()=>[{l:'Zurück zum Tatort',to:'tatort'}]},
+cookie_eat:{place:'tatort',t:'Eine schlechte Idee',
+text:()=>`<p>Du beißt in einen Zimtstern. Er ist köstlich. Zimt, Mandel, ein Hauch von Bitterkeit, den du für Gewürz hältst. Zwei Minuten später verwandelt sich dein Magen in eine Waschmaschine, und du erkennst: Der Hauch von Bitterkeit war <em>Absicht</em>.</p><p>Dr. Schneeflocke, gerade von der Toilette zurück, schiebt dir ohne Worte einen Eimer hin. „Magenspülung?“, fragt er. „Kostet nichts. Nur Würde.“ Nach zwanzig Minuten ist es überstanden. Du hast die Hälfte deiner Ehre verloren, aber alles andere behalten.</p><p>Du merkst dir: <b>Die Plätzchen sind vergiftet.</b></p>`,
+on:()=>{set('poisonKnown');clue('poison','Die Zimtsterne sind vergiftet. Ich habe es auf die harte Tour erfahren.')},
+ch:()=>[{l:'Zurück zum Tatort',to:'tatort'}]},
+room:{place:'tatort',t:'Das verschlossene Zimmer',
+hint:'Wenn niemand durch Tür, Fenster oder Kamin kam, muss es einen vierten Weg geben. Zugluft verrät oft mehr als Schlösser.',
+text:()=>`<p>Du prüfst jeden Ausgang. <b>Die Tür:</b> Der Schlüssel steckt von innen, der Riegel ist vorgelegt, das Holz wurde von außen eingetreten, aber der Riegel war zu. <b>Das Fenster:</b> von innen mit Eis versiegelt, kein Kratzer. <b>Der Kamin:</b> zu eng, und das Feuer brennt seit Stunden. Selbst der Weihnachtsmann würde nicht freiwillig durch ein Feuer rutschen.</p><p>Du setzt dich hin und denkst nach. Dann spürst du es: einen kaum merklichen Luftzug, der von der Wand hinter dem Bücherregal kommt, obwohl dort kein Fenster ist.</p>`,
+on:()=>{set('draft');clue('draft','Das Zimmer war von innen verriegelt, aber hinter dem Bücherregal zieht ein kalter Luftzug.')},
+ch:()=>[{l:'Zurück zum Tatort',to:'tatort'}]},
+shelf:{place:'tatort',t:'Das Bücherregal',
+hint:'Das Tagebuch: zuerst der Rentner-Ratgeber, dann das Reiseziel, dann Gertrud, zuletzt der Wunschzettel.',
+puzzle:{syms:[{id:'rente',ic:'📘',nm:'Rentner-Ratgeber'},{id:'reise',ic:'🏝️',nm:'Seychellen-Reiseführer'},{id:'frau',ic:'💬',nm:'Wie sag ich’s meiner Frau?'},{id:'wunsch',ic:'✉️',nm:'Wunschzettel: Eine Liebeserklärung'}],ans:['rente','reise','frau','wunsch'],ok:'hatch',bad:'shelf_bad'},
+text:()=>`<p>Das Regal ist voll mit Büchern, aber vier stechen heraus, weil sie nicht verstaubt sind: <b>„Rentner-Ratgeber“</b>, <b>„Seychellen: Das Paradies für Faule“</b>, <b>„Wie sag ich’s meiner Frau?“</b> und <b>„Wunschzettel: Eine Liebeserklärung“</b>. Hinter ihnen spürst du den Luftzug.</p><p>Du erinnerst dich an das Tagebuch: <em>Das Regal klemmt, wenn man die Reihenfolge nicht einhält.</em></p><p class="note">Ziehe die Bücher in der richtigen Reihenfolge heraus: Tippe sie nacheinander an und bestätige.</p>`,
+ch:()=>[{l:'Zurück zum Tatort',to:'tatort'}]},
+shelf_bad:{place:'tatort',t:'Das Regal klemmt',
+text:()=>`<p>Das Regal knarrt, rattert, stößt einen Seufzer aus und schiebt alle vier Bücher wieder zurück. Aus der Wand tönt eine Stimme wie ein beleidigtes Möbelstück: <em>„Falsche Reihenfolge. Bitte nochmal.“</em> ${S.n.wrong>=2?'Du liest im Tagebuch nach: Zuerst muss er sich schlaumachen, dann das Reiseziel, dann Gertrud, und zuletzt die Kinder.':''}</p>`,
+ch:()=>[{l:'Noch einmal versuchen',to:'shelf'},{l:'Zurück zum Tatort',to:'tatort'}]},
+hatch:{place:'tatort',chap:'Akt II · Der Fluchtweg',t:'Die Geheimluke',
+text:()=>`<p>Das Regal schwingt mit einem Seufzer zur Seite. Dahinter: ein schmaler Schacht aus Messing, in dem ein pneumatisches Rohr mündet, wie bei einer alten Rohrpost. Ein Schild: <em>„Wunschzettel-Express. Richtung: Nordpol International. Nicht für Menschen gedacht. Für dicke Menschen schon gar nicht.“</em> Im Schacht hängt noch ein Hauch von Aftershave und Zimt.</p><p>Der Weihnachtsmann hat diesen Raum nicht betreten, <em>er hat ihn verlassen</em>. Durch die Wand, bevor die Tür aufgebrochen wurde.</p>`,
+on:()=>{set('hatch');clue('hatch','Hinter dem Regal liegt die Rohrpost „Wunschzettel-Express“ zum Flughafen. Der echte Weihnachtsmann ist durch sie geflohen.')},
+ch:()=>[{l:'Zurück zum Tatort',to:'tatort'}]},
+hatch_view:{place:'tatort',t:'Der Wunschzettel-Express',
+text:()=>`<p>Die Rohrpost ist leer und warm. Aus der Tiefe klingt ein leises Summen, als würde irgendwo ein Fördermechanismus laufen. Du weißt, wo das Rohr endet: am Flughafen Nordpol International, Gate 7.</p>`,
+ch:()=>[{l:'Zurück zum Tatort',to:'tatort'}]}
+});
+Object.assign(N,{
+kueche:{act:1,place:'kueche',chap:'Akt I · Die Verdächtigen',t:'Die Küche',
+hint:'Frau Claus hat mehr zu verbergen, als sie sagt. Ein Beweisstück und ein Gespür für Lügen helfen weiter.',
+text:()=>`<p>Die Küche ist ein Backparadies: Hunderte Förmchen, ein Ofen, groß wie ein Panzer, Mehl auf allen Flächen. Gertrud Claus steht am Teigtisch und knetet, als würde sie jemanden damit erwürgen. „Wenn ich beschäftigt bin, denke ich nicht“, sagt sie, ohne aufzusehen. „Ich backe seit vier Stunden. Wir haben jetzt Plätzchen für das ganze Jahr.“</p>`,
+ch:()=>[
+ {l:'Nach dem Fund der Leiche fragen',to:'gert_talk'},
+ {l:'Nach den Zimtsternen fragen',to:'gert_cookies'},
+ {l:'Ihr das Seychellen-Ticket zeigen',to:'gert_ticket',if:()=>has('Seychellen-Ticket')&&!f('gertTicket')},
+ {l:'Sie mit der Wachsfigur konfrontieren',to:'gert_conf',if:()=>f('wax')&&!f('gertConf')},
+ {l:'Zurück zur Villa',to:'villa'}]},
+gert_talk:{place:'kueche',t:'Gertruds Version',
+text:()=>`<p>„Ich habe ihn um Viertel vor sechs gefunden“, sagt Gertrud. „Ich wollte ihm Plätzchen bringen. Die Tür war verschlossen. Ich habe geklopft, gerufen, dann geschrien. Rudolf hat sie eingetreten.“ Sie schnauft. „Er saß einfach da. Wie immer, wenn er nachdenkt. Nur ... ohne Atem.“</p><p>${C('Du merkst: Ihr Kummer ist echt, aber eingeübt, wie ein Text, den man vorliest. Die Tränen kommen auf Stichwort.','Du hältst ihre Hand. Sie zittert, aber nicht vor Trauer, sondern vor Angst, etwas zu verraten.','Du fragst direkt: „Haben Sie ihn umgebracht?“ Sie lacht hysterisch und wirft dir einen Teigklumpen an den Kopf. Du fühlst dich seltsam bestätigt.')}</p>`,
+on:()=>{set('gertTalked');clue('gertTalk','Gertrud „fand“ ihren Mann um 17:45. Die Tür war verschlossen, Rudolf trat sie ein. Ihre Trauer wirkt eingeübt.')},
+ch:()=>[{l:'Zurück zu Gertrud',to:'kueche'}]},
+gert_cookies:{place:'kueche',t:'Die Zimtsterne',
+text:()=>`<p>„Die habe ich gebacken, ja. Aber Nick isst keine Plätzchen mehr. Seit Jahren Diät.“ Sie schnaubt. „Der Teller war nur Dekoration. Pimpernuss hat ihn <em>verschönert</em>. Ist ja sonst nie so hilfsbereit. Er hat sogar Blümchen von draußen mitgebracht und den Teller selbst hochgetragen.“</p><p>Du schreibst auf: <em>Pimpernuss hat den Teller dekoriert und hochgetragen.</em></p>`,
+on:()=>{set('gertTalked');set('osterHint');clue('gertPimp','Gertrud: Chef-Elf Pimpernuss hat den Plätzchenteller „verschönert“ (mit Blümchen) und selbst ins Arbeitszimmer getragen. Nick isst keine Plätzchen mehr.')},
+ch:()=>[{l:'Zurück zu Gertrud',to:'kueche'}]},
+gert_ticket:{place:'kueche',t:'Ein Ticket nach Mahé',
+text:()=>`<p>Du legst das Ticket auf den Teigtisch. Gertrud erstarrt, ihre Hände stecken bis zu den Handgelenken im Teig. „Das ...“ Sie schluckt. „Das ist ein Missverständnis.“ Dann, leiser: „Er wollte Urlaub. Das ist alles. Ein Mann, der siebzehnhundert Jahre lang arbeitet, will einmal an den Strand. Ist das ein Verbrechen?“</p><p>Mehr sagt sie nicht. Aber ihr Blick geht zum Fenster, wo draußen der Schnee fällt, und er wirkt, als wüsste sie etwas, das sie noch nicht sagen kann.</p>`,
+on:()=>{set('gertTicket');num('gert',1);clue('gertTicket','Gertrud gibt zu: Nick wollte Urlaub. Mehr verrät sie nicht.')},
+ch:()=>[{l:'Zurück zu Gertrud',to:'kueche'}]},
+gert_conf:{place:'kueche',t:'Die Wahrheit',
+text:()=>`<p>Du legst ihr das Prägestück der Wachsfigur auf den Tisch: <em>„Madame Schnees Wachsfigurenkabinett. Modell: Santa Deluxe.“</em> Gertrud sagt lange nichts. Dann sinkt sie auf einen Hocker. „Er hat mich gebeten. Dreimal. Und ich habe gesagt: Nick, du bist verrückt.“ Sie lacht ein bisschen. „Dann habe ich ja gesagt.“</p><p>„Wir haben die Figur um fünf Uhr in den Sessel gesetzt. Er ist durch die Rohrpost zum Flughafen. Er wartet am Gate 7. Sein Flug geht um 23:10.“ Ihre Stimme bricht. „Ich sollte schreien, damit alle denken, er sei tot. Und das habe ich getan. Und es war das Schlimmste, was ich je gespielt habe.“</p><p>„Aber vergiften? Niemals. Ich wollte ihn nur gehen lassen.“</p>`,
+on:()=>{set('gertConf');set('gertTalked');num('gert',2);clue('gertConf','Gertrud gesteht: Sie und Nick haben die Wachsfigur um 17:00 in den Sessel gesetzt. Er floh um 17:15 durch die Rohrpost zum Gate 7. Vergiftet hat sie niemanden.')},
+ch:()=>[{l:'Zurück zu Gertrud',to:'kueche'}]},
+
+stall:{act:1,place:'stall',chap:'Akt I · Die Verdächtigen',t:'Der Stall',
+hint:'Rudolf hat ein Motiv, aber auch ein Alibi. Hör genau zu, wann er was gehört hat.',
+text:()=>`<p>Der Stall ist warm, dampfig und riecht nach Heu, Rentieren und Eitelkeit. In der Mitte steht Rudolf, das berühmteste Rentier der Welt, mit einer Nase, die im Takt seiner Empörung blinkt. Hinter ihm lehnt eine glänzende, kalte Gestalt in der Ecke: ein Rentier aus Plastik und Draht, mit LED-Nase und leerem Blick. Auf dem Schild: <em>„Rudolf 2.0. Kein Gehalt, keine Meinung.“</em></p>`,
+ch:()=>[
+ {l:'Rudolf Mitgefühl zeigen',to:'rud_talk'},
+ {l:'Ihm das Drohnenmodell unter die Nase halten',to:'rud_drone'},
+ {l:'Nach dem Nachmittag fragen',to:'rud_tube'},
+ {l:'Zurück zur Villa',to:'villa'}]},
+rud_talk:{place:'stall',t:'Rudolfs schlechtes Gewissen',
+text:()=>`<p>Rudolf schnaubt, und die Nase flackert. „Ich habe ihm gesagt, er sei ersetzbar. Vor drei Tagen. Im Streit. Und jetzt ist er tot.“ Er stampft. „Ich bin schuld. Ich weiß es. Er konnte nicht mehr, weil ich ihn gekränkt habe.“</p><p>Du legst ihm die Hand auf den Hals. „Du warst sein bestes Rentier“, sagst du, und es stimmt wahrscheinlich nicht, aber Rudolf entspannt sich augenblicklich. „Danke“, murmelt er. „Du bist der Erste, der mich nicht für ein Monster hält.“</p>`,
+on:()=>{set('rudTalked');if(!f('rudSoft')){set('rudSoft');num('rud',1)}},
+ch:()=>[{l:'Zurück zu Rudolf',to:'stall'}]},
+rud_drone:{place:'stall',t:'Rudolf 2.0',
+text:()=>`<p>Rudolf tritt gegen den Stallboden. „Das Ding? Das hat der Chef-Elf besorgt. Nick wollte es probieren, ‚für Notfälle‘. Er hat mir den Plan gezeigt.“ Er wirft dir einen zerknitterten Zettel zu: <em>„Projekt Rudolf 2.0: Lieferdrohne mit LED-Nase. Betriebskosten: 0 Möhren. Meinung: keine.“</em></p><p>„Wenn jemand ein Motiv hatte, dann ich“, sagt Rudolf. „Aber ich habe ihn geliebt. Auch wenn er ein sturer Dickkopf war.“</p><p><b>Erhalten: Drohnenplan.</b></p>`,
+on:()=>{set('rudTalked');add('Drohnenplan');clue('drone','Rudolf hätte ein Motiv: Nick wollte ihn durch eine Drohne („Rudolf 2.0“) ersetzen. Der Plan stammt vom Chef-Elfen.')},
+ch:()=>[{l:'Zurück zu Rudolf',to:'stall'}]},
+rud_tube:{place:'stall',t:'Rudolfs Nachmittag',
+text:()=>`<p>„Ich war hier. Die ganze Zeit. Ich habe mit dem Plastikding gestritten, ob es Möhren braucht. Es hat nicht geantwortet.“ Er überlegt. „Um Viertel nach fünf hat es irgendwo gerumpelt. Die alte Rohrpost. Sonst benutzt Nick die nie nach vier.“ Er schüttelt den Kopf. „Dann um zwanzig vor sechs kam Gertrud, hysterisch. Ich bin hoch und habe die Tür eingetreten.“</p><p>„Der Riegel war von innen zu. Das hat mich gewundert. Aber ich war zu aufgeregt, um zu denken.“</p>`,
+on:()=>{set('rudTalked');set('rudTube');clue('rud1715','Rudolf hörte um 17:15 die alte Rohrpost rumpeln. Um 17:40 trat er die Tür ein; der Riegel war von innen zu.')},
+ch:()=>[{l:'Zurück zu Rudolf',to:'stall'}]},
+
+werkstatt:{act:1,place:'werkstatt',chap:'Akt I · Die Verdächtigen',t:'Die Werkstatt',
+hint:'Pimpernuss wirkt zu hilfsbereit. Such nach Dingen, die ein Elf nicht haben sollte.',
+text:()=>`<p>Die Werkstatt ist ein Reich aus Hobelspänen, Lichterketten und winzigen Werkbänken. An den Wänden hängen Poster mit Aufschriften wie <em>„Effizienz ist die Liebe der Elfen“</em>. Chef-Elf Pimpernuss, hager, spitzohrig, mit Klemmbrett und Brille, schaut dich an wie ein Buchhalter, der gerade den Taschenrechner versteckt hat.</p><p>„Ich bin nur ein einfacher Elf“, sagt er, ohne dass du gefragt hast.</p>`,
+ch:()=>[
+ {l:'Mit Pimpernuss reden',to:'pimp_talk'},
+ {l:'Die Werkstatt durchsuchen',to:'pimp_search',if:()=>f('osterHint')||has('Laborbefund')||f('poisonKnown'),lock:'Du hast keinen konkreten Grund, die Werkstatt zu durchsuchen. Frag erst herum: Wer hat den Teller berührt?'},
+ {l:'Pimpernuss mit den Beweisen konfrontieren',to:'pimp_confess',if:()=>has('Eisenhut-Strauß')&&has('Laborbefund')&&!f('pimpConfessed')},
+ {l:'Zurück zur Villa',to:'villa'}]},
+pimp_talk:{place:'werkstatt',t:'Der einfache Elf',
+text:()=>`<p>„Ich habe vierhundert Jahre lang gedient“, sagt Pimpernuss. „Vierhundert Jahre. Kein Tag Urlaub. Ich bin das Gedächtnis dieser Firma.“ Er rückt die Brille zurecht. „Ich bin tief betroffen. Wirklich. Ich habe kaum geschlafen, seit ich es gehört habe.“</p><p>Du fragst nach den Plätzchen. Er zuckt zusammen wie ein Mensch, dem man unvermittelt in den Nacken pustet. „Plätzchen? Welche Plätzchen? Ich esse nie Plätzchen. Ich bin Veganer. Seit heute.“ Seine Hände zittern, und auf seinem Klemmbrett steht dreimal dasselbe Wort: <em>„Nachfolgeregelung“</em>.</p>`,
+on:()=>{set('pimpTalked');clue('pimpTalk','Chef-Elf Pimpernuss wirkt nervös, zuckt bei „Plätzchen“ zusammen. Auf seinem Klemmbrett steht dreimal „Nachfolgeregelung“.')},
+ch:()=>[{l:'Zurück zu Pimpernuss',to:'werkstatt'}]},
+pimp_search:{place:'werkstatt',t:'Die Werkstatt durchsuchen',
+text:()=>`<p>${C('Du riechst es sofort: ein herbwürziger, leicht metallischer Geruch, der nicht hierher gehört. Hinter einem Poster („Effizienz ist die Liebe der Elfen“) findest du, was du suchst.','Du lobst Pimpernuss’ „vorbildliche Ordnung“ so lange, bis er dir stolz seine Schubladen zeigt. In der dritten liegt, was er verstecken wollte.','Du kippst den Tisch um, schüttelst die Schränke und trittst gegen die Wand. Hinter einer losen Latte fällt ein Bündel zu Boden, und Pimpernuss quiekt.')}</p><p>Ein Strauß getrockneter Pflanzen mit tiefblauen Blüten. Daneben ein schmales Notizbuch, das sich liest wie die Gedanken eines Mannes, der zu lange Chef-Elf war: <em>„1. Nick weg. 2. Nachfolgegesetz §3: Der Chef-Elf übernimmt. 3. Kostümprobe: Größe XL, Bauch ausstopfen. 4. Elfen: Arbeitszeit auf 20 Stunden täglich anheben.“</em></p><p><b>Erhalten: Eisenhut-Strauß, Notizbuch.</b></p>`,
+on:()=>{add('Eisenhut-Strauß');add('Notizbuch');clue('pimpFound','In Pimpernuss’ Werkstatt: ein Strauß getrockneter Eisenhut-Blüten (blau) und ein Notizbuch mit seinem Plan: Nick weg, Nachfolgegesetz §3, Kostümprobe XL.')},
+ch:()=>[{l:'Zurück zur Werkstatt',to:'werkstatt'}]},
+pimp_confess:{place:'werkstatt',t:'Der Zusammenbruch des Chef-Elfen',
+text:()=>`<p>Du legst den Eisenhut-Strauß und den Laborbefund auf die Werkbank. Pimpernuss starrt darauf. Dann sackt er zusammen, wie ein Luftballon, aus dem jemand die Luft lässt. „Ich wollte ihn nicht ... doch, ich wollte. Aber ich war es nicht!“ Er rauft sich die Spitzohren. „Ich habe den Teller um zehn vor fünf hochgetragen, und als ich ihn abstellen wollte, saß er schon da. Regungslos. Ich dachte: <em>Mein Gift wirkt so schnell?</em> Ich war kurz stolz.“</p><p>„Dann hat Rudolf die Tür eingetreten, alle haben geschrien, und ich habe mich gefragt, ob ich ein Genie bin oder ein Mörder.“ Er schnieft. „Ich wollte nur Chef sein. Nur ein einziges Mal.“</p><p>Dann, plötzlich, mit glänzenden Augen: „Hör zu. Du bist klug. Zehn Millionen Zimtsterne. Ein Posten als Vizeweihnachtsmann. Und kein Wort zu niemandem. Es war ja gar kein Mord.“</p>`,
+on:()=>{set('pimpConfessed');clue('pimpConf','Pimpernuss gesteht: Er hat die Plätzchen vergiftet und den Teller um 16:50 hinaufgetragen. Er dachte, sein Gift habe gewirkt; die Leiche saß da schon. Er bot dir ein Bestechungsgeld an.')},
+ch:()=>[
+ {l:'Das Angebot annehmen',to:'end_deal',if:()=>gateReady(),lock:'Du weißt noch nicht genug über den Fall, um dich schon zu verkaufen. Finde erst heraus, was wirklich passiert ist.'},
+ {l:'Ablehnen: „Du wirst deine Strafe bekommen.“',to:'werkstatt'}]},
+
+salon:{act:1,place:'salon',chap:'Akt I · Die Verdächtigen',t:'Der Gästesalon',
+hint:'Der Osterhase ist komisch, aber aufmerksam. Er hat etwas gesehen, das du brauchst.',
+text:()=>`<p>Der Gästesalon ist mit Ostereiern dekoriert, die niemand zu entfernen gewagt hat. In einem Sessel liegt, die Pfoten über den Kopf gelegt, ein Hase im Schokoladenmantel: <b>der Osterhase</b>, Vorsitzender des Österlichen Saisongeschäfts. Neben ihm eine Schale mit Schokoeiern, die er alle drei Minuten ersetzt.</p><p>„Ich bin nur hier, um zu kondolieren“, sagt er. „Und um ein Geschäft vorzuschlagen. Das ist kein Widerspruch.“</p>`,
+ch:()=>[
+ {l:'Nach seiner Rolle fragen',to:'hase_talk'},
+ {l:'Nach dem Nachmittag fragen',to:'hase_wit'},
+ {l:'Zurück zur Villa',to:'villa'}]},
+hase_talk:{place:'salon',t:'Die Fusion',
+text:()=>`<p>„Weihnachten und Ostern sind ein Fehler der Geschichte“, erklärt der Osterhase. „Zwei Feste, zwei Marketingabteilungen, zwei Lieferketten. Wenn Nick und ich fusioniert hätten, wären wir <em>Weihnachtsostern</em> geworden. Alle hätten Eier und Geschenke bekommen, und niemand hätte sich beschwert.“ Er seufzt. „Er hat abgelehnt. Er sagte: ‚Ich will einfach nur Ruhe.‘ Das habe ich nicht verstanden.“</p><p>Er schiebt dir ein Schokoei zu. „Ich bin laktoseintolerant, übrigens. Milch hätte ich nie angefasst.“ Du notierst das nicht, aber du denkst es.</p>`,
+on:()=>{set('haseTalked');clue('hase','Der Osterhase wollte mit Nick fusionieren („Weihnachtsostern“). Nick lehnte ab: „Ich will einfach nur Ruhe.“ Der Hase ist laktoseintolerant.')},
+ch:()=>[{l:'Zurück zum Osterhasen',to:'salon'}]},
+hase_wit:{place:'salon',t:'Ein Zeuge',
+text:()=>`<p>„Ich war die ganze Zeit hier und habe mit meinen Eiern gesprochen“, sagt der Hase. „Es ist wichtig, ihnen Mut zu machen.“ Er knabbert nachdenklich an einem Schokoladenohr. „Aber um zehn vor fünf bin ich zur Toilette. Auf dem Flur kam mir Pimpernuss entgegen, mit einem Sträußchen blauer Blumen. So ein tiefes Blau, das sieht man im Winter selten.“</p><p>„Er hat sich sofort umgedreht, als er mich gesehen hat. Ich dachte: Wer verschenkt im Dezember Eisenhut? Aber ich bin ein Hase, ich kenne mich mit Gemüse aus.“</p>`,
+on:()=>{set('haseTalked');set('osterHint');clue('hase1650','Der Osterhase sah Pimpernuss um 16:50 mit einem Strauß blauer Blüten (Eisenhut?) auf dem Flur.')},
+ch:()=>[{l:'Zurück zum Osterhasen',to:'salon'}]},
+
+kranken:{act:1,place:'kranken',chap:'Akt I · Die Verdächtigen',t:'Die Krankenstation',
+hint:'Dr. Schneeflocke kann Proben analysieren. Bring ihm den Zimtstern vom Tatort.',
+text:()=>`<p>Die Krankenstation ist ein weißer Raum voller Verbandsmaterial für Rentiere und Pflaster mit Weihnachtsmotiven. Dr. Schneeflocke, ein kleiner, rundlicher Elf mit Stethoskop und zerzausten Haaren, sitzt auf einem Hocker und schiebt sich Pfefferminzbonbons in den Mund, als wären es Beruhigungsmittel.</p><p>„Ich bin Hausarzt“, sagt er schnell. „Für Rentiere. Hauptsächlich für Rentiere.“</p>`,
+ch:()=>[
+ {l:'Mit Dr. Schneeflocke reden',to:'doc_talk'},
+ {l:'Ihm die Keksprobe zur Analyse geben',to:'doc_lab',if:()=>has('Keksprobe')&&!has('Laborbefund')},
+ {l:'Zurück zur Villa',to:'villa'}]},
+doc_talk:{place:'kranken',t:'Ein sehr kurzer Befund',
+text:()=>`<p>„Ich habe die Leiche nicht untersucht“, gesteht der Doktor, nachdem du ihn zehn Sekunden schweigend angesehen hast. „Die Tür war offen, ich sah einen roten Mantel, einen weißen Bart, und da war die Stille. Ich habe ‚tot‘ gesagt. Das macht man so. Man sagt ‚tot‘, wenn alle schreien.“ Er schluckt. „Ich war danach kurz auf der Toilette. Aus Scham.“</p>${f('wax')?'<p>Du erzählst ihm von der Wachsfigur. Er wird weiß, dann grün, dann sagt er leise: „Ich habe zwei Jahre Medizin studiert, drei Jahre Rentiere. Das erklärt vieles.“</p>':''}`,
+on:()=>{clue('doc','Dr. Schneeflocke hat die „Leiche“ nie richtig untersucht. Er erklärte sie für tot, weil alle schrien.')},
+ch:()=>[{l:'Zurück zu Dr. Schneeflocke',to:'kranken'}]},
+doc_lab:{place:'kranken',t:'Das Labor des Doktors',
+text:()=>`<p>Der Doktor träufelt etwas auf den Zimtstern, rührt, erhitzt, riecht und schnappt nach Luft. „Das ist ...“ Er liest vom Teststreifen. „<b>Eisenhut.</b> Aconitum. Tödlich in zwanzig Minuten, für Mensch, Elf oder Weihnachtsmann.“ Er sieht dich an. „Wer auch immer das auf den Teller getan hat, wollte ihn tot sehen. Mit Absicht. Das ist kein Unfall, das ist Gebäckmord.“</p><p>Er faltet den Befund und reicht ihn dir. „Aber wenn niemand etwas gegessen hat, wie kann Nick daran gestorben sein?“</p><p><b>Erhalten: Laborbefund.</b></p>`,
+on:()=>{rem('Keksprobe');add('Laborbefund');set('lab');clue('lab','Dr. Schneeflocke: Die Zimtsterne enthalten Eisenhut, tödlich in 20 Minuten. Aber alle zwölf sind unberührt.')},
+ch:()=>[{l:'Zurück zu Dr. Schneeflocke',to:'kranken'}]}
+});
+Object.assign(N,{
+gate1:{act:3,place:'flug',time:'22:40',chap:'Akt III · Gate 7',t:'Flughafen Nordpol International',
+hint:'Der Weihnachtsmann kommt nur mit, wenn er versteht, warum. Hör zu, erwähne die Kinder, und sag ihm, dass jemand ihn töten wollte.',
+text:()=>`<p>Der Flughafen Nordpol International ist ein Terminal aus Eis, Neonlicht und Duty-Free-Shops für Rentiere. Am Gate 7 hängt eine Anzeige: <em>„Mahé (Seychellen) · Planmäßig 23:10 · Boarding in 25 Minuten.“</em></p><p>Auf einer Plastikbank, zwischen einem Rollkoffer und einem Strohhut, sitzt ein dicker Mann in einem Hawaiihemd. Er trägt Sonnenbrille, Strandsandalen und genau einen Bart, den er für unauffällig hält. Er nippt an einem Cocktail mit Schirmchen, der aus Eiswasser besteht.</p><p>„Ach“, sagt er, ohne aufzusehen. „Die Kripo. Gertrud hat gesagt, ihr braucht noch zwei Stunden.“</p><p class="note">Vertrauen des Weihnachtsmanns: ${heart(S.n.nick)}</p>`,
+ch:()=>[
+ {l:'Fragen: „Warum, Nick?“',to:'santa_why',if:()=>!f('sWhy'),hide:()=>f('sWhy')},
+ {l:'Seine Kinder und den Wunschzettel erwähnen',to:'santa_kids',if:()=>has('Tagebuch')&&!f('sKids'),hide:()=>f('sKids')||!has('Tagebuch')},
+ {l:'Ihm von den vergifteten Plätzchen erzählen',to:'santa_poison',if:()=>has('Laborbefund')&&!f('santaPoison'),hide:()=>f('santaPoison')||!has('Laborbefund')},
+ {l:'Zwei Wochen Urlaub im Jahr vorschlagen',to:'santa_deal',if:()=>!f('sDeal'),hide:()=>f('sDeal')},
+ {l:'Ihn bitten, mit in die Villa zurückzukommen',to:'santa_back',if:()=>f('santaPoison'),lock:'Er kommt nicht mit, wenn er nicht weiß, dass es mehr ist als ein Streich. Er muss wissen, was auf dem Teller lag.'},
+ {l:'Ihn gehen lassen und schweigen',to:'end_blackmail'},
+ {l:'Zurück zur Villa',to:'villa'}]},
+santa_why:{place:'flug',t:'Siebzehnhundert Jahre',
+text:()=>`<p>Nick nimmt die Sonnenbrille ab. Er sieht müde aus, wie jemand, der seit Jahrhunderten nachts arbeitet. „Warum? Weil ich einmal im Jahr zu Besuch bin, in Wohnzimmern, die mir nicht gehören, und es nett finde. Und die restlichen 364 Tage sitze ich allein im Büro und lese Wunschzettel, die inzwischen ‚iPhone 17‘ heißen.“</p><p>„Die Kinder rufen nicht mehr meinen Namen, sie scannen Barcodes.“ Er lächelt schief. „Ich will einen Liegestuhl, Kommissar. Nur einen. Eine Woche. Ist das zu viel?“</p>`,
+on:()=>{if(!f('sWhy')){set('sWhy');num('nick',1)}},
+ch:()=>[{l:'Zurück zum Gespräch',to:'gate1'}]},
+santa_kids:{place:'flug',t:'Der Wunschzettel',
+text:()=>`<p>Du ziehst das Tagebuch hervor und liest die letzte Zeile: <em>„Wunschzettel: Eine Liebeserklärung.“</em> Nick wird still. „Das habe ich geschrieben, als ich noch gedacht habe, ich kann das.“ Er reibt sich die Nase. „Ich liebe die Kinder. Ich liebe sie wirklich. Ich liebe nur die <em>Arbeit</em> nicht mehr.“</p><p>„Das ist ein Unterschied“, sagst du. „Ja“, murmelt er. „Es ist der Unterschied.“</p>`,
+on:()=>{if(!f('sKids')){set('sKids');num('nick',1)}},
+ch:()=>[{l:'Zurück zum Gespräch',to:'gate1'}]},
+santa_poison:{place:'flug',t:'Der vergiftete Teller',
+text:()=>`<p>„Nick“, sagst du. „Ich muss dir etwas sagen. Die Zimtsterne auf deinem Teller waren vergiftet. Eisenhut. Tödlich in zwanzig Minuten.“ Du legst ihm den Laborbefund hin.</p><p>Der Weihnachtsmann erstarrt. Der Cocktail zittert, das Schirmchen fällt ins Eiswasser. „Das ist ... ich esse keine Plätzchen. Seit Jahren. Gertrud weiß das.“ Er sieht dich an, plötzlich nicht mehr müde, sondern wach. „Wer?“ Dann leise: „Ich wollte weglaufen, und jemand wollte mich <em>töten</em>?“</p><p>Er greift nach dem Strohhut, setzt ihn ab, setzt ihn wieder auf. „Gut. Ich komme mit. Aber nur, weil ich es wissen muss.“</p>`,
+on:()=>{if(!f('santaPoison')){set('santaPoison');num('nick',1)}},
+ch:()=>[{l:'Zurück zum Gespräch',to:'gate1'}]},
+santa_deal:{place:'flug',t:'Ein Angebot',
+text:()=>`<p>„Was, wenn du Urlaub bekommst?“, fragst du. „Zwei Wochen im Januar. Seychellen. Rudolf 2.0 schickt Postkarten, Rudolf fliegt weiter, und die Kinder kriegen trotzdem ihre Geschenke.“</p><p>Nick lacht, ein kurzes, ehrliches Ho. „Das wäre das erste vernünftige Angebot seit tausend Jahren.“ Er sieht dich an. „Das ist nicht deine Zuständigkeit.“ „Ich bin Kripo“, sagst du. „Ich ermittle in allem.“</p>`,
+on:()=>{if(!f('sDeal')){set('sDeal');num('nick',1)}},
+ch:()=>[{l:'Zurück zum Gespräch',to:'gate1'}]},
+santa_back:{place:'flug',t:'Zurück in die Villa',
+text:()=>`<p>Nick steht auf. Er zieht das Hawaiihemd glatt, setzt den Strohhut ab und nimmt seinen roten Mantel aus dem Koffer, den er „für Notfälle“ eingepackt hat. „Gertrud kommt mit?“ „Sie wartet“, sagst du, und es stimmt, auch wenn sie es noch nicht weiß.</p><p>Auf dem Rückweg erzählst du ihm, was du weißt. Er schweigt lange. Dann sagt er: „Wenn es der ist, den ich denke, dann hätte ich es vor vierhundert Jahren merken müssen.“</p>`,
+on:()=>{set('santaBack')},
+ch:()=>[{l:'In den Festsaal',to:'festsaal'}]},
+
+festsaal:{act:4,place:'saal',time:'23:15',chap:'Akt IV · Die große Auflösung',t:'Der Festsaal',
+hint:()=>f('rekonOk')?'Wähle den Schuldigen. Beweise sind der Schlüssel: Laborbefund und Eisenhut (oder ein Geständnis) belegen die Tat.':'Rekonstruiere zuerst, was an diesem Nachmittag geschah: Teller, Wachsfigur, Rohrpost, Tür. Die Uhrzeiten stehen in deiner Akte.',
+text:()=>`<p>Der Festsaal ist ein Ballsaal aus Tannenholz und Kerzenlicht, gefüllt mit allen, die in dieser Nacht gelogen haben. Gertrud Claus sitzt in der ersten Reihe, Rudolf scharrt mit dem Huf, Pimpernuss zupft nervös an seinem Klemmbrett, der Osterhase knabbert ein Schokoei, Dr. Schneeflocke versteckt sich hinter einem Rentier. Draußen heult der Wind. Hinter dem Vorhang auf der Bühne wartet der Weihnachtsmann.</p><p>Du stellst dich in die Mitte. Alle starren dich an. „Meine Damen und Herren“, sagst du. „Ich weiß jetzt, was passiert ist.“</p>`,
+ch:()=>[
+ {l:'Die Ereignisse des Nachmittags rekonstruieren',to:'rekon',if:()=>!f('rekonOk'),hide:()=>f('rekonOk')},
+ {l:'Chef-Elf Pimpernuss anklagen',to:'acc_pimp',if:()=>f('rekonOk')&&pimpProof(),hide:()=>!f('rekonOk'),lock:'Dir fehlen Beweise: Laborbefund und Eisenhut-Strauß, oder Pimpernuss’ Geständnis.'},
+ {l:'Frau Claus anklagen',to:'end_frau',if:()=>f('rekonOk'),hide:()=>!f('rekonOk')},
+ {l:'Rudolf anklagen',to:'end_drone',if:()=>f('rekonOk'),hide:()=>!f('rekonOk'),fx:()=>{set('accRudolf')}},
+ {l:'Den Osterhasen anklagen',to:'end_hase',if:()=>f('rekonOk'),hide:()=>!f('rekonOk')},
+ {l:'Niemanden anklagen: ein natürlicher Tod',to:'end_tyrann',if:()=>f('rekonOk'),hide:()=>!f('rekonOk')},
+ {l:'Doch noch mehr Beweise sammeln',to:'villa'}]},
+rekon:{place:'saal',t:'Die Rekonstruktion',
+hint:'Vier Ereignisse: Pimpernuss trägt den vergifteten Teller hinauf (16:50). Gertrud und Nick setzen die Wachsfigur in den Sessel (17:00). Die Rohrpost rumpelt (17:15). Rudolf tritt die Tür ein (17:40).',
+puzzle:{syms:[{id:'teller',ic:'🍪',nm:'Der vergiftete Teller wird hinaufgetragen'},{id:'wachs',ic:'🕯️',nm:'Die Wachsfigur wird in den Sessel gesetzt'},{id:'rohr',ic:'📮',nm:'Die Rohrpost rumpelt: Nick flieht'},{id:'tuer',ic:'🚪',nm:'Rudolf tritt die Tür ein'}],ans:['teller','wachs','rohr','tuer'],ok:'rekon_ok',bad:'rekon_bad'},
+text:()=>`<p>Du hängst vier Karten an die Pinnwand der Bühne: vier Ereignisse, ohne Uhrzeit. Der Saal wird still. „Wenn wir wissen, in welcher Reihenfolge das alles passiert ist“, sagst du, „wissen wir, wer lügt.“</p><p class="note">Tippe die Ereignisse in zeitlicher Reihenfolge an und bestätige.</p>`,
+ch:()=>[{l:'Zurück',to:'festsaal'}]},
+rekon_bad:{place:'saal',t:'Das stimmt nicht',
+text:()=>`<p>Du hängst die Karten auf, und im Saal brandet Gemurmel auf. „Das kann nicht stimmen“, ruft jemand. Gertrud schüttelt den Kopf, Rudolf schnaubt. Hinter dem Vorhang raunt Nicks Stimme: „Fast. Aber nicht ganz.“ ${S.n.wrong>=2?'Er flüstert: „Zuerst das Gift. Dann die Figur. Dann bin ich weg. Und erst danach wird die Tür eingetreten.“':''}</p>`,
+ch:()=>[{l:'Noch einmal versuchen',to:'rekon'}]},
+rekon_ok:{place:'saal',t:'Der Ablauf',
+text:()=>`<p>Du hängst die Karten in die richtige Reihenfolge, und der Saal atmet auf. „Um 16:50 trägt jemand einen vergifteten Teller hinauf. Um 17:00 setzen Gertrud und Nick die Wachsfigur in den Sessel. Um 17:15 flieht Nick durch die Rohrpost. Um 17:40 tritt Rudolf die Tür ein. Der Weihnachtsmann war nie tot. Er war einfach nicht mehr da.“</p><p>Ein Raunen geht durch den Saal. Dann Totenstille. „Aber jemand wollte ihn <em>wirklich</em> töten“, sagst du und lässt den Blick wandern. „Und dieser Jemand sitzt hier.“</p>`,
+on:()=>{set('rekonOk');clue('rekon','Rekonstruktion: 16:50 Teller · 17:00 Wachsfigur · 17:15 Rohrpost · 17:40 Tür.')},
+ch:()=>[{l:'Den Schuldigen nennen',to:'festsaal'}]},
+acc_pimp:{place:'saal',t:'Chef-Elf Pimpernuss',
+text:()=>`<p>„Chef-Elf Pimpernuss“, sagst du. „Sie haben den Teller um zehn vor fünf hochgetragen. Sie haben die Zimtsterne mit Eisenhut dekoriert. Sie wollten die Nachfolge nach §3, Größe XL.“ Du hältst den Strauß und den Laborbefund hoch.</p><p>Pimpernuss öffnet den Mund, schließt ihn, öffnet ihn. „Ich ... ich habe vierhundert Jahre ...“ Dann bricht seine Stimme. Und hinter ihm, vom Bühnenvorhang her, tritt eine Gestalt in rotem Mantel und weißem Bart. „Hallo, Pimpernuss“, sagt der Weihnachtsmann.</p><p>Der Saal explodiert. Gertrud springt auf, Rudolf wiehert, der Osterhase lässt sein Ei fallen. Pimpernuss sinkt auf die Knie. „Ich wollte nur ... einmal Chef sein.“ Zwei Eisbär-Wachtmeister nehmen ihn zwischen sich. „Notiert ist notiert“, sagt einer von ihnen.</p>`,
+on:()=>{set('solved')},
+ch:()=>[{l:'Der Weihnachtsmann ergreift das Wort',to:'zukunft'}]},
+zukunft:{place:'saal',t:'Und jetzt?',
+hint:'Nick fliegt nur noch einmal, wenn du sein Vertrauen gewonnen hast (zwei Herzen). Rudolf übernimmt nur, wenn du ihm Mitgefühl gezeigt hast.',
+text:()=>`<p>Es ist 23:25. Der Saal ist still. Der Weihnachtsmann steht auf der Bühne, die Hände in den Manteltaschen. „Nun“, sagt er. „Ich lebe. Mein Mörder sitzt in Gewahrsam. Und in fünf Minuten soll ein Schlitten starten, den ich nicht mehr fliegen will.“ Er sieht dich an. „Du bist die Kripo. Was schlägst du vor?“</p><p class="note">Vertrauen des Weihnachtsmanns: ${heart(S.n.nick)}${S.n.rud?' · Rudolf: '+heart(S.n.rud):''}</p>`,
+ch:()=>[
+ {l:'Nick bitten, noch ein letztes Mal zu fliegen, mit Urlaub im Januar',to:'end_perfect',if:()=>S.n.nick>=2,lock:'Nick vertraut dir noch nicht genug. Rede am Flughafen länger mit ihm.'},
+ {l:'Nick gehen lassen: Die Eltern liefern selbst',to:'end_retire'},
+ {l:'Rudolf die Schlittenleitung übernehmen lassen',to:'end_rudolf',if:()=>S.n.rud>=1,lock:'Rudolf hat noch kein Vertrauen zu dir gefasst. Zeig ihm Mitgefühl im Stall.'},
+ {l:'Selbst den roten Mantel anziehen',to:'end_kevin'},
+ {l:'Die Lieferdrohne Rudolf 2.0 einsetzen',to:'end_drone'}]}
+});
+Object.assign(N,{
+end_perfect:{act:5,place:'end',end:'perfect',chap:'Epilog · Triumph',t:'Die Bescherung ist gerettet',
+text:()=>`<p>Nick sieht dich an, dann Gertrud, dann den Saal. Er atmet tief durch, so tief, dass sein Mantel einen Knopf verliert. „Ein letztes Mal“, sagt er. „Aber ich habe Bedingungen.“ Er zählt sie an den Fingern ab: Zwei Wochen Urlaub im Januar. Rudolf bekommt ein Möhrenabo und einen Betriebsrat. Pimpernuss darf seine Strafe in Gertruds Küche abarbeiten, beim Plätzchenspülen, unter Aufsicht. Und die Wunschzettel werden wieder gelesen, <em>jeder einzelne</em>.</p><p>Um 23:30 startet der Schlitten, pünktlich auf die Sekunde. Gertrud winkt vom Balkon, Rudolf leuchtet wie nie zuvor, und Nick lacht wieder, dieses lange, tiefe „Ho“, das man bis nach Hamburg hören kann. Dr. Schneeflocke probiert die neuen Plätzchen (ohne Eisenhut) und überlebt.</p><p><b>Du hast den Mord aufgeklärt, den es nie gab, den Täter überführt und Weihnachten gerettet. Dafür bekommst du einen Orden: „Kommissar der Herzen“.</b></p><p class="soup">Und die Plätzchen? Gertrud hat dir eine Dose gepackt. Du hast sie nicht geöffnet. Man weiß ja nie.</p>`},
+end_retire:{act:5,place:'end',end:'retire',chap:'Epilog · Neuanfang',t:'Weihnachten ohne Weihnachtsmann',
+text:()=>`<p>„Dann geh“, sagst du. „Du hast es dir verdient.“ Nick sieht dich lange an. Dann umarmt er Gertrud, nimmt den Koffer und verschwindet, noch im roten Mantel, in Richtung Gate 7. Pimpernuss wird abgeführt, die Elfen räumen die Werkstatt, und in der Nacht passiert etwas, womit niemand gerechnet hat: <em>Die Eltern liefern selbst.</em></p><p>Es ist chaotisch. Die Geschenke sind falsch verpackt, der Schlitten ist ein Lieferwagen, die Kinder bekommen Socken statt Spielzeug, und jemand klebt den Bart falsch herum. Aber um Mitternacht, in Millionen Wohnzimmern, stehen Eltern im Schlafanzug vor dem Tannenbaum und flüstern: „Pssst, er kommt.“ Sie wissen es besser. Sie tun es trotzdem.</p>${knotNote()}<p><b>Das erste Weihnachten ohne Weihnachtsmann war das schlechteste seit tausend Jahren. Und das ehrlichste.</b></p><p class="soup">Und die Plätzchen? Gertrud schickt dir jedes Jahr eine Dose aus den Seychellen, mit Sand.</p>`},
+end_kevin:{act:5,place:'end',end:'kevin',chap:'Epilog · Verwandlung',t:'Der rote Mantel',
+text:()=>`<p>„Ich übernehme“, sagst du, und der Saal hält den Atem an. Nick lächelt, zieht den Mantel aus und reicht ihn dir. Er passt nicht. Er ist zu weit, zu lang, riecht nach Zimt und Pension. Die Elfen setzen dir eine Mütze auf, kleben dir einen Bart ans Kinn und tragen den Sack ins Schlittenhaus. Er wiegt dreihundert Kilo.</p><p>Um 23:30 startet ein Schlitten mit einem Kommissar am Steuer, einem Rentier, das <em>sehr</em> deutlich zeigt, dass es nicht einverstanden ist, und tausend Elfen, die „Hohoho“ rufen und nicht wissen, was sie tun. Der erste Schornstein klemmt. Der zweite auch. Beim dritten bleibst du hängen.</p><p>Pimpernuss sitzt im Gewahrsam und lacht zum ersten Mal seit vierhundert Jahren.</p><p><b>Du bist der neue Weihnachtsmann. Nach einer Nacht weißt du, warum Nick gehen wollte.</b></p><p class="soup">Und die Plätzchen? Gertrud hat dir fünftausend Dosen eingepackt. Nur zur Sicherheit.</p>`},
+end_rudolf:{act:5,place:'end',end:'rudolf',chap:'Epilog · Ein neuer Chef',t:'Rudolf übernimmt',
+text:()=>`<p>„Rudolf“, sagst du. „Du fliegst, und du bist der Chef.“ Das Rentier starrt dich an. Dann leuchtet seine Nase so hell, dass der ganze Saal rot wird. „Ich?“ Er scharrt, schnaubt, zittert. „Ich, der Rentier-Nick?“</p><p>Der Mantel ist zu groß, der Bart rutscht nach unten, die Mütze kippt vornüber. Rudolf zieht den Schlitten nicht mehr, er <em>lenkt</em> ihn, mit den Hufen auf den Zügeln, während die Elfen im Hintergrund hastig improvisieren. Die Geschenke trägt er mit den Zähnen, einzeln, durch jeden Kamin. Es dauert bis neun Uhr morgens.</p><p>Aber kein Kind hat je ein Rentier im Mantel gesehen, das so stolz „Ho“ sagt. Die Kinder jubeln. Nick schickt Postkarten aus Mahé.</p><p><b>Das berühmteste Rentier der Welt wurde der berühmteste Weihnachtsmann. Nicht wegen der Nase, sondern wegen des Herzens.</b></p><p class="soup">Und die Plätzchen? Rudolf mag sie nicht. Er will Möhren.</p>`},
+end_drone:{act:5,place:'end',end:'drone',chap:'Epilog · Automatisierung',t:'Santa Prime',
+text:()=>`<p>${f('accRudolf')?'Du zeigst auf Rudolf. Das Rentier starrt dich an, ungläubig, die Nase blinkt rot-weiß-rot. „Ich? Ich?“ Zwei Eisbär-Wachtmeister nehmen ihn in Gewahrsam. Er wiehert, tritt, ruft: „Ich war es nicht!“ Du bist sehr überzeugend, und völlig falsch.':'Du zeigst auf die Plastikgestalt in der Ecke des Saals: Rudolf 2.0, die Lieferdrohne. „Die da“, sagst du. „Kein Gehalt, keine Meinung.“ Der Saal schweigt. Pimpernuss lächelt zum ersten Mal.'}</p><p>Rudolf 2.0 liefert in vier Minuten 2,3 Milliarden Pakete, ohne Kamin, ohne Rückfragen, ohne Möhren. Die Kinder erhalten ab sofort ein Abonnement: <em>„Santa Prime: Geschenke monatlich, ungefragt, nicht zurückgebbar.“</em> Die Elfen werden entlassen. Gertrud bäckt für niemanden mehr. Nick bleibt verschwunden.</p><p><b>Weihnachten ist jetzt ein Dienst. Niemand weiß, wann er kündbar ist.</b></p><p class="soup">Und die Plätzchen? Ab sofort per Lieferdienst, innerhalb von 30 Minuten. Mit Eisenhut optional.</p>`},
+end_frau:{act:5,place:'end',end:'frau',chap:'Epilog · Irrtum',t:'Falsche Verhaftung',
+text:()=>`<p>„Frau Claus“, sagst du. „Sie haben Ihren Mann vergiftet.“ Der Saal keucht. Gertrud wird kreidebleich, die Teigreste an ihren Händen zittern. Zwei Eisbär-Wachtmeister treten auf sie zu, und plötzlich schiebt sich der Vorhang auseinander: „NEIN!“, brüllt eine Stimme. „Lasst meine Frau in Ruhe!“</p><p>Der Weihnachtsmann stürmt auf die Bühne, mit Strohhut, Hawaiihemd und der Wut eines Mannes, der soeben seinen eigenen Tod aufgeklärt bekommt. „Ich bin am Leben! Und sie hat mir nur geholfen!“ Der Saal schreit durcheinander. Am Ende werden beide verhaftet: er für „Vortäuschung des Todes“, sie für „Beihilfe“, du für „grob fahrlässige Ermittlung“.</p><p>In der Ecke tupft sich Pimpernuss die Stirn ab, klappt sein Klemmbrett zu und lächelt, wie jemand, der gerade davongekommen ist.</p><p><b>Du hast einen Mord aufgeklärt, der nie stattfand, und den, der fast geschah, übersehen.</b></p><p class="soup">Und die Plätzchen? Pimpernuss backt jetzt. Sie schmecken ausgezeichnet. Fast ein bisschen zu gut.</p>`},
+end_hase:{act:5,place:'end',end:'hase',chap:'Epilog · Diplomatie',t:'Weihnachtsostern',
+text:()=>`<p>„Der Osterhase!“, rufst du. „Er wollte fusionieren, Nick hat abgelehnt, er war allein im Flur und hat keine Milch angefasst, weil er sie gar nicht verträgt. Das ist ein Alibi, das es nicht gibt!“ Der Hase lässt sein Ei fallen. „Ich? Das ist ein Skandal!“</p><p>Das Österliche Saisongeschäft droht mit Krieg: Ostereier fliegen durch den Saal, Elfen gehen in Deckung, Dr. Schneeflocke versteckt sich unter dem Piano. Um den Konflikt zu beenden, verkündet der Weihnachtsmann (der inzwischen hinter dem Vorhang hervorgetreten ist) die Fusion. „Weihnachtsostern“, flüstert er. „Wir fusionieren. Hauptsache Ruhe.“</p><p>Seither bekommen Kinder am 24. Dezember Geschenke und Schokoladeneier, am 1. April einen Tannenbaum, und niemand weiß mehr, welcher Tag welcher ist. Pimpernuss grinst im Hintergrund.</p><p><b>Du hast einen Krieg verhindert und ein Fest vernichtet.</b></p><p class="soup">Und die Plätzchen? Mit Schokolade überzogen. Auch die Eisenhut-Sorte. Du solltest sie nicht probieren.</p>`},
+end_tyrann:{act:5,place:'end',end:'tyrann',chap:'Epilog · Machtübernahme',t:'Der Chef-Elf im roten Mantel',
+text:()=>`<p>„Es war ein natürlicher Tod“, sagst du. „Herzversagen. Zu viele Plätzchen, zu viel Stress.“ Du schließt den Aktendeckel. Hinter dem Vorhang hört Nick jedes Wort und begreift, dass das seine Chance ist. Er schleicht leise zur Hintertür hinaus, Richtung Gate 7.</p><p>Im Saal stolpert Pimpernuss vor Glück fast über seine eigene Mütze. „Nachfolgegesetz §3!“, ruft er. „Der Chef-Elf übernimmt!“ Er zieht den roten Mantel an, den man ihm reicht (Größe XL, Bauch ausgestopft), und lässt sich zum neuen Weihnachtsmann ausrufen.</p><p>Von da an arbeiten die Elfen zwanzig Stunden täglich, der Schlitten fliegt im Akkord, die Kinder bekommen Geschenke nach Leistung. Du wirst befördert, weil du keine Fragen gestellt hast.</p><p><b>Der Mörder hat gewonnen. Aber die Geschenke sind pünktlich.</b></p><p class="soup">Und die Plätzchen? Die besten seit Jahren. Mit einer ganz feinen, leicht bitteren Note.</p>`},
+end_deal:{act:5,place:'end',end:'deal',chap:'Epilog · Bestechung',t:'Das Angebot des Elfen',
+text:()=>`<p>Du nimmst das Angebot an. „Zehn Millionen Zimtsterne“, flüstert Pimpernuss, und seine Augen glänzen. „Und ein Posten als Vizeweihnachtsmann.“ Ihr gebt euch die Hand, seine ist feucht und klebrig, wie Honig mit Verwaltungsvorschriften.</p><p>Pimpernuss lässt den Weihnachtsmann offiziell für tot erklären. Der echte Nick sitzt nichtsahnend an Gate 7 und trinkt Eiswasser, bis die Ansage kommt: „Letzter Aufruf für Herrn Weiß.“ Er fliegt los und wird nie wieder gesehen. Der Chef-Elf übernimmt den Mantel (Größe XL), du das Büro mit der Aussicht.</p><p>Du bist reich, dick und gefürchtet. Die Elfen arbeiten zwanzig Stunden am Tag, die Geschenke sind pünktlich, und die Plätzchen schmecken fantastisch. Nur manchmal, nachts, hörst du in der Ferne eine Rohrpost rumpeln.</p><p><b>Du hast den Fall gelöst, zu deinen Gunsten.</b></p><p class="soup">Und die Plätzchen? Du isst nur noch die ohne blaue Blüten. Sicherheitshalber.</p>`},
+end_blackmail:{act:5,place:'end',end:'blackmail',chap:'Epilog · Schweigen',t:'Schweigegeld in Keksen',
+text:()=>`<p>Du sagst nichts. Du nickst nur. Nick sieht dich verwundert an, dann lächelt er, nimmt Koffer und Strohhut und geht zur Sicherheitskontrolle. „Danke, Kommissar“, sagt er. „Ich würde dir etwas schenken, aber ich bin gerade ... im Urlaub.“</p><p>Zwei Minuten später erscheint Gertrud am Gate, mit einem Korb voller Zimtsterne und einem Gesicht wie ein offenes Buch. „Für deine Schweigepflicht“, sagt sie, und ihre Stimme zittert. „Ein Leben lang. Jeden Monat. Und ich verspreche: ohne Eisenhut.“</p><p>Der Weihnachtsmann wird mit einem Staatsbegräbnis beigesetzt: Die Wachsfigur wird feierlich in den Schnee gelegt, die Elfen weinen, Rudolf hält eine Rede. Weihnachten fällt dieses Jahr aus, aber niemand merkt es, weil ohnehin alle bei Online-Händlern bestellt haben. Pimpernuss wartet im Kühlhaus auf seinen Auftritt, der nie kommt.</p><p><b>Du hast Nick gerettet. Und Weihnachten verloren.</b></p><p class="soup">Und die Plätzchen? Jeden Monat eine Dose. Du kannst sie nicht mehr sehen, aber du isst sie trotzdem.</p>`}
+});
+function knotNote(){return f('pimpConfessed')||has('Eisenhut-Strauß')?'<p>Pimpernuss wird abgeführt. Im Gewahrsam fängt er sofort an, die Zellen neu zu organisieren.</p>':'<p>Pimpernuss entkommt mit einer verlegenen Verbeugung, und niemand merkt, was er getan hat.</p>'}
+
+load();go(S.node);
+</script></body></html>
